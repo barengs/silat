@@ -20,17 +20,51 @@ import {
     ShieldAlert,
     Building2,
     Network,
-    Plus
+    Plus,
+    Check
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import axios from '@/bootstrap';
 
 export default function AppLayout() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(false);
+    const [showNotifications, setShowNotifications] = useState(false);
     const { user, roles, permissions } = useSelector(state => state.auth);
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const location = useLocation();
+    const queryClient = useQueryClient();
+
+    // Fetch Notifications
+    const { data: notifData } = useQuery({
+        queryKey: ['notifications', 'unread'],
+        queryFn: async () => {
+            const res = await axios.get('/notifications/unread');
+            return res.data;
+        },
+        refetchInterval: 30000, // Poll every 30 seconds
+    });
+
+    const markAsReadMutation = useMutation({
+        mutationFn: async (id) => {
+            return await axios.post(`/notifications/${id}/read`);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries(['notifications', 'unread']);
+        }
+    });
+
+    const markAllAsReadMutation = useMutation({
+        mutationFn: async () => {
+            return await axios.post(`/notifications/read-all`);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries(['notifications', 'unread']);
+            setShowNotifications(false);
+        }
+    });
 
     const handleLogout = async () => {
         try {
@@ -181,10 +215,54 @@ export default function AppLayout() {
 
                     {/* Right utilities */}
                     <div className="flex items-center space-x-4">
-                        <button className="text-slate-500 hover:text-slate-700 relative">
-                            <Bell size={20} />
-                            <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
-                        </button>
+                        <div className="relative">
+                            <button 
+                                className="text-slate-500 hover:text-slate-700 relative p-1"
+                                onClick={() => setShowNotifications(!showNotifications)}
+                            >
+                                <Bell size={20} />
+                                {notifData?.count > 0 && (
+                                    <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
+                                )}
+                            </button>
+                            
+                            {/* Notification Dropdown */}
+                            {showNotifications && (
+                                <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-slate-200 z-50 overflow-hidden">
+                                    <div className="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                                        <h3 className="text-sm font-bold text-slate-800">Notifikasi</h3>
+                                        {notifData?.count > 0 && (
+                                            <button 
+                                                className="text-xs text-emerald-600 hover:text-emerald-700 font-medium"
+                                                onClick={() => markAllAsReadMutation.mutate()}
+                                            >
+                                                Tandai semua dibaca
+                                            </button>
+                                        )}
+                                    </div>
+                                    <div className="max-h-80 overflow-y-auto">
+                                        {notifData?.data?.length > 0 ? (
+                                            notifData.data.map(notif => (
+                                                <div key={notif.id} className="px-4 py-3 border-b border-slate-50 hover:bg-slate-50 transition-colors flex gap-3 cursor-pointer" onClick={() => markAsReadMutation.mutate(notif.id)}>
+                                                    <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
+                                                        <BookOpen size={14} />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-xs font-bold text-slate-800 mb-0.5">{notif.data.title || 'Notifikasi'}</p>
+                                                        <p className="text-xs text-slate-500 line-clamp-2">{notif.data.message}</p>
+                                                        <p className="text-[10px] text-slate-400 mt-1">{new Date(notif.created_at).toLocaleString('id-ID')}</p>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="px-4 py-8 text-center text-slate-400 text-sm">
+                                                Tidak ada notifikasi baru.
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                         <button className="text-slate-500 hover:text-slate-700 hidden sm:block">
                             <HelpCircle size={20} />
                         </button>

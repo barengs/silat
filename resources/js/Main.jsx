@@ -25,6 +25,10 @@ const InstitutionList = React.lazy(() => import('@/pages/institutions/Institutio
 // Divisions
 const DivisionList    = React.lazy(() => import('@/pages/divisions/DivisionList'));
 
+// Guest Book
+const GuestBookList   = React.lazy(() => import('@/pages/guest-book/GuestBookList'));
+const GuestBookReport = React.lazy(() => import('@/pages/guest-book/GuestBookReport'));
+
 // ── Route Guards ──────────────────────────────────────────────────────────────
 
 /**
@@ -113,6 +117,10 @@ export default function Main() {
 
                         {/* Divisions */}
                         <Route path="/divisions" element={<DivisionList />} />
+
+                        {/* Guest Book */}
+                        <Route path="/guest-book" element={<GuestBookList />} />
+                        <Route path="/guest-book/report" element={<GuestBookReport />} />
                     </Route>
 
                     {/* 404 */}

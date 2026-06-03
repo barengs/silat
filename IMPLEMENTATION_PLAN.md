@@ -251,13 +251,13 @@ Sistem:
 
 ### 🔲 Phase 4B — Modul Buku Tamu
 
-- [ ] `GuestBookController::store()` — check-in dengan auto-create agency
-- [ ] `GuestBookController::searchAgencies()` — autocomplete endpoint
-- [ ] `GuestBookController::report()` — rekap per divisi/bulan
-- [ ] Job: `SendGuestArrivalNotification` — notif in-app ke divisi tujuan
-- [ ] `pages/guest-book/CheckinPage.jsx` — form check-in (mode resepsionis)
-- [ ] `pages/guest-book/GuestBookList.jsx` — log tamu + filter tanggal
-- [ ] `pages/guest-book/GuestBookReport.jsx` — grafik Recharts
+- [x] `GuestBookController::store()` — check-in dengan auto-create agency
+- [x] `GuestBookController::searchAgencies()` — autocomplete endpoint
+- [x] `GuestBookController::export()` & `index()` — Ekspor Excel dan Rekap Filter
+- [x] Job: `SendGuestArrivalNotification` — notif in-app ke divisi tujuan
+- [x] `pages/guest-book/CheckinModal.jsx` — form check-in modal layar penuh (mode resepsionis)
+- [x] `pages/guest-book/GuestBookList.jsx` — log tamu + filter tanggal + ekspor
+- [x] `pages/guest-book/GuestBookReport.jsx` — grafik Recharts
 
 ---
 

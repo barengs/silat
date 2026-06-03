@@ -121,6 +121,7 @@ Route::middleware('jwt.auth')->group(function () {
         Route::get('/',              [\App\Http\Controllers\Api\GuestBookController::class, 'index'])->middleware('permission:guest-book.view');
         Route::post('/',             [\App\Http\Controllers\Api\GuestBookController::class, 'store'])->middleware('permission:guest-book.create');
         Route::get('/report',        [\App\Http\Controllers\Api\GuestBookController::class, 'report'])->middleware('permission:guest-book.report');
+        Route::get('/export',        [\App\Http\Controllers\Api\GuestBookController::class, 'export'])->middleware('permission:guest-book.view');
         Route::get('/agencies/search', [\App\Http\Controllers\Api\GuestBookController::class, 'searchAgencies'])->middleware('permission:guest-book.create');
         Route::get('/{id}',          [\App\Http\Controllers\Api\GuestBookController::class, 'show'])->middleware('permission:guest-book.view');
         Route::patch('/{id}/checkout', [\App\Http\Controllers\Api\GuestBookController::class, 'checkout'])->middleware('permission:guest-book.create');
