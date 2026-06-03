@@ -1,0 +1,39 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class ApprovalFlow extends Model
+{
+    protected $fillable = [
+        'module_name',
+        'step_order',
+        'step_label',
+        'role_id_required',
+        'action_type',
+        'is_active',
+    ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
+
+    public function role(): BelongsTo
+    {
+        return $this->belongsTo(\Spatie\Permission\Models\Role::class, 'role_id_required');
+    }
+
+    /**
+     * Get all steps for a specific module, ordered.
+     */
+    public static function getFlowForModule(string $module): \Illuminate\Database\Eloquent\Collection
+    {
+        return static::query()
+            ->where('module_name', $module)
+            ->where('is_active', true)
+            ->orderBy('step_order')
+            ->get();
+    }
+}

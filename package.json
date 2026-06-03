@@ -12,5 +12,32 @@
         "laravel-vite-plugin": "^3.1",
         "tailwindcss": "^4.0.0",
         "vite": "^8.0.0"
+    },
+    "dependencies": {
+        "@hookform/resolvers": "^5.4.0",
+        "@reduxjs/toolkit": "^2.12.0",
+        "@tanstack/react-query": "^5.101.0",
+        "@tanstack/react-table": "^8.21.3",
+        "@tiptap/extension-image": "^3.25.0",
+        "@tiptap/extension-link": "^3.25.0",
+        "@tiptap/pm": "^3.25.0",
+        "@tiptap/react": "^3.25.0",
+        "@tiptap/starter-kit": "^3.25.0",
+        "@vitejs/plugin-react": "^6.0.2",
+        "axios": "^1.17.0",
+        "clsx": "^2.1.1",
+        "date-fns": "^4.4.0",
+        "lucide-react": "^1.17.0",
+        "react": "^19.2.7",
+        "react-dom": "^19.2.7",
+        "react-dropzone": "^15.0.0",
+        "react-hook-form": "^7.77.0",
+        "react-redux": "^9.3.0",
+        "react-router-dom": "^7.16.0",
+        "react-select": "^5.10.2",
+        "recharts": "^3.8.1",
+        "sonner": "^2.0.7",
+        "tailwind-merge": "^3.6.0",
+        "zod": "^4.4.3"
     }
 }
