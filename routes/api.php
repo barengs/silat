@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\TransportTypeController;
 use App\Http\Controllers\Api\SignatureController;
 use App\Http\Controllers\Api\TreasurerChangeController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\VerificationController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -239,5 +240,8 @@ Route::middleware('jwt.auth')->group(function () {
         Route::post('/{userId}/upload', [SignatureController::class, 'upload']);
         Route::delete('/{userId}', [SignatureController::class, 'delete']);
     });
+
+    // ── Document Verification Queue (Antrean Verifikasi) ───────────────────
+    Route::get('/verifikasi/antrean', [VerificationController::class, 'index'])->middleware('permission:verifikasi.view');
 
 });

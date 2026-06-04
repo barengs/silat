@@ -62,6 +62,7 @@ const DocumentVerify = React.lazy(() => import('@/pages/public/DocumentVerify'))
 const SignatureVault = React.lazy(() => import('@/pages/settings/SignatureVault'));
 const SystemSettings = React.lazy(() => import('@/pages/settings/SystemSettings'));
 const ProfilePage    = React.lazy(() => import('@/pages/profile/ProfilePage'));
+const DocumentVerificationQueue = React.lazy(() => import('@/pages/verifikasi/DocumentVerificationQueue'));
 
 // ── Route Guards ──────────────────────────────────────────────────────────────
 
@@ -187,6 +188,9 @@ export default function Main() {
                         <Route path="/articles/create" element={<ArticleForm />} />
                         <Route path="/articles/:id/edit" element={<ArticleForm />} />
                         <Route path="/articles/:id" element={<ArticleShow />} />
+
+                        {/* Verifikasi Dokumen */}
+                        <Route path="/verifikasi" element={<DocumentVerificationQueue />} />
 
                         {/* Settings */}
                         <Route path="/settings/signatures" element={<SignatureVault />} />

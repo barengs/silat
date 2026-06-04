@@ -67,6 +67,9 @@ class RolesAndPermissionsSeeder extends Seeder
 
             // Reports & Analytics
             'reports.guest-book', 'reports.sppd', 'reports.ijazah', 'reports.treasurer',
+
+            // Verifikasi Dokumen
+            'verifikasi.view',
         ];
 
         foreach ($permissions as $permission) {
@@ -93,6 +96,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 'ijazah.view-all', 'ijazah.verify', 'ijazah.reject',
                 'treasurer.view-all', 'treasurer.verify', 'treasurer.reject',
                 'reports.sppd', 'reports.ijazah', 'reports.treasurer',
+                'verifikasi.view',
             ]);
 
         // 4. Approver (Kepala Bidang / Sekretaris / Kepala Dinas)
@@ -105,6 +109,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 'treasurer.generate-letter', 'treasurer.download',
                 'reports.sppd', 'reports.ijazah', 'reports.treasurer',
                 'signatures.view', 'signatures.upload',
+                'verifikasi.view',
             ]);
 
         // 4a. Kabid (Kepala Bidang)
@@ -115,6 +120,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 'ijazah.view-all', 'ijazah.approve', 'ijazah.reject',
                 'treasurer.view-all', 'treasurer.approve', 'treasurer.reject',
                 'reports.sppd', 'reports.ijazah', 'reports.treasurer',
+                'verifikasi.view',
             ]);
 
         // 4b. Kadis (Kepala Dinas)
@@ -127,6 +133,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 'treasurer.generate-letter', 'treasurer.download',
                 'reports.sppd', 'reports.ijazah', 'reports.treasurer',
                 'signatures.view', 'signatures.upload',
+                'verifikasi.view',
             ]);
 
         // 5. Humas / Pengelola Konten
