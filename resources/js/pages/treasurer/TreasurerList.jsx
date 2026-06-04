@@ -2,17 +2,8 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import axios from '@/bootstrap';
-import {
-    FileSignature,
-    Plus,
-    Search,
-    ChevronRight,
-    Filter,
-    Folder,
-    FileText,
-    Printer,
-    Download
-} from 'lucide-react';
+import { FileSignature, Plus, Search, ChevronRight, Filter, Folder, FileText, Printer, Download } from 'lucide-react';
+import SkeletonCard from '@/components/ui/SkeletonCard';
 import { useSelector } from 'react-redux';
 
 export default function TreasurerList() {
@@ -71,12 +62,12 @@ export default function TreasurerList() {
     };
 
     return (
-        <div className="max-w-6xl mx-auto pb-10">
+        <div className="w-full pb-10">
             {/* Top Title & Button */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-800">Dashboard Rekening</h1>
-                    <p className="text-sm text-slate-500 mt-1">Ringkasan pengajuan perubahan bendahara dan rekening sekolah aktif.</p>
+                    <h1 className="text-2xl font-bold text-slate-800">Data Pengajuan</h1>
+                    <p className="text-sm">Ringkasan pengajuan perubahan bendahara dan rekening sekolah aktif.</p>
                 </div>
                 {isSekolah && (
                     <Link
@@ -146,7 +137,7 @@ export default function TreasurerList() {
                 {/* Search & Filters */}
                 <div className="px-6 py-4 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-50/50">
                     <h3 className="font-bold text-slate-800 text-base">Pengajuan Terbaru</h3>
-                    
+
                     <div className="flex items-center gap-3 w-full sm:w-auto">
                         <div className="relative flex-1 sm:w-64">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
@@ -189,11 +180,15 @@ export default function TreasurerList() {
                         </thead>
                         <tbody className="divide-y divide-slate-100">
                             {isLoading ? (
-                                <tr>
-                                    <td colSpan={5} className="px-6 py-8 text-center text-slate-400 text-sm">
-                                        Memuat data...
-                                    </td>
-                                </tr>
+                                [1, 2, 3, 4, 5].map((n) => (
+                                    <tr key={n} className="animate-pulse">
+                                        <td className="px-6 py-4"><SkeletonCard width="100%" height="1rem" /></td>
+                                        <td className="px-6 py-4"><SkeletonCard width="100%" height="1rem" /></td>
+                                        <td className="px-6 py-4"><SkeletonCard width="100%" height="1rem" /></td>
+                                        <td className="px-6 py-4"><SkeletonCard width="100%" height="1rem" /></td>
+                                        <td className="px-6 py-4 text-right"><SkeletonCard width="1rem" height="1rem" /></td>
+                                    </tr>
+                                ))
                             ) : changes.length === 0 ? (
                                 <tr>
                                     <td colSpan={5} className="px-6 py-12 text-center text-slate-500 text-sm">
@@ -203,8 +198,8 @@ export default function TreasurerList() {
                                 </tr>
                             ) : (
                                 changes.map((item) => (
-                                    <tr 
-                                        key={item.id} 
+                                    <tr
+                                        key={item.id}
                                         className="hover:bg-slate-50 cursor-pointer transition-colors"
                                         onClick={() => navigate(`/treasurer/${item.id}`)}
                                     >
@@ -215,7 +210,7 @@ export default function TreasurerList() {
                                         <td className="px-6 py-4">
                                             {item.change_type === 'rekening' ? (
                                                 <span className="text-xs font-medium text-slate-600 bg-slate-50 border border-slate-100 px-2 py-0.5 rounded">
-                                                    Perubahan Rekening Saja
+                                                    Perubahan Bendahara Saja
                                                 </span>
                                             ) : (
                                                 <div className="text-xs text-slate-700 flex items-center gap-1.5 flex-wrap">
@@ -226,7 +221,7 @@ export default function TreasurerList() {
                                             )}
                                         </td>
                                         <td className="px-6 py-4 text-xs text-slate-600">
-                                            {item.submitted_at 
+                                            {item.submitted_at
                                                 ? new Date(item.submitted_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
                                                 : new Date(item.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
                                             }

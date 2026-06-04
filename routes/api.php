@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\SettingController;
 use App\Http\Controllers\Api\SppdController;
 use App\Http\Controllers\Api\SppdReportController;
 use App\Http\Controllers\Api\TransportTypeController;
+use App\Http\Controllers\Api\SignatureController;
 use App\Http\Controllers\Api\TreasurerChangeController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
@@ -229,6 +230,14 @@ Route::middleware('jwt.auth')->group(function () {
         Route::get('/ijazah', [ReportController::class, 'ijazah'])->middleware('permission:reports.ijazah');
         Route::get('/treasurer', [ReportController::class, 'treasurer'])->middleware('permission:reports.treasurer');
         Route::get('/guest-book', [ReportController::class, 'guestBook'])->middleware('permission:reports.guest-book');
+    });
+
+    // ── Signature Vault (Tanda Tangan Pejabat) ──────────────────────────────
+    Route::prefix('signatures')->middleware('permission:settings.manage')->group(function () {
+        Route::get('/', [SignatureController::class, 'index']);
+        Route::get('/active-signer', [SignatureController::class, 'getActiveSigner']);
+        Route::post('/{userId}/upload', [SignatureController::class, 'upload']);
+        Route::delete('/{userId}', [SignatureController::class, 'delete']);
     });
 
 });

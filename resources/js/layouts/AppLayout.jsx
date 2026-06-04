@@ -22,7 +22,9 @@ import {
     Network,
     Plus,
     Check,
-    Newspaper
+    Newspaper,
+    GitBranch,
+    PenTool
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -86,13 +88,15 @@ export default function AppLayout() {
         { path: '/guest-book', label: 'Buku Tamu', icon: BookOpen, permission: 'guest-book.view' },
         { path: '/sppd', label: 'Manajemen SPPD', icon: Plane, permission: 'sppd.view' },
         { path: '/ijazah', label: 'Revisi Ijazah', icon: FileSignature, permission: 'ijazah.view' },
-        { path: '/treasurer', label: 'Perubahan Rekening', icon: FileSignature, permission: 'treasurer.view' },
+        { path: '/treasurer', label: 'Perubahan Bendahara', icon: FileSignature, permission: 'treasurer.view' },
         { path: '/articles', label: 'Portal Berita', icon: Newspaper, permission: 'articles.view' },
         { path: '/verifikasi', label: 'Verifikasi Dokumen', icon: CheckSquare, permission: 'verifikasi.view' },
         { path: '/users', label: 'Pengguna', icon: Users, permission: 'users.view' },
         { path: '/roles', label: 'Roles & Akses', icon: ShieldAlert, permission: 'roles.view' },
+        { path: '/approval-flows', label: 'Alur Persetujuan', icon: GitBranch, permission: 'approval-flows.view' },
         { path: '/institutions', label: 'Instansi / Sekolah', icon: Building2, permission: 'institutions.view' },
         { path: '/divisions', label: 'Divisi / Bidang', icon: Network, permission: 'divisions.view' },
+        { path: '/settings/signatures', label: 'Tanda Tangan Pejabat', icon: PenTool, permission: 'settings.manage' },
         { path: '/settings', label: 'Pengaturan', icon: Settings, permission: 'settings.view' },
     ];
 

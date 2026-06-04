@@ -150,7 +150,7 @@ export default function TreasurerCreate() {
     }
 
     return (
-        <div className="max-w-5xl mx-auto pb-10">
+        <div className="w-full pb-10">
             {/* Header */}
             <div className="mb-8">
                 <h1 className="text-2xl font-bold text-slate-800">Formulir Perubahan Data</h1>

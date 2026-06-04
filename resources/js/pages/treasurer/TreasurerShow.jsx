@@ -83,7 +83,56 @@ export default function TreasurerShow() {
         }, 1500);
     };
 
-    if (isLoading) return <div className="p-8 text-center text-slate-500">Memuat data...</div>;
+    if (isLoading) {
+        return (
+            <div className="w-full pb-10 animate-pulse">
+                {/* Header Actions Skeleton */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                    <div>
+                        <div className="h-4 bg-slate-200 rounded w-24 mb-2"></div>
+                        <div className="h-7 bg-slate-300 rounded w-64"></div>
+                    </div>
+                    <div className="flex gap-2">
+                        <div className="h-9 bg-slate-200 rounded w-28"></div>
+                        <div className="h-9 bg-slate-200 rounded w-36"></div>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Left Column - Details */}
+                    <div className="lg:col-span-2 space-y-6">
+                        <div className="bg-white border border-slate-200 rounded shadow-sm p-6 space-y-4">
+                            <div className="h-4 bg-slate-300 rounded w-1/4 mb-4"></div>
+                            <div className="space-y-3">
+                                <div className="h-10 bg-slate-100 rounded w-full"></div>
+                                <div className="h-10 bg-slate-100 rounded w-full"></div>
+                                <div className="h-10 bg-slate-100 rounded w-full"></div>
+                            </div>
+                        </div>
+                        <div className="bg-white border border-slate-200 rounded shadow-sm p-6 space-y-4">
+                            <div className="h-4 bg-slate-300 rounded w-1/4 mb-4"></div>
+                            <div className="grid grid-cols-3 gap-4">
+                                {[1, 2, 3].map(n => (
+                                    <div key={n} className="h-20 bg-slate-100 rounded"></div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                    {/* Right Column */}
+                    <div className="space-y-6">
+                        <div className="bg-white border border-slate-200 rounded shadow-sm p-6 space-y-4">
+                            <div className="h-4 bg-slate-300 rounded w-1/3 mb-4"></div>
+                            <div className="space-y-3">
+                                <div className="h-12 bg-slate-100 rounded w-full"></div>
+                                <div className="h-12 bg-slate-100 rounded w-full"></div>
+                                <div className="h-12 bg-slate-100 rounded w-full"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
     if (!change) return <div className="p-8 text-center text-red-500">Data tidak ditemukan.</div>;
 
     const getStatusBadge = (status) => {
@@ -101,7 +150,7 @@ export default function TreasurerShow() {
     };
 
     return (
-        <div className="max-w-6xl mx-auto pb-10">
+        <div className="w-full pb-10">
             {/* Header Actions */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                 <div>

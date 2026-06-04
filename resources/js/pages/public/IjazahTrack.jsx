@@ -12,7 +12,7 @@ export default function IjazahTrack() {
         queryKey: ['track-ijazah', searchQuery],
         queryFn: async () => {
             if (!searchQuery) return null;
-            const res = await axios.get(`/api/public/ijazah-track/${searchQuery}`);
+            const res = await axios.get(`/track/ijazah/${searchQuery}`);
             return res.data;
         },
         enabled: !!searchQuery,
@@ -33,7 +33,7 @@ export default function IjazahTrack() {
             <div className="max-w-2xl w-full">
                 {/* Header */}
                 <div className="text-center mb-10">
-                    <div className="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center mx-auto mb-4 border border-slate-200">
+                    <div className="w-16 h-16 bg-white rounded shadow-sm flex items-center justify-center mx-auto mb-4 border border-slate-200">
                         <FileSignature size={32} className="text-emerald-600" />
                     </div>
                     <h1 className="text-2xl font-extrabold text-slate-800">Lacak Pengajuan Ijazah</h1>
@@ -42,7 +42,7 @@ export default function IjazahTrack() {
 
                 {/* Search Box */}
                 <form onSubmit={handleSearch} className="relative mb-8">
-                    <div className="flex bg-white rounded-full shadow-sm border border-slate-200 p-1.5 focus-within:ring-2 focus-within:ring-emerald-500 focus-within:border-emerald-500 transition-all">
+                    <div className="flex bg-white rounded shadow-sm border border-slate-200 p-1.5 focus-within:ring-2 focus-within:ring-emerald-500 focus-within:border-emerald-500 transition-all">
                         <div className="flex items-center pl-4 pr-2 text-slate-400">
                             <Search size={20} />
                         </div>
@@ -56,7 +56,7 @@ export default function IjazahTrack() {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-full transition-colors flex items-center disabled:opacity-50"
+                            className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded transition-colors flex items-center disabled:opacity-50"
                         >
                             {isLoading ? 'Mencari...' : 'Lacak'}
                         </button>
@@ -65,7 +65,7 @@ export default function IjazahTrack() {
 
                 {/* Results */}
                 {isError && (
-                    <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center animate-in fade-in slide-in-from-bottom-2">
+                    <div className="bg-red-50 border border-red-200 rounded p-6 text-center animate-in fade-in slide-in-from-bottom-2">
                         <ShieldAlert size={32} className="text-red-500 mx-auto mb-3" />
                         <h3 className="font-bold text-red-800 mb-1">Tiket Tidak Ditemukan</h3>
                         <p className="text-sm text-red-600">Pastikan nomor tiket yang Anda masukkan sudah benar.</p>
@@ -73,7 +73,7 @@ export default function IjazahTrack() {
                 )}
 
                 {ijazah && (
-                    <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm animate-in fade-in slide-in-from-bottom-2">
+                    <div className="bg-white border border-slate-200 rounded p-6 shadow-sm animate-in fade-in slide-in-from-bottom-2">
                         <div className="flex justify-between items-start border-b border-slate-100 pb-4 mb-4">
                             <div>
                                 <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Nomor Tiket</p>
@@ -100,7 +100,7 @@ export default function IjazahTrack() {
                             </div>
                         </div>
 
-                        <div className="bg-slate-50 rounded-lg p-5">
+                        <div className="bg-slate-50 rounded p-5">
                             <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4">Status Pengajuan</h3>
                             
                             <div className="flex items-start gap-4">

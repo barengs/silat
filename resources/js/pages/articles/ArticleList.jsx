@@ -295,8 +295,8 @@ const ArticleList = () => {
                                         </td>
                                         <td className="px-6 py-4 text-center">
                                             <div className="flex justify-center items-center gap-1.5">
-                                                <Link to={`/news/${article.slug}`} target="_blank">
-                                                    <button className="p-1.5 hover:bg-slate-100 rounded text-slate-500 hover:text-slate-900 transition-colors" title="Buka Halaman Publik">
+                                                <Link to={`/articles/${article.id}`}>
+                                                    <button className="p-1.5 hover:bg-slate-100 rounded text-slate-500 hover:text-slate-900 transition-colors" title="Preview & Detail Berita">
                                                         <Eye size={15} />
                                                     </button>
                                                 </Link>

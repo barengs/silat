@@ -42,10 +42,13 @@ const NewsDetail = () => {
 
     if (loading) {
         return (
-            <div className="max-w-7xl mx-auto px-4 py-20 flex flex-col items-center justify-center">
-                <div className="h-10 w-10 animate-spin rounded-full border-4 border-blue-600 border-t-transparent mb-4" />
-                <span className="text-sm text-slate-500 font-semibold">Memuat halaman berita...</span>
-            </div>
+          <div className="max-w-7xl mx-auto px-4 py-20 flex flex-col items-center justify-center">
+            <SkeletonCard className="h-6 w-1/3" />
+            <SkeletonCard className="h-48 w-full" />
+            <SkeletonCard className="h-4 w-2/3" />
+            <SkeletonCard className="h-4 w-1/2" />
+            <SkeletonCard className="h-4 w-3/4" />
+          </div>
         );
     }
 
@@ -65,7 +68,7 @@ const NewsDetail = () => {
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
                     {/* Main Content (Left Column) */}
-                    <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200/80 p-6 sm:p-8 shadow-sm">
+                    <div className="lg:col-span-2 bg-white rounded border border-slate-200/80 p-6 sm:p-8 shadow-sm">
                         {/* Meta information */}
                         <div className="flex flex-wrap items-center gap-2.5 mb-4">
                             <span
@@ -117,7 +120,7 @@ const NewsDetail = () => {
 
                         {/* Thumbnail image */}
                         {article.thumbnail_path && (
-                            <div className="rounded-2xl overflow-hidden mb-8 border border-slate-100 shadow-sm max-h-[400px]">
+                            <div className="rounded overflow-hidden mb-8 border border-slate-100 shadow-sm max-h-[400px]">
                                 <img
                                     src={`/storage/${article.thumbnail_path}`}
                                     alt={article.title}
@@ -136,7 +139,7 @@ const NewsDetail = () => {
                     {/* Sidebar (Right Column) */}
                     <div className="flex flex-col gap-6">
                         {/* Other news card */}
-                        <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm">
+                        <div className="bg-white rounded border border-slate-200/80 p-6 shadow-sm">
                             <h3 className="font-extrabold text-slate-900 text-base border-b border-slate-100 pb-3 mb-4">
                                 Berita Terkini Lainnya
                             </h3>
@@ -144,7 +147,7 @@ const NewsDetail = () => {
                                 <div className="flex flex-col gap-4">
                                     {latestArticles.map((latest) => (
                                         <div key={latest.id} className="flex gap-3 group">
-                                            <div className="h-16 w-16 rounded-xl bg-slate-50 overflow-hidden border border-slate-100 shrink-0">
+                                            <div className="h-16 w-16 rounded bg-slate-50 overflow-hidden border border-slate-100 shrink-0">
                                                 {latest.thumbnail_path ? (
                                                     <img
                                                         src={`/storage/${latest.thumbnail_path}`}
@@ -179,7 +182,7 @@ const NewsDetail = () => {
                         </div>
 
                         {/* Virtual Loket Info */}
-                        <div className="bg-gradient-to-br from-blue-900 to-indigo-950 text-white rounded-2xl p-6 shadow-md relative overflow-hidden">
+                        <div className="bg-gradient-to-br from-blue-900 to-indigo-950 text-white rounded p-6 shadow-md relative overflow-hidden">
                             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,0.15),transparent_60%)] pointer-events-none" />
                             <h3 className="font-extrabold text-sm tracking-wider uppercase text-blue-300 mb-2">
                                 Layanan Virtual Loket
@@ -189,7 +192,7 @@ const NewsDetail = () => {
                             </p>
                             <Link
                                 to="/track-ijazah"
-                                className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-center font-bold text-xs rounded-xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+                                className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-center font-bold text-xs rounded shadow-md flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
                             >
                                 Lacak Layanan Sekarang
                                 <ChevronRight size={14} />

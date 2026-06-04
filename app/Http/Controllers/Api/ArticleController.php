@@ -57,7 +57,7 @@ class ArticleController extends Controller
             $file = $request->file('thumbnail');
             $filename = 'thumb_'.uniqid().'.webp';
             $path = 'articles/'.$filename;
-            $encoded = Image::read($file)->toWebp(quality: 80);
+            $encoded = Image::decode($file)->encodeUsingFileExtension('webp', quality: 80);
             Storage::disk('public')->put($path, (string) $encoded);
             $thumbnailPath = $path;
         }
@@ -115,7 +115,7 @@ class ArticleController extends Controller
             $file = $request->file('thumbnail');
             $filename = 'thumb_'.uniqid().'.webp';
             $path = 'articles/'.$filename;
-            $encoded = Image::read($file)->toWebp(quality: 80);
+            $encoded = Image::decode($file)->encodeUsingFileExtension('webp', quality: 80);
             Storage::disk('public')->put($path, (string) $encoded);
             $article->thumbnail_path = $path;
         }
@@ -180,7 +180,7 @@ class ArticleController extends Controller
             $file = $request->file('image');
             $filename = 'img_'.uniqid().'.webp';
             $path = 'articles_content/'.$filename;
-            $encoded = Image::read($file)->toWebp(quality: 80);
+            $encoded = Image::decode($file)->encodeUsingFileExtension('webp', quality: 80);
             Storage::disk('public')->put($path, (string) $encoded);
             $url = asset('storage/'.$path);
 
@@ -225,7 +225,15 @@ class ArticleController extends Controller
             ->where('slug', $slug)
             ->firstOrFail();
 
-        $article->incrementView();
+        // Prevent duplicate views incrementing within 10 minutes from same IP/UserAgent
+        $request = request();
+        $ip = $request->ip();
+        $cacheKey = 'viewed_article_'.$article->id.'_'.md5($ip.$request->userAgent());
+
+        if (! cache()->has($cacheKey)) {
+            $article->incrementView();
+            cache()->put($cacheKey, true, now()->addMinutes(10));
+        }
 
         return response()->json($article);
     }

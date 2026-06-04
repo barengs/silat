@@ -27,9 +27,9 @@ const LandingPage = () => {
     }, []);
 
     const ServiceCard = ({ icon: Icon, title, description, linkTo, color }) => (
-        <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group">
+        <div className="bg-white rounded border border-slate-100 p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group">
             <div>
-                <div className={`h-12 w-12 rounded-xl flex items-center justify-center ${color} mb-5 group-hover:scale-110 transition-transform duration-300`}>
+                <div className={`h-12 w-12 rounded flex items-center justify-center ${color} mb-5 group-hover:scale-110 transition-transform duration-300`}>
                     <Icon className="text-white" size={24} />
                 </div>
                 <h3 className="font-bold text-slate-800 text-lg mb-2 group-hover:text-blue-900 transition-colors">
@@ -80,14 +80,14 @@ const LandingPage = () => {
                         <div className="flex flex-wrap gap-4">
                             <Link
                                 to="/news"
-                                className="px-6 py-3.5 bg-blue-600 hover:bg-blue-700 font-semibold rounded-xl shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all text-sm flex items-center gap-2"
+                                className="px-6 py-3.5 bg-blue-600 hover:bg-blue-700 font-semibold rounded shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all text-sm flex items-center gap-2"
                             >
                                 <BookOpen size={16} />
                                 Lihat Portal Berita
                             </Link>
                             <Link
                                 to="/track-ijazah"
-                                className="px-6 py-3.5 bg-white/10 hover:bg-white/15 border border-white/20 font-semibold rounded-xl active:scale-[0.98] transition-all text-sm flex items-center gap-2"
+                                className="px-6 py-3.5 bg-white/10 hover:bg-white/15 border border-white/20 font-semibold rounded active:scale-[0.98] transition-all text-sm flex items-center gap-2"
                             >
                                 <Search size={16} />
                                 Lacak Berkas Ijazah
@@ -151,7 +151,7 @@ const LandingPage = () => {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             {[1, 2, 3].map((n) => (
                                 <div key={n} className="animate-pulse flex flex-col gap-4">
-                                    <div className="bg-slate-200 h-48 rounded-2xl w-full" />
+                                    <div className="bg-slate-200 h-48 rounded w-full" />
                                     <div className="h-4 bg-slate-200 rounded w-1/4" />
                                     <div className="h-6 bg-slate-200 rounded w-3/4" />
                                     <div className="h-4 bg-slate-200 rounded w-full" />
@@ -163,7 +163,7 @@ const LandingPage = () => {
                             {articles.map((article) => (
                                 <article
                                     key={article.id}
-                                    className="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between"
+                                    className="bg-white rounded overflow-hidden border border-slate-100 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between"
                                 >
                                     <div>
                                         {/* Thumbnail */}

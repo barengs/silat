@@ -18,6 +18,7 @@ const UserForm        = React.lazy(() => import('@/pages/users/UserForm'));
 // Roles
 const RoleList        = React.lazy(() => import('@/pages/roles/RoleList'));
 const RoleForm        = React.lazy(() => import('@/pages/roles/RoleForm'));
+const ApprovalFlowConfig = React.lazy(() => import('@/pages/approval-flows/ApprovalFlowConfig'));
 
 // Institutions
 const InstitutionList = React.lazy(() => import('@/pages/institutions/InstitutionList'));
@@ -48,12 +49,17 @@ const TreasurerShow = React.lazy(() => import('@/pages/treasurer/TreasurerShow')
 // Portal Berita CMS (Admin)
 const ArticleList = React.lazy(() => import('@/pages/articles/ArticleList'));
 const ArticleForm = React.lazy(() => import('@/pages/articles/ArticleForm'));
+const ArticleShow = React.lazy(() => import('@/pages/articles/ArticleShow'));
 
 // Public Portal Layout & Pages
 const PublicLayout = React.lazy(() => import('@/layouts/PublicLayout'));
 const LandingPage = React.lazy(() => import('@/pages/public/LandingPage'));
 const NewsPage = React.lazy(() => import('@/pages/public/NewsPage'));
 const NewsDetail = React.lazy(() => import('@/pages/public/NewsDetail'));
+const DocumentVerify = React.lazy(() => import('@/pages/public/DocumentVerify'));
+
+// Settings
+const SignatureVault = React.lazy(() => import('@/pages/settings/SignatureVault'));
 
 // ── Route Guards ──────────────────────────────────────────────────────────────
 
@@ -113,17 +119,7 @@ export default function Main() {
                         <Route path="/news" element={<NewsPage />} />
                         <Route path="/news/:slug" element={<NewsDetail />} />
                         <Route path="/track-ijazah" element={<IjazahTrack />} />
-                        <Route
-                            path="/verify-document"
-                            element={
-                                <div className="p-16 text-center text-slate-500 font-semibold max-w-xl mx-auto flex flex-col items-center gap-3">
-                                    <h2 className="text-xl font-bold text-slate-800">Verifikasi TTE Dokumen</h2>
-                                    <p className="text-sm text-slate-400">
-                                        Halaman ini digunakan untuk memindai kode QR verifikasi dokumen resmi dinas. Layanan verifikasi ini akan aktif secara penuh pada Fase 6.
-                                    </p>
-                                </div>
-                            }
-                        />
+                        <Route path="/verify-document" element={<DocumentVerify />} />
                     </Route>
 
                     {/* Authentication Route */}
@@ -156,6 +152,9 @@ export default function Main() {
                         <Route path="/roles/create" element={<RoleForm />} />
                         <Route path="/roles/:id/edit" element={<RoleForm />} />
 
+                        {/* Approval Flows */}
+                        <Route path="/approval-flows" element={<ApprovalFlowConfig />} />
+
                         {/* Institutions */}
                         <Route path="/institutions" element={<InstitutionList />} />
 
@@ -185,6 +184,10 @@ export default function Main() {
                         <Route path="/articles" element={<ArticleList />} />
                         <Route path="/articles/create" element={<ArticleForm />} />
                         <Route path="/articles/:id/edit" element={<ArticleForm />} />
+                        <Route path="/articles/:id" element={<ArticleShow />} />
+
+                        {/* Settings */}
+                        <Route path="/settings/signatures" element={<SignatureVault />} />
                     </Route>
 
                     {/* 404 */}

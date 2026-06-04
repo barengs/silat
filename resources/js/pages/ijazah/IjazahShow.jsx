@@ -14,7 +14,8 @@ import {
     CheckSquare,
     PackageCheck,
     MessageSquare,
-    AlertCircle
+    AlertCircle,
+    User
 } from 'lucide-react';
 import { useSelector } from 'react-redux';
 
@@ -75,7 +76,68 @@ export default function IjazahShow() {
         });
     };
 
-    if (isLoading) return <div className="p-8 text-center text-slate-500">Memuat data...</div>;
+    if (isLoading) {
+        return (
+            <div className="max-w-6xl mx-auto pb-10 animate-pulse">
+                {/* Header Actions Skeleton */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                    <div>
+                        <div className="h-4 bg-slate-200 rounded w-24 mb-2"></div>
+                        <div className="h-7 bg-slate-300 rounded w-64"></div>
+                    </div>
+                    <div className="flex gap-2">
+                        <div className="h-9 bg-slate-200 rounded w-28"></div>
+                        <div className="h-9 bg-slate-200 rounded w-36"></div>
+                    </div>
+                </div>
+
+                {/* Ticket Summary Card Skeleton */}
+                <div className="bg-white border border-slate-200 rounded p-5 mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-sm">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded bg-slate-100 shrink-0"></div>
+                        <div>
+                            <div className="h-3 bg-slate-100 rounded w-16 mb-2"></div>
+                            <div className="h-6 bg-slate-200 rounded w-36"></div>
+                        </div>
+                    </div>
+                    <div className="flex flex-col sm:items-end gap-2">
+                        <div className="h-6 bg-slate-200 rounded w-20"></div>
+                        <div className="h-3 bg-slate-100 rounded w-32"></div>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Left Column - Details */}
+                    <div className="lg:col-span-2 space-y-6">
+                        <div className="bg-white border border-slate-200 rounded shadow-sm p-6 space-y-4">
+                            <div className="h-4 bg-slate-300 rounded w-1/4 mb-4"></div>
+                            <div className="h-10 bg-slate-100 rounded w-full"></div>
+                            <div className="h-20 bg-slate-100 rounded w-full"></div>
+                        </div>
+                        <div className="bg-white border border-slate-200 rounded shadow-sm p-6 space-y-4">
+                            <div className="h-4 bg-slate-300 rounded w-1/4 mb-4"></div>
+                            <div className="grid grid-cols-4 gap-4">
+                                {[1, 2, 3, 4].map(n => (
+                                    <div key={n} className="h-24 bg-slate-100 rounded"></div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                    {/* Right Column */}
+                    <div className="space-y-6">
+                        <div className="bg-white border border-slate-200 rounded shadow-sm p-6 space-y-4">
+                            <div className="h-4 bg-slate-300 rounded w-1/3 mb-4"></div>
+                            <div className="space-y-3">
+                                <div className="h-12 bg-slate-100 rounded w-full"></div>
+                                <div className="h-12 bg-slate-100 rounded w-full"></div>
+                                <div className="h-12 bg-slate-100 rounded w-full"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
     if (!ijazah) return <div className="p-8 text-center text-red-500">Data tidak ditemukan.</div>;
 
     const getStatusBadge = (status) => {
@@ -143,7 +205,7 @@ export default function IjazahShow() {
                     <div className="bg-white border border-slate-200 rounded shadow-sm overflow-hidden">
                         <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center">
                             <h3 className="font-bold text-slate-800 text-sm flex items-center">
-                                <UserSquare2 size={16} className="mr-2 text-slate-500" />
+                                <User size={16} className="mr-2 text-slate-500" />
                                 Data Pemohon & Koreksi
                             </h3>
                         </div>

@@ -173,13 +173,16 @@
             </td>
             <td class="signature-cell">
                 <div class="signature-block">
-                    <p>Pamekasan, {{ now()->toLocaleDateString('id-ID', ['day' => 'numeric', 'month' => 'long', 'year' => 'numeric']) }}<br>
+                    <p>Pamekasan, {{ now()->translatedFormat('d F Y') }}<br>
                     Kepala Dinas Pendidikan<br>
                     Kabupaten Pamekasan</p>
-                    <br><br><br>
-                    <p><strong><u>MOHAMMAD ALWI, M.Pd</u></strong><br>
-                    Pembina Utama Muda<br>
-                    NIP. 19680512 199303 1 005</p>
+                    @if($signatureImagePath && file_exists($signatureImagePath))
+                        <img src="{{ $signatureImagePath }}" alt="Tanda Tangan" style="height: 60px; margin: 10px 0;">
+                    @else
+                        <br><br><br>
+                    @endif
+                    <p><strong><u>{{ $signerName }}</u></strong><br>
+                    NIP. {{ $signerNip }}</p>
                 </div>
             </td>
         </tr>

@@ -324,44 +324,44 @@ Memfasilitasi pihak sekolah atau warga untuk mengajukan revisi ijazah yang salah
 
 ---
 
-### 🔲 Phase 4F & Phase 8 — Portal Berita (CMS) & Public Landing Page (Integrated)
+### ✅ Phase 4F & Phase 8 — Portal Berita (CMS) & Public Landing Page (Integrated)
 
-- [/] `ArticleController` — CRUD dengan rich text content
-- [/] `ArticleCategoryController`
-- [/] `PublicArticleController` — endpoint publik (no auth) (diimplementasikan langsung di ArticleController)
-- [/] `pages/articles/ArticleList.jsx` — CMS dashboard
-- [/] `pages/articles/ArticleForm.jsx` (pengganti ArticleEditor) — Tiptap rich text editor
-- [/] `pages/public/LandingPage.jsx` — halaman publik utama tanpa login
-- [/] `pages/public/NewsPage.jsx` — halaman index berita publik tanpa login
-- [/] `pages/public/NewsDetail.jsx` — halaman detail baca berita publik tanpa login
+- [x] `ArticleController` — CRUD dengan rich text content
+- [x] `ArticleCategoryController`
+- [x] `PublicArticleController` — endpoint publik (no auth) (diimplementasikan langsung di ArticleController)
+- [x] `pages/articles/ArticleList.jsx` — CMS dashboard
+- [x] `pages/articles/ArticleForm.jsx` (pengganti ArticleEditor) — Tiptap rich text editor
+- [x] `pages/public/LandingPage.jsx` — halaman publik utama tanpa login
+- [x] `pages/public/NewsPage.jsx` — halaman index berita publik tanpa login
+- [x] `pages/public/NewsDetail.jsx` — halaman detail baca berita publik tanpa login
 
 ---
 
-### 🔲 Phase 5 — Dynamic Approval Engine
+### ✅ Phase 5 — Dynamic Approval Engine
 
 - [x] `app/Services/ApprovalService.php` — engine multi-step terpusat
   - `getNextStep(module, currentStep)` 
   - `advance(document, user, action, note)` (diimplementasikan sebagai `processApproval`)
   - `reject(document, user, note)` (diimplementasikan sebagai `processApproval` dengan status rejected)
   - `isComplete(document)` (diverifikasi dengan status `approved`)
-- [ ] `ApprovalFlowController` — CRUD config alur per modul
-- [ ] `pages/approval-flows/ApprovalFlowConfig.jsx` — UI konfigurasi alur
+- [x] `ApprovalFlowController` — CRUD config alur per modul
+- [x] `pages/approval-flows/ApprovalFlowConfig.jsx` — UI konfigurasi alur
 
 ---
 
-### 🔲 Phase 6 — TTE, PDF & Verifikasi Publik
+### ✅ Phase 6 — TTE, PDF & Verifikasi Publik
 
 - [/] `app/Services/DocumentService.php` (Pembuatan PDF saat ini diletakkan langsung di dalam Controller masing-masing)
   - [x] `generateSppdPdf(Sppd $sppd)` → DomPDF + QR Code (inline di SppdController)
   - [x] `generateRecommendationPdf(TreasurerChange $tc)` → DomPDF + QR Code (inline di TreasurerChangeController)
-  - [x] `generateQrToken()` → unique token
+  - [x] `generateQrToken()` → unique token + simpan ke `document_approvals`
 - [x] Template PDF:
   - `resources/views/pdf/sppd.blade.php`
-  - `resources/views/pdf/recommendation_letter.blade.php`
-- [ ] `DocumentVerificationController::verify($token)` — publik
-- [ ] `pages/public/DocumentVerify.jsx` — scan QR → tampilkan info dokumen + TTE
-- [ ] `Signature Vault` — upload tanda tangan pejabat (Kadis, Kabid)
-- [ ] `pages/settings/SignatureVault.jsx`
+  - `resources/views/pdf/recommendation_letter.blade.php` — data penanda tangan dinamis dari user role kadis
+- [x] `DocumentVerificationController::verify($token)` — publik, cari via `document_approvals.qr_verification_token`
+- [x] `pages/public/DocumentVerify.jsx` — scan QR → tampilkan info dokumen + TTE
+- [x] `Signature Vault` — upload tanda tangan pejabat (Kadis, Kabid) via `SignatureController`
+- [x] `pages/settings/SignatureVault.jsx` — grid pejabat + upload/preview/hapus TTE
 
 ---
 

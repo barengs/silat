@@ -100,7 +100,7 @@ const PublicLayout = () => {
                         {isAuthenticated ? (
                             <button
                                 onClick={() => navigate('/dashboard')}
-                                className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700 shadow-md shadow-blue-500/10 hover:shadow-blue-500/20 active:scale-[0.98] transition-all"
+                                className="flex items-center gap-2 px-5 py-2.5 rounded bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700 shadow-md shadow-blue-500/10 hover:shadow-blue-500/20 active:scale-[0.98] transition-all"
                             >
                                 <LayoutDashboard size={16} />
                                 Ke Dashboard
@@ -108,7 +108,7 @@ const PublicLayout = () => {
                         ) : (
                             <button
                                 onClick={() => navigate('/login')}
-                                className="flex items-center gap-2 px-5 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-700 font-semibold text-sm hover:bg-slate-50 hover:text-slate-900 shadow-sm active:scale-[0.98] transition-all"
+                                className="flex items-center gap-2 px-5 py-2.5 rounded border border-slate-300 bg-white text-slate-700 font-semibold text-sm hover:bg-slate-50 hover:text-slate-900 shadow-sm active:scale-[0.98] transition-all"
                             >
                                 <LogIn size={16} />
                                 Login Portal

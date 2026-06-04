@@ -397,10 +397,37 @@ class TreasurerChangeController extends Controller
         $verificationToken = md5($change->reference_number.uniqid());
         $verificationUrl = url("/verify/doc/{$verificationToken}");
 
+        // Persist the QR token to the latest approved DocumentApproval record
+        $latestApproval = $change->approvals()
+            ->where('status', 'approved')
+            ->orderBy('step_order', 'desc')
+            ->first();
+
+        if ($latestApproval) {
+            $latestApproval->update([
+                'qr_verification_token' => $verificationToken,
+                'qr_verification_url'   => $verificationUrl,
+            ]);
+        }
+
+        // Get the active Kadis signer for TTE
+        $signer = \App\Models\User::where('is_active', true)
+            ->whereHas('roles', fn ($q) => $q->where('name', 'kadis'))
+            ->first();
+
+        $signerName = $signer?->name ?? 'MOHAMMAD ALWI, M.Pd';
+        $signerNip  = $signer?->nip ?? '19680512 199303 1 005';
+        $signatureImagePath = $signer?->signature_image_path
+            ? storage_path('app/public/' . $signer->signature_image_path)
+            : null;
+
         // Generate QR code as SVG content to inline in PDF
         $qrCode = QrCode::size(80)->generate($verificationUrl);
 
-        $pdf = Pdf::loadView('pdf.recommendation_letter', compact('change', 'qrCode', 'verificationUrl'));
+        $pdf = Pdf::loadView('pdf.recommendation_letter', compact(
+            'change', 'qrCode', 'verificationUrl',
+            'signerName', 'signerNip', 'signatureImagePath'
+        ));
 
         $path = "treasurer_changes/{$change->reference_number}/surat_rekomendasi.pdf";
         Storage::disk('public')->put($path, $pdf->output());

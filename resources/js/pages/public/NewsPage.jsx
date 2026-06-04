@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import SkeletonCard from '@/components/ui/SkeletonCard';
 import { Link } from 'react-router-dom';
 import axios from '@/bootstrap';
 import { Search, Calendar, Eye, FileText, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -74,7 +75,7 @@ const NewsPage = () => {
                 </div>
 
                 {/* Filter and Search Bar */}
-                <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between mb-10">
+                <div className="bg-white rounded p-6 border border-slate-200/80 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between mb-10">
                     {/* Search form */}
                     <form onSubmit={handleSearchSubmit} className="relative w-full md:max-w-md">
                         <input
@@ -82,7 +83,7 @@ const NewsPage = () => {
                             placeholder="Cari judul berita..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full bg-slate-50 text-slate-800 placeholder-slate-400 pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-blue-500 focus:bg-white transition-all text-sm"
+                            className="w-full bg-slate-50 text-slate-800 placeholder-slate-400 pl-10 pr-4 py-2.5 rounded border border-slate-200 focus:outline-none focus:border-blue-500 focus:bg-white transition-all text-sm"
                         />
                         <Search className="absolute left-3.5 top-3 text-slate-400" size={18} />
                         <button type="submit" className="hidden">Cari</button>
@@ -92,7 +93,7 @@ const NewsPage = () => {
                     <div className="flex flex-wrap gap-2 w-full md:w-auto justify-start md:justify-end">
                         <button
                             onClick={() => { setSelectedCategory('all'); setPage(1); }}
-                            className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all border ${
+                            className={`px-4 py-2 rounded text-xs font-semibold transition-all border ${
                                 selectedCategory === 'all'
                                     ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/10'
                                     : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
@@ -104,7 +105,7 @@ const NewsPage = () => {
                             <button
                                 key={cat.id}
                                 onClick={() => { setSelectedCategory(cat.id); setPage(1); }}
-                                className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all border ${
+                                className={`px-4 py-2 rounded text-xs font-semibold transition-all border ${
                                     selectedCategory === cat.id
                                         ? 'text-white border-transparent shadow-md shadow-slate-900/10'
                                         : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
@@ -124,14 +125,14 @@ const NewsPage = () => {
                 {/* News Grid */}
                 {loading ? (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {[1, 2, 3, 4, 5, 6].map((n) => (
-                            <div key={n} className="animate-pulse flex flex-col gap-4 bg-white p-4 rounded-2xl border border-slate-100">
-                                <div className="bg-slate-200 h-44 rounded-xl w-full" />
-                                <div className="h-4 bg-slate-200 rounded w-1/4" />
-                                <div className="h-6 bg-slate-200 rounded w-3/4" />
-                                <div className="h-4 bg-slate-200 rounded w-full" />
-                            </div>
-                        ))}
+                      {[1, 2, 3, 4, 5, 6].map((n) => (
+                        <div key={n} className="flex flex-col gap-4 bg-white p-4 rounded border border-slate-100">
+                          <SkeletonCard className="h-44 w-full" />
+                          <SkeletonCard className="h-4 w-1/4" />
+                          <SkeletonCard className="h-6 w-3/4" />
+                          <SkeletonCard className="h-4 w-full" />
+                        </div>
+                      ))}
                     </div>
                 ) : articles.length > 0 ? (
                     <>
@@ -139,7 +140,7 @@ const NewsPage = () => {
                             {articles.map((article) => (
                                 <article
                                     key={article.id}
-                                    className="bg-white rounded-2xl overflow-hidden border border-slate-200/60 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between"
+                                    className="bg-white rounded overflow-hidden border border-slate-200/60 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between"
                                 >
                                     <div>
                                         {/* Thumbnail */}
@@ -207,7 +208,7 @@ const NewsPage = () => {
                                 <button
                                     onClick={() => setPage((p) => Math.max(p - 1, 1))}
                                     disabled={page === 1}
-                                    className="p-2 rounded-lg border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    className="p-2 rounded border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                 >
                                     <ChevronLeft size={16} />
                                 </button>
@@ -217,7 +218,7 @@ const NewsPage = () => {
                                 <button
                                     onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
                                     disabled={page === totalPages}
-                                    className="p-2 rounded-lg border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    className="p-2 rounded border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                 >
                                     <ChevronRight size={16} />
                                 </button>
@@ -225,7 +226,7 @@ const NewsPage = () => {
                         )}
                     </>
                 ) : (
-                    <div className="text-center py-20 bg-white rounded-2xl border border-slate-200 shadow-sm text-slate-500">
+                    <div className="text-center py-20 bg-white rounded border border-slate-200 shadow-sm text-slate-500">
                         Tidak ada berita atau pengumuman yang sesuai dengan pencarian Anda.
                     </div>
                 )}
