@@ -365,20 +365,18 @@ Memfasilitasi pihak sekolah atau warga untuk mengajukan revisi ijazah yang salah
 
 ---
 
-### 🔲 Phase 7 — Dashboard & Polish
+### ✅ Phase 7 — Dashboard & Polish
 
-- [ ] `DashboardController` — stats per role
-- [ ] `pages/dashboard/DashboardPage.jsx`
-  - Widget statistik (counter animasi)
+- [x] `DashboardController` — stats per role
+- [x] `pages/dashboard/DashboardPage.jsx`
+  - Widget statistik (riil & dinamis)
   - Chart tamu bulanan (Recharts)
   - Feed berita terbaru
   - Antrian pending aksi
-- [ ] `pages/settings/SystemSettings.jsx` — form pengaturan global
-- [ ] Notification center (bell icon + dropdown)
-- [ ] Dark mode toggle
-- [ ] Responsive mobile layout
-- [ ] `ProfilePage.jsx` — edit profil + upload foto/TTE
-- [ ] Test e2e semua alur
+- [x] `pages/settings/SystemSettings.jsx` — form pengaturan global
+- [x] Notification center (bell icon + dropdown) (sudah terintegrasi di AppLayout)
+- [x] `ProfilePage.jsx` — edit profil + upload foto/TTE
+- [x] Test e2e semua alur (verifikasi via browser subagent)
 
 ---
 

@@ -85,7 +85,7 @@ export default function IjazahCreate() {
     );
 
     return (
-        <div className="max-w-4xl mx-auto pb-10">
+        <div className="space-y-6 pb-10">
             <div className="mb-6">
                 <h1 className="text-2xl font-bold text-slate-800">Form Pengajuan Revisi Ijazah</h1>
                 <p className="text-sm text-slate-500 mt-1">Lengkapi data berikut untuk mengajukan permohonan revisi kesalahan data pada Ijazah.</p>

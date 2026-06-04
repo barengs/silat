@@ -57,7 +57,7 @@ export default function IjazahList() {
     const readyForPickupCount = ijazahs?.data?.filter(i => i.status === 'ready_for_pickup').length || 0;
 
     return (
-        <div className="max-w-6xl mx-auto pb-10">
+        <div className="space-y-6 pb-10">
             {/* Header */}
             <div className="mb-6">
                 <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">

@@ -60,6 +60,8 @@ const DocumentVerify = React.lazy(() => import('@/pages/public/DocumentVerify'))
 
 // Settings
 const SignatureVault = React.lazy(() => import('@/pages/settings/SignatureVault'));
+const SystemSettings = React.lazy(() => import('@/pages/settings/SystemSettings'));
+const ProfilePage    = React.lazy(() => import('@/pages/profile/ProfilePage'));
 
 // ── Route Guards ──────────────────────────────────────────────────────────────
 
@@ -188,6 +190,8 @@ export default function Main() {
 
                         {/* Settings */}
                         <Route path="/settings/signatures" element={<SignatureVault />} />
+                        <Route path="/settings" element={<SystemSettings />} />
+                        <Route path="/profile" element={<ProfilePage />} />
                     </Route>
 
                     {/* 404 */}

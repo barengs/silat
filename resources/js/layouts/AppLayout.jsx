@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { Outlet, NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { clearAuth } from '@/store/slices/authSlice';
 import authService from '@/services/authService';
@@ -284,13 +284,13 @@ export default function AppLayout() {
                             <HelpCircle size={20} />
                         </button>
                         <div className="h-8 w-px bg-slate-200 hidden sm:block"></div>
-                        <button className="flex items-center">
+                        <Link to="/profile" className="flex items-center hover:opacity-80 transition-opacity">
                             <img 
-                                src={user?.photo_path || `https://ui-avatars.com/api/?name=${user?.name || 'User'}&background=166534&color=fff`} 
+                                src={user?.photo_path ? (user.photo_path.startsWith('http') ? user.photo_path : `/storage/${user.photo_path}`) : `https://ui-avatars.com/api/?name=${user?.name || 'User'}&background=166534&color=fff`} 
                                 alt="Profile" 
                                 className="h-8 w-8 rounded-full border border-slate-200 object-cover"
                             />
-                        </button>
+                        </Link>
                     </div>
                 </header>
 

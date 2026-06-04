@@ -78,7 +78,7 @@ export default function IjazahShow() {
 
     if (isLoading) {
         return (
-            <div className="max-w-6xl mx-auto pb-10 animate-pulse">
+            <div className="space-y-6 pb-10 animate-pulse">
                 {/* Header Actions Skeleton */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                     <div>
@@ -153,7 +153,7 @@ export default function IjazahShow() {
     };
 
     return (
-        <div className="max-w-6xl mx-auto pb-10">
+        <div className="space-y-6 pb-10">
             {/* Header Actions */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                 <div>
