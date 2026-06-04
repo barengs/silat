@@ -64,15 +64,20 @@ export default function LoginPage() {
         <div className="flex min-h-screen bg-white">
             {/* Left Panel - Branding (Hidden on mobile) */}
             <div className="hidden lg:flex lg:w-1/2 bg-[#166534] text-white flex-col justify-between p-12 relative overflow-hidden">
+                {/* Batik background overlay */}
+                <div 
+                    className="absolute inset-0 bg-cover bg-center opacity-10 pointer-events-none mix-blend-overlay" 
+                    style={{ backgroundImage: "url('/images/batik.png')" }}
+                ></div>
                 {/* Decorative background element */}
                 <div className="absolute top-0 right-0 -mr-32 -mt-32 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
                 <div className="absolute bottom-0 left-0 -ml-32 -mb-32 w-[400px] h-[400px] bg-teal-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-                <div className="relative z-10 flex items-center space-x-3">
-                    <img src="/images/logo-pamekasan.png" alt="Logo Pamekasan" className="w-12 h-12 object-contain" onError={(e) => e.target.src='https://upload.wikimedia.org/wikipedia/commons/e/e0/Lambang_Kabupaten_Pamekasan.png'} />
+                <div className="relative z-10 flex items-center space-x-5">
+                    <img src="/images/logo-pamekasan.png" alt="Logo Pamekasan" className="w-32 h-32 object-contain" onError={(e) => e.target.src='https://upload.wikimedia.org/wikipedia/commons/e/e0/Lambang_Kabupaten_Pamekasan.png'} />
                     <div>
-                        <h1 className="font-bold text-lg leading-tight">Dinas Pendidikan</h1>
-                        <p className="text-[10px] tracking-widest text-slate-400 font-semibold uppercase">Kabupaten Pamekasan</p>
+                        <h1 className="font-bold text-3xl leading-tight">Dinas Pendidikan</h1>
+                        <p className="text-sm tracking-widest text-slate-300 font-semibold uppercase">Kabupaten Pamekasan</p>
                     </div>
                 </div>
 
@@ -97,11 +102,11 @@ export default function LoginPage() {
             {/* Right Panel - Login Form */}
             <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 lg:p-24 relative">
                 {/* Mobile branding (visible only on small screens) */}
-                <div className="absolute top-8 left-8 lg:hidden flex items-center space-x-3">
-                    <img src="/images/logo-pamekasan.png" alt="Logo Pamekasan" className="w-10 h-10 object-contain" onError={(e) => e.target.src='https://upload.wikimedia.org/wikipedia/commons/e/e0/Lambang_Kabupaten_Pamekasan.png'} />
+                <div className="absolute top-8 left-8 lg:hidden flex items-center space-x-5">
+                    <img src="/images/logo-pamekasan.png" alt="Logo Pamekasan" className="w-20 h-20 object-contain" onError={(e) => e.target.src='https://upload.wikimedia.org/wikipedia/commons/e/e0/Lambang_Kabupaten_Pamekasan.png'} />
                     <div>
-                        <h1 className="font-bold text-[#166534] text-sm leading-tight">Dinas Pendidikan</h1>
-                        <p className="text-[9px] tracking-widest text-slate-500 font-semibold uppercase">Kab. Pamekasan</p>
+                        <h1 className="font-bold text-[#166534] text-xl leading-tight">Dinas Pendidikan</h1>
+                        <p className="text-sm tracking-widest text-slate-500 font-semibold uppercase">Kab. Pamekasan</p>
                     </div>
                 </div>
 

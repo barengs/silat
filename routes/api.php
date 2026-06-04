@@ -48,6 +48,7 @@ Route::prefix('auth')->group(function () {
 Route::prefix('public')->group(function () {
     Route::get('/articles', [ArticleController::class, 'indexPublic']);
     Route::get('/articles/{slug}', [ArticleController::class, 'showPublic']);
+    Route::get('/categories', [ArticleCategoryController::class, 'index']);
 });
 
 // QR Code document verification (no login — for bank officers or public scan)
@@ -134,10 +135,6 @@ Route::middleware('jwt.auth')->group(function () {
     // ── Master Data ─────────────────────────────────────────────────────────
     Route::apiResource('transport-types', TransportTypeController::class);
 
-    // ── Articles / News (Admin) ─────────────────────────────────────────────
-    Route::apiResource('articles', ArticleController::class);
-    Route::apiResource('article-categories', ArticleCategoryController::class)->except(['show']);
-
     // ── Ijazah Revisions ────────────────────────────────────────────────────
     Route::prefix('ijazah-revisions')->group(function () {
         Route::get('/', [IjazahRevisionController::class, 'index']);
@@ -148,8 +145,11 @@ Route::middleware('jwt.auth')->group(function () {
         Route::post('/{id}/mark-ready', [IjazahRevisionController::class, 'markReadyForPickup']);
         Route::post('/{id}/mark-completed', [IjazahRevisionController::class, 'markCompleted']);
     });
+    // ── Article Categories (Auth & Manage) ──────────────────────────────────
     Route::get('/article-categories', [ArticleCategoryController::class, 'index']);
-    Route::apiResource('article-categories', ArticleCategoryController::class)->middleware('permission:article-categories.manage');
+    Route::post('/article-categories', [ArticleCategoryController::class, 'store'])->middleware('permission:article-categories.manage');
+    Route::put('/article-categories/{id}', [ArticleCategoryController::class, 'update'])->middleware('permission:article-categories.manage');
+    Route::delete('/article-categories/{id}', [ArticleCategoryController::class, 'destroy'])->middleware('permission:article-categories.manage');
 
     // ── RBAC & Master Data Management ───────────────────────────────────────────────
     Route::apiResource('institutions', InstitutionController::class);

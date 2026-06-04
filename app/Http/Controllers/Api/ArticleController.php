@@ -7,6 +7,7 @@ use App\Models\Article;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Intervention\Image\Laravel\Facades\Image;
 
 class ArticleController extends Controller
 {
@@ -23,6 +24,10 @@ class ArticleController extends Controller
 
         if ($request->has('status') && $request->status !== 'all') {
             $query->where('status', $request->status);
+        }
+
+        if ($request->has('category_id') && $request->category_id !== 'all') {
+            $query->where('category_id', $request->category_id);
         }
 
         $articles = $query->latest('published_at')->paginate(10);
@@ -49,7 +54,12 @@ class ArticleController extends Controller
 
         $thumbnailPath = null;
         if ($request->hasFile('thumbnail')) {
-            $thumbnailPath = $request->file('thumbnail')->store('articles', 'public');
+            $file = $request->file('thumbnail');
+            $filename = 'thumb_'.uniqid().'.webp';
+            $path = 'articles/'.$filename;
+            $encoded = Image::read($file)->toWebp(quality: 80);
+            Storage::disk('public')->put($path, (string) $encoded);
+            $thumbnailPath = $path;
         }
 
         $article = Article::create([
@@ -102,7 +112,12 @@ class ArticleController extends Controller
             if ($article->thumbnail_path) {
                 Storage::disk('public')->delete($article->thumbnail_path);
             }
-            $article->thumbnail_path = $request->file('thumbnail')->store('articles', 'public');
+            $file = $request->file('thumbnail');
+            $filename = 'thumb_'.uniqid().'.webp';
+            $path = 'articles/'.$filename;
+            $encoded = Image::read($file)->toWebp(quality: 80);
+            Storage::disk('public')->put($path, (string) $encoded);
+            $article->thumbnail_path = $path;
         }
 
         $article->update([
@@ -136,14 +151,63 @@ class ArticleController extends Controller
     }
 
     /**
+     * Publish article.
+     */
+    public function publish($id)
+    {
+        $article = Article::findOrFail($id);
+        $article->update([
+            'status' => 'published',
+            'published_at' => $article->published_at ?? now(),
+        ]);
+
+        return response()->json([
+            'message' => 'Berita berhasil dipublikasikan.',
+            'data' => $article,
+        ]);
+    }
+
+    /**
+     * Upload image from Tiptap editor as WebP.
+     */
+    public function uploadImage(Request $request)
+    {
+        $request->validate([
+            'image' => 'required|image|max:5120',
+        ]);
+
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $filename = 'img_'.uniqid().'.webp';
+            $path = 'articles_content/'.$filename;
+            $encoded = Image::read($file)->toWebp(quality: 80);
+            Storage::disk('public')->put($path, (string) $encoded);
+            $url = asset('storage/'.$path);
+
+            return response()->json(['url' => $url]);
+        }
+
+        return response()->json(['message' => 'No image file uploaded'], 400);
+    }
+
+    /**
      * Public Endpoint: Get latest published articles for Landing Page.
      */
     public function indexPublic(Request $request)
     {
-        $articles = Article::with(['category:id,name', 'author:id,name,photo_path'])
+        $query = Article::with(['category:id,name,color', 'author:id,name,photo_path'])
             ->published()
-            ->public()
-            ->orderBy('is_pinned', 'desc')
+            ->public();
+
+        if ($request->has('category_id') && $request->category_id !== 'all') {
+            $query->where('category_id', $request->category_id);
+        }
+
+        if ($request->has('q') && $request->q !== '') {
+            $query->where('title', 'like', '%'.$request->q.'%');
+        }
+
+        $articles = $query->orderBy('is_pinned', 'desc')
             ->orderBy('published_at', 'desc')
             ->paginate(6);
 
@@ -155,7 +219,7 @@ class ArticleController extends Controller
      */
     public function showPublic($slug)
     {
-        $article = Article::with(['category:id,name', 'author:id,name,photo_path'])
+        $article = Article::with(['category:id,name,color', 'author:id,name,photo_path'])
             ->published()
             ->public()
             ->where('slug', $slug)

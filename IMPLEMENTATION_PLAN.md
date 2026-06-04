@@ -324,14 +324,16 @@ Memfasilitasi pihak sekolah atau warga untuk mengajukan revisi ijazah yang salah
 
 ---
 
-### 🔲 Phase 4F — Portal Berita (CMS)
+### 🔲 Phase 4F & Phase 8 — Portal Berita (CMS) & Public Landing Page (Integrated)
 
-- [ ] `ArticleController` — CRUD dengan rich text content
-- [ ] `ArticleCategoryController`
-- [ ] `PublicArticleController` — endpoint publik (no auth)
-- [ ] `pages/articles/ArticleList.jsx` — CMS dashboard
-- [ ] `pages/articles/ArticleEditor.jsx` — Tiptap rich text editor
-- [ ] `pages/public/NewsPage.jsx` — halaman publik tanpa login
+- [/] `ArticleController` — CRUD dengan rich text content
+- [/] `ArticleCategoryController`
+- [/] `PublicArticleController` — endpoint publik (no auth) (diimplementasikan langsung di ArticleController)
+- [/] `pages/articles/ArticleList.jsx` — CMS dashboard
+- [/] `pages/articles/ArticleForm.jsx` (pengganti ArticleEditor) — Tiptap rich text editor
+- [/] `pages/public/LandingPage.jsx` — halaman publik utama tanpa login
+- [/] `pages/public/NewsPage.jsx` — halaman index berita publik tanpa login
+- [/] `pages/public/NewsDetail.jsx` — halaman detail baca berita publik tanpa login
 
 ---
 
