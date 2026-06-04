@@ -7,7 +7,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from '@/bootstrap';
 import { toast } from 'sonner';
-import { Save, ArrowLeft, Loader2 } from 'lucide-react';
+import { Save, ArrowLeft, Loader2, User, Shield } from 'lucide-react';
 
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -130,31 +130,31 @@ export default function UserForm() {
 
     return (
         <div className="max-w-4xl mx-auto space-y-6">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-4 mb-4">
                 <button 
                     onClick={() => navigate('/users')}
                     className="p-2 rounded-full hover:bg-slate-200 text-slate-500 transition-colors"
                 >
-                    <ArrowLeft size={20} />
+                    <ArrowLeft size={18} />
                 </button>
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900">
+                    <h1 className="text-xl font-bold text-slate-900">
                         {isEditMode ? 'Edit Pengguna' : 'Tambah Pengguna Baru'}
                     </h1>
-                    <p className="text-sm text-slate-500">
-                        Lengkapi formulir di bawah ini untuk mengatur akun pengguna sistem.
-                    </p>
                 </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
-                <form onSubmit={handleSubmit(onSubmit)} className="p-6 md:p-8 space-y-8">
+            <div className="bg-white rounded shadow-sm border border-slate-200 overflow-hidden">
+                <form onSubmit={handleSubmit(onSubmit)} className="p-5 space-y-6">
                     
                     {/* Data Diri Section */}
-                    <div className="space-y-4">
-                        <h2 className="text-base font-bold text-slate-900 border-b border-slate-100 pb-2">Informasi Profil</h2>
+                    <div className="space-y-3">
+                        <h2 className="text-base font-bold text-slate-800 flex items-center gap-2 mb-3 border-b border-slate-100 pb-2">
+                            <User className="text-teal-600" size={18} />
+                            Informasi Profil
+                        </h2>
                         
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <FormGroup label="Nama Lengkap" error={errors.name?.message} required>
                                 <Input
                                     type="text"
@@ -186,10 +186,13 @@ export default function UserForm() {
                     </div>
 
                     {/* Pekerjaan & Akses Section */}
-                    <div className="space-y-4 pt-4">
-                        <h2 className="text-base font-bold text-slate-900 border-b border-slate-100 pb-2">Penempatan & Hak Akses (Multi-Role)</h2>
+                    <div className="space-y-3 pt-2">
+                        <h2 className="text-base font-bold text-slate-800 flex items-center gap-2 mb-3 border-b border-slate-100 pb-2">
+                            <Shield className="text-teal-600" size={18} />
+                            Penempatan & Hak Akses
+                        </h2>
                         
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <FormGroup label="Instansi (Opsional)">
                                 <UISelect {...register('institution_id')}>
                                     <option value="">-- Dinas Pendidikan (Pusat) --</option>
@@ -224,7 +227,7 @@ export default function UserForm() {
                     </div>
 
                     {/* Status */}
-                    <div className="pt-4 border-t border-slate-100">
+                    <div className="pt-2 border-t border-slate-100 mt-2">
                         <div className="flex items-center">
                             <Checkbox id="is_active" {...register('is_active')} />
                             <label htmlFor="is_active" className="ml-2 block text-sm text-slate-900 font-medium cursor-pointer">
@@ -234,17 +237,22 @@ export default function UserForm() {
                     </div>
 
                     {/* Actions */}
-                    <div className="pt-6 flex justify-end gap-3 border-t border-slate-100">
+                    <div className="pt-4 flex justify-end gap-2 border-t border-slate-100">
                         <Button
-                            variant="secondary"
+                            type="button"
+                            variant="outline"
+                            size="sm"
                             onClick={() => navigate('/users')}
+                            className="border-slate-200 text-slate-600 bg-white hover:bg-slate-50"
                         >
                             Batal
                         </Button>
                         <Button
                             type="submit"
+                            size="sm"
                             isLoading={isSubmitting}
                             icon={Save}
+                            className="bg-[#0f172a] hover:bg-slate-800 text-white"
                         >
                             Simpan Data
                         </Button>

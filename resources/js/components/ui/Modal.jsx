@@ -6,7 +6,7 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 'ma
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-            <div className={`bg-white rounded-xl shadow-xl w-full ${maxWidth} overflow-hidden animate-in fade-in zoom-in duration-200 flex flex-col max-h-[90vh]`}>
+            <div className={`bg-white rounded shadow-xl w-full ${maxWidth} overflow-hidden animate-in fade-in zoom-in duration-200 flex flex-col max-h-[90vh]`}>
                 
                 {/* Header */}
                 <div className="flex justify-between items-center p-5 border-b border-slate-100 flex-shrink-0">

@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
@@ -30,15 +30,15 @@ class AuthController extends Controller
 
         $user = User::query()->where($field, $username)->first();
 
-        if (!$user || !Hash::check($password, $user->password)) {
+        if (! $user || ! Hash::check($password, $user->password)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Email atau password salah.',
-                'error'   => 'invalid_credentials',
+                'error' => 'invalid_credentials',
             ], 401);
         }
 
-        if (!$user->is_active) {
+        if (! $user->is_active) {
             return response()->json([
                 'success' => false,
                 'message' => 'Akun Anda telah dinonaktifkan. Hubungi administrator.',
@@ -58,13 +58,13 @@ class AuthController extends Controller
         $user->update(['last_login_at' => now()]);
 
         return response()->json([
-            'success'     => true,
-            'message'     => 'Login berhasil.',
-            'token'       => $token,
-            'token_type'  => 'bearer',
-            'expires_in'  => config('jwt.ttl') * 60, // seconds
-            'user'        => $this->userResource($user),
-            'roles'       => $user->getRoleNames(),
+            'success' => true,
+            'message' => 'Login berhasil.',
+            'token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => config('jwt.ttl') * 60, // seconds
+            'user' => $this->userResource($user),
+            'roles' => $user->getRoleNames(),
             'permissions' => $user->getAllPermissions()->pluck('name'),
         ]);
     }
@@ -103,8 +103,8 @@ class AuthController extends Controller
         }
 
         return response()->json([
-            'success'    => true,
-            'token'      => $newToken,
+            'success' => true,
+            'token' => $newToken,
             'token_type' => 'bearer',
             'expires_in' => config('jwt.ttl') * 60,
         ]);
@@ -119,9 +119,9 @@ class AuthController extends Controller
         $user = JWTAuth::parseToken()->authenticate();
 
         return response()->json([
-            'success'     => true,
-            'user'        => $this->userResource($user),
-            'roles'       => $user->getRoleNames(),
+            'success' => true,
+            'user' => $this->userResource($user),
+            'roles' => $user->getRoleNames(),
             'permissions' => $user->getAllPermissions()->pluck('name'),
         ]);
     }
@@ -148,9 +148,9 @@ class AuthController extends Controller
     public function resetPassword(Request $request)
     {
         $request->validate([
-            'token'                 => 'required',
-            'email'                 => 'required|email',
-            'password'              => 'required|min:8|confirmed',
+            'token' => 'required',
+            'email' => 'required|email',
+            'password' => 'required|min:8|confirmed',
         ]);
 
         // TODO: Implement password reset logic
@@ -166,25 +166,26 @@ class AuthController extends Controller
     private function userResource(User $user): array
     {
         $user->loadMissing(['institution', 'division']);
+
         return [
-            'id'              => $user->id,
-            'name'            => $user->name,
-            'email'           => $user->email,
-            'nip'             => $user->nip,
-            'phone'           => $user->phone,
-            'photo_path'      => $user->photo_path ? asset('storage/' . $user->photo_path) : null,
-            'signature_path'  => $user->signature_image_path ? asset('storage/' . $user->signature_image_path) : null,
-            'institution'     => $user->institution ? [
-                'id'   => $user->institution->id,
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'nip' => $user->nip,
+            'phone' => $user->phone,
+            'photo_path' => $user->photo_path ? asset('storage/'.$user->photo_path) : null,
+            'signature_path' => $user->signature_image_path ? asset('storage/'.$user->signature_image_path) : null,
+            'institution' => $user->institution ? [
+                'id' => $user->institution->id,
                 'name' => $user->institution->name,
                 'type' => $user->institution->type,
             ] : null,
-            'division'        => $user->division ? [
-                'id'   => $user->division->id,
+            'division' => $user->division ? [
+                'id' => $user->division->id,
                 'name' => $user->division->name,
             ] : null,
-            'is_active'       => $user->is_active,
-            'last_login_at'   => $user->last_login_at?->toISOString(),
+            'is_active' => $user->is_active,
+            'last_login_at' => $user->last_login_at?->toISOString(),
         ];
     }
 }

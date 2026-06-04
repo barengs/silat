@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -32,10 +33,10 @@ class Sppd extends Model
     ];
 
     protected $casts = [
-        'start_date'       => 'date',
-        'end_date'         => 'date',
+        'start_date' => 'date',
+        'end_date' => 'date',
         'estimated_budget' => 'decimal:2',
-        'actual_budget'    => 'decimal:2',
+        'actual_budget' => 'decimal:2',
     ];
 
     public function user(): BelongsTo
@@ -58,7 +59,7 @@ class Sppd extends Model
         return $this->hasMany(SppdMember::class);
     }
 
-    public function report(): \Illuminate\Database\Eloquent\Relations\HasOne
+    public function report(): HasOne
     {
         return $this->hasOne(SppdReport::class);
     }
@@ -95,14 +96,14 @@ class Sppd extends Model
     {
         return static::where('user_id', $userId)
             ->whereNotIn('status', ['draft', 'rejected', 'closed'])
-            ->when($excludeId, fn($q) => $q->where('id', '!=', $excludeId))
+            ->when($excludeId, fn ($q) => $q->where('id', '!=', $excludeId))
             ->where(function ($q) use ($startDate, $endDate) {
                 $q->whereBetween('start_date', [$startDate, $endDate])
-                  ->orWhereBetween('end_date', [$startDate, $endDate])
-                  ->orWhere(function ($q2) use ($startDate, $endDate) {
-                      $q2->where('start_date', '<=', $startDate)
-                         ->where('end_date', '>=', $endDate);
-                  });
+                    ->orWhereBetween('end_date', [$startDate, $endDate])
+                    ->orWhere(function ($q2) use ($startDate, $endDate) {
+                        $q2->where('start_date', '<=', $startDate)
+                            ->where('end_date', '>=', $endDate);
+                    });
             })
             ->exists();
     }

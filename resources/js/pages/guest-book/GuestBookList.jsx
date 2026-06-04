@@ -151,14 +151,14 @@ export default function GuestBookList() {
             </div>
 
             {/* Date Filters */}
-            <div className="bg-white border border-slate-200 rounded-xl p-4 flex flex-col sm:flex-row gap-4 items-end shadow-sm">
+            <div className="bg-white border border-slate-200 rounded p-4 flex flex-col sm:flex-row gap-4 items-end shadow-sm">
                 <div className="w-full sm:w-auto">
                     <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Mulai Tanggal</label>
                     <input 
                         type="date" 
                         value={startDate}
                         onChange={(e) => { setStartDate(e.target.value); setPageIndex(0); }}
-                        className="w-full sm:w-48 px-3 py-2 border border-slate-200 rounded-lg text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
+                        className="w-full sm:w-48 px-3 py-2 border border-slate-200 rounded text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
                     />
                 </div>
                 <div className="w-full sm:w-auto">
@@ -167,7 +167,7 @@ export default function GuestBookList() {
                         type="date" 
                         value={endDate}
                         onChange={(e) => { setEndDate(e.target.value); setPageIndex(0); }}
-                        className="w-full sm:w-48 px-3 py-2 border border-slate-200 rounded-lg text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
+                        className="w-full sm:w-48 px-3 py-2 border border-slate-200 rounded text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
                     />
                 </div>
                 {(startDate || endDate) && (
@@ -183,8 +183,8 @@ export default function GuestBookList() {
 
             {/* Dashboard Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white border border-slate-200 rounded-xl p-6 flex items-center shadow-sm">
-                    <div className="w-14 h-14 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center mr-4 shrink-0">
+                <div className="bg-white border border-slate-200 rounded p-6 flex items-center shadow-sm">
+                    <div className="w-14 h-14 rounded bg-blue-100 text-blue-600 flex items-center justify-center mr-4 shrink-0">
                         <Users size={28} />
                     </div>
                     <div>
@@ -193,8 +193,8 @@ export default function GuestBookList() {
                     </div>
                 </div>
 
-                <div className="bg-white border border-slate-200 rounded-xl p-6 flex items-center shadow-sm">
-                    <div className="w-14 h-14 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center mr-4 shrink-0">
+                <div className="bg-white border border-slate-200 rounded p-6 flex items-center shadow-sm">
+                    <div className="w-14 h-14 rounded bg-emerald-100 text-emerald-600 flex items-center justify-center mr-4 shrink-0">
                         <Building2 size={28} />
                     </div>
                     <div>
@@ -203,8 +203,8 @@ export default function GuestBookList() {
                     </div>
                 </div>
 
-                <div className="bg-white border border-slate-200 rounded-xl p-6 flex items-center shadow-sm">
-                    <div className="w-14 h-14 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center mr-4 shrink-0">
+                <div className="bg-white border border-slate-200 rounded p-6 flex items-center shadow-sm">
+                    <div className="w-14 h-14 rounded bg-orange-100 text-orange-600 flex items-center justify-center mr-4 shrink-0">
                         <Network size={28} />
                     </div>
                     <div>
@@ -215,7 +215,7 @@ export default function GuestBookList() {
             </div>
 
             {/* Data Table */}
-            <div className="bg-slate-50 border border-slate-200 rounded-xl shadow-sm p-1">
+            <div className="bg-slate-50 border border-slate-200 rounded shadow-sm p-1">
                 <div className="px-5 py-4 border-b border-slate-200 flex justify-between items-center bg-white rounded-t-xl">
                     <h3 className="text-lg font-bold text-slate-800">Daftar Kunjungan Terbaru</h3>
                 </div>

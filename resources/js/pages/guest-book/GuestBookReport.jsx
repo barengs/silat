@@ -33,7 +33,7 @@ export default function GuestBookReport() {
     return (
         <div className="space-y-6">
             {/* Header & Filters */}
-            <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+            <div className="bg-white border border-slate-200 rounded p-6 shadow-sm">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                     <div>
                         <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
@@ -51,7 +51,7 @@ export default function GuestBookReport() {
                             type="date" 
                             value={startDate}
                             onChange={(e) => setStartDate(e.target.value)}
-                            className="w-full sm:w-48 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
+                            className="w-full sm:w-48 px-3 py-2 border border-slate-200 rounded text-sm focus:ring-2 focus:ring-emerald-500"
                         />
                     </div>
                     <div className="w-full sm:w-auto">
@@ -60,7 +60,7 @@ export default function GuestBookReport() {
                             type="date" 
                             value={endDate}
                             onChange={(e) => setEndDate(e.target.value)}
-                            className="w-full sm:w-48 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
+                            className="w-full sm:w-48 px-3 py-2 border border-slate-200 rounded text-sm focus:ring-2 focus:ring-emerald-500"
                         />
                     </div>
                     {(startDate || endDate) && (
@@ -79,7 +79,7 @@ export default function GuestBookReport() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 
                 {/* Line Chart: Daily Trend */}
-                <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+                <div className="bg-white border border-slate-200 rounded p-6 shadow-sm">
                     <h3 className="text-lg font-bold text-slate-800 mb-6">Tren Kunjungan Harian</h3>
                     {isLoading ? (
                         <div className="h-72 flex items-center justify-center text-slate-400 animate-pulse">Memuat data...</div>
@@ -109,7 +109,7 @@ export default function GuestBookReport() {
                 </div>
 
                 {/* Pie Chart: Division Stats */}
-                <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+                <div className="bg-white border border-slate-200 rounded p-6 shadow-sm">
                     <h3 className="text-lg font-bold text-slate-800 mb-6">Kunjungan Berdasarkan Bidang Tujuan</h3>
                     {isLoading ? (
                         <div className="h-72 flex items-center justify-center text-slate-400 animate-pulse">Memuat data...</div>
@@ -143,7 +143,7 @@ export default function GuestBookReport() {
                 </div>
 
                 {/* Bar Chart: Division Stats (Alternative View) */}
-                <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm lg:col-span-2">
+                <div className="bg-white border border-slate-200 rounded p-6 shadow-sm lg:col-span-2">
                     <h3 className="text-lg font-bold text-slate-800 mb-6">Distribusi Tamu per Bidang</h3>
                     {isLoading ? (
                         <div className="h-80 flex items-center justify-center text-slate-400 animate-pulse">Memuat data...</div>

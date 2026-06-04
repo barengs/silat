@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\Permission\Models\Role;
 
 class ApprovalFlow extends Model
 {
@@ -22,13 +24,13 @@ class ApprovalFlow extends Model
 
     public function role(): BelongsTo
     {
-        return $this->belongsTo(\Spatie\Permission\Models\Role::class, 'role_id_required');
+        return $this->belongsTo(Role::class, 'role_id_required');
     }
 
     /**
      * Get all steps for a specific module, ordered.
      */
-    public static function getFlowForModule(string $module): \Illuminate\Database\Eloquent\Collection
+    public static function getFlowForModule(string $module): Collection
     {
         return static::query()
             ->where('module_name', $module)

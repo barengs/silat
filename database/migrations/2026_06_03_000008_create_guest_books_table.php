@@ -19,7 +19,7 @@ return new class extends Migration
             $table->text('purpose')->comment('Keperluan kunjungan');
             $table->unsignedBigInteger('guest_agency_id')->nullable();
             $table->unsignedBigInteger('target_division_id')
-                  ->comment('Bidang/divisi yang dituju oleh tamu');
+                ->comment('Bidang/divisi yang dituju oleh tamu');
             // Who registered (receptionist user)
             $table->unsignedBigInteger('registered_by')->nullable();
             $table->text('notes')->nullable();

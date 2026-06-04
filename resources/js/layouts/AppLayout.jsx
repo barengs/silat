@@ -85,6 +85,7 @@ export default function AppLayout() {
         { path: '/guest-book', label: 'Buku Tamu', icon: BookOpen, permission: 'guest-book.view' },
         { path: '/sppd', label: 'Manajemen SPPD', icon: Plane, permission: 'sppd.view' },
         { path: '/ijazah', label: 'Revisi Ijazah', icon: FileSignature, permission: 'ijazah.view' },
+        { path: '/treasurer', label: 'Perubahan Rekening', icon: FileSignature, permission: 'treasurer.view' },
         { path: '/verifikasi', label: 'Verifikasi Dokumen', icon: CheckSquare, permission: 'verifikasi.view' },
         { path: '/users', label: 'Pengguna', icon: Users, permission: 'users.view' },
         { path: '/roles', label: 'Roles & Akses', icon: ShieldAlert, permission: 'roles.view' },
@@ -97,7 +98,7 @@ export default function AppLayout() {
     const hasPermission = (permissionRequired) => {
         if (!permissionRequired) return true; // No specific permission needed
         if (roles?.includes('super-admin')) return true; // Super admin sees all
-        return permissions?.includes(permissionRequired);
+        return permissions?.some(p => p === permissionRequired || p.startsWith(permissionRequired + '-'));
     };
 
     // Filter items based on permissions
@@ -133,14 +134,24 @@ export default function AppLayout() {
                     )}
                 </div>
 
-                {/* Create New Button */}
+                {/* User Profile Info */}
                 <div className={`mb-6 ${isCollapsed ? 'px-3' : 'px-4'}`}>
-                    <button 
-                        className={`bg-teal-600 hover:bg-teal-500 text-white rounded-lg font-medium transition-colors shadow-sm flex items-center justify-center ${isCollapsed ? 'w-full py-3' : 'w-full py-2.5 px-4'}`}
-                        title="Buat Laporan Baru"
+                    <div 
+                        className={`bg-[#14532d] border border-emerald-800 text-white rounded-lg flex items-center ${isCollapsed ? 'justify-center w-full py-3' : 'py-2 px-3 gap-3'}`}
+                        title={isCollapsed ? user?.name : undefined}
                     >
-                        {isCollapsed ? <Plus size={20} /> : 'Buat Laporan Baru'}
-                    </button>
+                        <div className="w-8 h-8 rounded bg-teal-600 flex items-center justify-center font-bold text-xs shrink-0">
+                            {user?.name?.substring(0, 2).toUpperCase() || 'U'}
+                        </div>
+                        {!isCollapsed && (
+                            <div className="min-w-0 flex-1">
+                                <p className="text-sm font-semibold truncate capitalize">{user?.name || 'User'}</p>
+                                <p className="text-[10px] text-emerald-200/70 truncate uppercase tracking-wider mt-0.5">
+                                    {roles?.[0]?.replace('-', ' ') || 'Staff'}
+                                </p>
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 {/* Navigation */}
@@ -208,7 +219,7 @@ export default function AppLayout() {
                             <input 
                                 type="text" 
                                 placeholder="Cari layanan, dokumen..." 
-                                className="block w-full pl-10 pr-3 py-2 border border-slate-200 rounded-lg text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
+                                className="block w-full pl-10 pr-3 py-2 border border-slate-200 rounded text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
                             />
                         </div>
                     </div>
@@ -228,7 +239,7 @@ export default function AppLayout() {
                             
                             {/* Notification Dropdown */}
                             {showNotifications && (
-                                <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-slate-200 z-50 overflow-hidden">
+                                <div className="absolute right-0 mt-2 w-80 bg-white rounded shadow-lg border border-slate-200 z-50 overflow-hidden">
                                     <div className="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                                         <h3 className="text-sm font-bold text-slate-800">Notifikasi</h3>
                                         {notifData?.count > 0 && (

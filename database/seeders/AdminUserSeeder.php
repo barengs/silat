@@ -15,13 +15,13 @@ class AdminUserSeeder extends Seeder
         $dinas = Institution::firstOrCreate(
             ['type' => 'dinas'],
             [
-                'name'     => 'Dinas Pendidikan Kabupaten Pamekasan',
-                'address'  => 'Jl. Jokotole No. 117, Pamekasan',
-                'city'     => 'Pamekasan',
+                'name' => 'Dinas Pendidikan Kabupaten Pamekasan',
+                'address' => 'Jl. Jokotole No. 117, Pamekasan',
+                'city' => 'Pamekasan',
                 'province' => 'Jawa Timur',
-                'phone'    => '(0324) 321234',
-                'email'    => 'disdik@pamekasankab.go.id',
-                'is_active'=> true,
+                'phone' => '(0324) 321234',
+                'email' => 'disdik@pamekasankab.go.id',
+                'is_active' => true,
             ]
         );
 
@@ -29,11 +29,11 @@ class AdminUserSeeder extends Seeder
         $superAdmin = User::firstOrCreate(
             ['email' => 'superadmin@disdik.pamekasan.go.id'],
             [
-                'name'           => 'Super Administrator',
-                'email'          => 'superadmin@disdik.pamekasan.go.id',
-                'password'       => Hash::make('password'),
+                'name' => 'Super Administrator',
+                'email' => 'superadmin@disdik.pamekasan.go.id',
+                'password' => Hash::make('password'),
                 'institution_id' => $dinas->id,
-                'is_active'      => true,
+                'is_active' => true,
             ]
         );
         $superAdmin->assignRole('super-admin');
@@ -42,11 +42,11 @@ class AdminUserSeeder extends Seeder
         $resepsionis = User::firstOrCreate(
             ['email' => 'resepsionis@disdik.pamekasan.go.id'],
             [
-                'name'           => 'Resepsionis Dinas',
-                'email'          => 'resepsionis@disdik.pamekasan.go.id',
-                'password'       => Hash::make('password'),
+                'name' => 'Resepsionis Dinas',
+                'email' => 'resepsionis@disdik.pamekasan.go.id',
+                'password' => Hash::make('password'),
                 'institution_id' => $dinas->id,
-                'is_active'      => true,
+                'is_active' => true,
             ]
         );
         $resepsionis->assignRole('resepsionis');

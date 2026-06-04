@@ -16,7 +16,7 @@ return [
     */
 
     'defaults' => [
-        'guard'     => env('AUTH_GUARD', 'api'),
+        'guard' => env('AUTH_GUARD', 'api'),
         'passwords' => env('AUTH_PASSWORD_BROKER', 'users'),
     ],
 
@@ -39,13 +39,13 @@ return [
 
     'guards' => [
         'web' => [
-            'driver'   => 'session',
+            'driver' => 'session',
             'provider' => 'users',
         ],
 
         // JWT API guard — used by all stateless API endpoints
         'api' => [
-            'driver'   => 'jwt',
+            'driver' => 'jwt',
             'provider' => 'users',
         ],
     ],

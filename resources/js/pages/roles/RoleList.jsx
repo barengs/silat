@@ -141,14 +141,14 @@ export default function RoleList() {
 
     return (
         <div className="space-y-6 max-w-6xl mx-auto">
-            <div className="flex justify-between items-center bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+            <div className="flex justify-between items-center bg-white p-6 rounded shadow-sm border border-slate-200">
                 <div>
                     <h1 className="text-2xl font-bold text-slate-900">Manajemen Peran (Roles)</h1>
                     <p className="text-sm text-slate-500 mt-1">Kelola daftar hak akses dan wewenang pengguna sistem.</p>
                 </div>
                 <button
                     onClick={() => navigate('/roles/create')}
-                    className="flex items-center px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-sm font-medium shadow-sm transition-colors"
+                    className="flex items-center px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded text-sm font-medium shadow-sm transition-colors"
                 >
                     <Plus size={18} className="mr-2" />
                     Tambah Role Baru

@@ -26,7 +26,6 @@ return [
     */
     'guard_name' => 'api',
 
-
     'table_names' => [
 
         /*

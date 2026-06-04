@@ -39,7 +39,7 @@ return new class extends Migration
             $table->dropForeign(['institution_id', 'division_id']);
             $table->dropColumn([
                 'institution_id', 'division_id', 'nip', 'phone',
-                'photo_path', 'signature_image_path', 'is_active', 'last_login_at'
+                'photo_path', 'signature_image_path', 'is_active', 'last_login_at',
             ]);
         });
     }

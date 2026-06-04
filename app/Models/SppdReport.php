@@ -21,9 +21,9 @@ class SppdReport extends Model
 
     protected $casts = [
         'real_start_date' => 'date',
-        'real_end_date'   => 'date',
-        'submitted_at'    => 'datetime',
-        'actual_cost'     => 'decimal:2',
+        'real_end_date' => 'date',
+        'submitted_at' => 'datetime',
+        'actual_cost' => 'decimal:2',
     ];
 
     public function sppd(): BelongsTo

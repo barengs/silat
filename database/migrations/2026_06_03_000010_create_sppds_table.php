@@ -12,11 +12,11 @@ return new class extends Migration
             $table->id();
             // Official SPPD document number (format: 090/123/432.401/2026)
             $table->string('document_number', 100)->nullable()->unique()
-                  ->comment('Nomor dokumen SPPD resmi, null saat masih draft');
+                ->comment('Nomor dokumen SPPD resmi, null saat masih draft');
             // Requester — the main officer/employee going on duty travel
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('institution_id')->nullable()
-                  ->comment('Institusi pengaju (untuk SPPD sekolah)');
+                ->comment('Institusi pengaju (untuk SPPD sekolah)');
             $table->text('destination')->comment('Tujuan perjalanan');
             $table->text('purpose')->comment('Maksud dan tujuan perjalanan dinas');
             $table->string('base_letter')->nullable()->comment('Dasar surat/SK');
@@ -34,12 +34,12 @@ return new class extends Migration
                 'active',        // Sedang dalam perjalanan
                 'reported',      // Sudah lapor/upload LPP
                 'closed',        // Selesai & ditutup
-                'rejected'       // Ditolak
+                'rejected',       // Ditolak
             ])->default('draft');
             $table->integer('current_step')->default(0)
-                  ->comment('Langkah approval saat ini');
+                ->comment('Langkah approval saat ini');
             $table->string('document_path')->nullable()
-                  ->comment('Path file PDF SPPD yang sudah disetujui');
+                ->comment('Path file PDF SPPD yang sudah disetujui');
             $table->text('rejection_note')->nullable();
             $table->timestamps();
             $table->softDeletes();

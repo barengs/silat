@@ -37,7 +37,7 @@ class SystemSettingSeeder extends Seeder
             ['setting_key' => 'sppd_office_code',   'setting_value' => '432.401',                 'type' => 'string',  'label' => 'Kode Kantor untuk SPPD', 'group' => 'sppd'],
 
             // Notification
-            ['setting_key' => 'notif_email_enabled','setting_value' => '1',                       'type' => 'boolean', 'label' => 'Notifikasi Email Aktif', 'group' => 'notification'],
+            ['setting_key' => 'notif_email_enabled', 'setting_value' => '1',                       'type' => 'boolean', 'label' => 'Notifikasi Email Aktif', 'group' => 'notification'],
             ['setting_key' => 'support_contact',    'setting_value' => '',                        'type' => 'string',  'label' => 'Kontak Bantuan (HP/WA)', 'group' => 'notification'],
 
             // QR Verification

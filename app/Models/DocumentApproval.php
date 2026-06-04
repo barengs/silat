@@ -21,6 +21,12 @@ class DocumentApproval extends Model
         'acted_at',
     ];
 
+    protected $appends = [
+        'action_taken',
+        'notes',
+        'step_label',
+    ];
+
     protected $casts = [
         'acted_at' => 'datetime',
     ];
@@ -38,9 +44,35 @@ class DocumentApproval extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function approver(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
     public function approvalFlow(): BelongsTo
     {
         return $this->belongsTo(ApprovalFlow::class);
+    }
+
+    public function step(): BelongsTo
+    {
+        return $this->belongsTo(ApprovalFlow::class, 'approval_flow_id');
+    }
+
+    // Accessors for compatibility with code/frontend expecting different names
+    public function getActionTakenAttribute()
+    {
+        return $this->status;
+    }
+
+    public function getNotesAttribute()
+    {
+        return $this->note;
+    }
+
+    public function getStepLabelAttribute()
+    {
+        return $this->approvalFlow?->step_label;
     }
 
     /**

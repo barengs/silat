@@ -18,7 +18,7 @@ class DivisionController extends Controller
         if ($request->has('search')) {
             $search = $request->search;
             $query->where('name', 'like', "%{$search}%")
-                  ->orWhere('code', 'like', "%{$search}%");
+                ->orWhere('code', 'like', "%{$search}%");
         }
 
         if ($request->has('is_active')) {
@@ -39,7 +39,7 @@ class DivisionController extends Controller
 
         return response()->json([
             'success' => true,
-            'data'    => $divisions,
+            'data' => $divisions,
         ]);
     }
 
@@ -49,12 +49,12 @@ class DivisionController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name'        => 'required|string|max:255',
-            'code'        => 'nullable|string|max:50|unique:divisions,code',
+            'name' => 'required|string|max:255',
+            'code' => 'nullable|string|max:50|unique:divisions,code',
             'description' => 'nullable|string',
-            'parent_id'   => 'nullable|exists:divisions,id',
-            'sort_order'  => 'integer',
-            'is_active'   => 'boolean',
+            'parent_id' => 'nullable|exists:divisions,id',
+            'sort_order' => 'integer',
+            'is_active' => 'boolean',
         ]);
 
         $division = Division::create($validated);
@@ -62,7 +62,7 @@ class DivisionController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Divisi/Bidang berhasil ditambahkan',
-            'data'    => $division,
+            'data' => $division,
         ], 201);
     }
 
@@ -72,9 +72,10 @@ class DivisionController extends Controller
     public function show(Division $division)
     {
         $division->load('parent', 'children');
+
         return response()->json([
             'success' => true,
-            'data'    => $division,
+            'data' => $division,
         ]);
     }
 
@@ -84,12 +85,12 @@ class DivisionController extends Controller
     public function update(Request $request, Division $division)
     {
         $validated = $request->validate([
-            'name'        => 'required|string|max:255',
-            'code'        => 'nullable|string|max:50|unique:divisions,code,' . $division->id,
+            'name' => 'required|string|max:255',
+            'code' => 'nullable|string|max:50|unique:divisions,code,'.$division->id,
             'description' => 'nullable|string',
-            'parent_id'   => 'nullable|exists:divisions,id|not_in:' . $division->id, // prevent self-parenting
-            'sort_order'  => 'integer',
-            'is_active'   => 'boolean',
+            'parent_id' => 'nullable|exists:divisions,id|not_in:'.$division->id, // prevent self-parenting
+            'sort_order' => 'integer',
+            'is_active' => 'boolean',
         ]);
 
         $division->update($validated);
@@ -97,7 +98,7 @@ class DivisionController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Divisi/Bidang berhasil diperbarui',
-            'data'    => $division,
+            'data' => $division,
         ]);
     }
 
@@ -115,6 +116,7 @@ class DivisionController extends Controller
 
         try {
             Division::destroy($division->id);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Divisi/Bidang berhasil dihapus',

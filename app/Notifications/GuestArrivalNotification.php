@@ -2,11 +2,10 @@
 
 namespace App\Notifications;
 
+use App\Models\GuestBook;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use App\Models\GuestBook;
 
 class GuestArrivalNotification extends Notification implements ShouldQueue
 {
@@ -41,7 +40,7 @@ class GuestArrivalNotification extends Notification implements ShouldQueue
     {
         return [
             'title' => 'Tamu Baru Tiba',
-            'message' => "Tamu bernama {$this->guestBook->guest_name} dari instansi " . ($this->guestBook->agency->name ?? '-') . " telah tiba untuk menemui divisi Anda dengan keperluan: {$this->guestBook->purpose}",
+            'message' => "Tamu bernama {$this->guestBook->guest_name} dari instansi ".($this->guestBook->agency->name ?? '-')." telah tiba untuk menemui divisi Anda dengan keperluan: {$this->guestBook->purpose}",
             'guest_book_id' => $this->guestBook->id,
             'check_in_time' => $this->guestBook->check_in_time,
         ];

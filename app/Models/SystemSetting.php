@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class SystemSetting extends Model
 {
@@ -22,15 +21,15 @@ class SystemSetting extends Model
     public static function get(string $key, mixed $default = null): mixed
     {
         $setting = static::where('setting_key', $key)->first();
-        if (!$setting) {
+        if (! $setting) {
             return $default;
         }
 
         return match ($setting->type) {
             'boolean' => (bool) $setting->setting_value,
             'integer' => (int) $setting->setting_value,
-            'json'    => json_decode($setting->setting_value, true),
-            default   => $setting->setting_value,
+            'json' => json_decode($setting->setting_value, true),
+            default => $setting->setting_value,
         };
     }
 
@@ -42,6 +41,7 @@ class SystemSetting extends Model
         $setting = static::firstOrNew(['setting_key' => $key]);
         $setting->setting_value = is_array($value) ? json_encode($value) : (string) $value;
         $setting->save();
+
         return $setting;
     }
 

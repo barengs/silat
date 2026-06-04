@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class RoleController extends Controller
 {
@@ -23,7 +23,7 @@ class RoleController extends Controller
 
         return response()->json([
             'success' => true,
-            'data'    => $roles,
+            'data' => $roles,
         ]);
     }
 
@@ -33,7 +33,7 @@ class RoleController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name'        => 'required|string|unique:roles,name',
+            'name' => 'required|string|unique:roles,name',
             'permissions' => 'nullable|array',
             'permissions.*' => 'string|exists:permissions,name',
         ]);
@@ -42,8 +42,8 @@ class RoleController extends Controller
         try {
             // Guard name should be 'api' since our whole app uses API tokens
             $role = Role::create([
-                'name'       => $request->name,
-                'guard_name' => 'api'
+                'name' => $request->name,
+                'guard_name' => 'api',
             ]);
 
             if ($request->has('permissions')) {
@@ -55,13 +55,14 @@ class RoleController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Role berhasil dibuat.',
-                'data'    => $role->load('permissions'),
+                'data' => $role->load('permissions'),
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal membuat role: ' . $e->getMessage(),
+                'message' => 'Gagal membuat role: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -77,7 +78,7 @@ class RoleController extends Controller
 
         return response()->json([
             'success' => true,
-            'data'    => $role->load('permissions'),
+            'data' => $role->load('permissions'),
         ]);
     }
 
@@ -91,7 +92,7 @@ class RoleController extends Controller
         }
 
         $request->validate([
-            'name'        => 'required|string|unique:roles,name,' . $role->id,
+            'name' => 'required|string|unique:roles,name,'.$role->id,
             'permissions' => 'nullable|array',
             'permissions.*' => 'string|exists:permissions,name',
         ]);
@@ -110,13 +111,14 @@ class RoleController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Role berhasil diperbarui.',
-                'data'    => $role->load('permissions'),
+                'data' => $role->load('permissions'),
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal memperbarui role: ' . $e->getMessage(),
+                'message' => 'Gagal memperbarui role: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -135,6 +137,7 @@ class RoleController extends Controller
 
         try {
             $role->delete();
+
             return response()->json([
                 'success' => true,
                 'message' => 'Role berhasil dihapus.',
@@ -142,7 +145,7 @@ class RoleController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal menghapus role: ' . $e->getMessage(),
+                'message' => 'Gagal menghapus role: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -160,36 +163,36 @@ class RoleController extends Controller
         foreach ($permissions as $permission) {
             // Split by the first dot (e.g., 'sppd.view-all' -> module: 'sppd', action: 'view-all')
             $parts = explode('.', $permission->name, 2);
-            
+
             if (count($parts) === 2) {
                 $module = $parts[0];
                 $action = $parts[1];
-                
-                if (!isset($matrix[$module])) {
+
+                if (! isset($matrix[$module])) {
                     $matrix[$module] = [];
                 }
-                
+
                 $matrix[$module][] = [
-                    'id'   => $permission->id,
+                    'id' => $permission->id,
                     'name' => $permission->name,
-                    'action' => $action
+                    'action' => $action,
                 ];
             } else {
                 // If it doesn't have a dot, put it in 'others'
-                if (!isset($matrix['others'])) {
+                if (! isset($matrix['others'])) {
                     $matrix['others'] = [];
                 }
                 $matrix['others'][] = [
-                    'id'   => $permission->id,
+                    'id' => $permission->id,
                     'name' => $permission->name,
-                    'action' => $permission->name
+                    'action' => $permission->name,
                 ];
             }
         }
 
         return response()->json([
             'success' => true,
-            'data'    => $matrix,
+            'data' => $matrix,
         ]);
     }
 }

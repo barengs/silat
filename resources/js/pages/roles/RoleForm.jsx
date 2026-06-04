@@ -117,51 +117,57 @@ export default function RoleForm() {
 
     return (
         <div className="max-w-5xl mx-auto space-y-6">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-4 mb-4">
                 <button 
                     onClick={() => navigate('/roles')}
                     className="p-2 rounded-full hover:bg-slate-200 text-slate-500 transition-colors"
                 >
-                    <ArrowLeft size={20} />
+                    <ArrowLeft size={18} />
                 </button>
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900">
+                    <h1 className="text-xl font-bold text-slate-900">
                         {isEditMode ? 'Konfigurasi Hak Akses Role' : 'Buat Role Baru'}
                     </h1>
-                    <p className="text-sm text-slate-500">
-                        Atur wewenang (permissions) secara detail melalui matriks modul di bawah ini.
-                    </p>
                 </div>
             </div>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={handleSubmit(onSubmit)} className="bg-white p-5 rounded shadow-sm border border-slate-200 space-y-6">
                 
                 {/* Role Name Section */}
-                <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-                    <FormGroup label="Identifier Nama Role" error={errors.name?.message}>
-                        <Input
-                            type="text"
-                            className="max-w-md"
-                            placeholder="contoh: kepala-bidang"
-                            error={errors.name}
-                            {...register('name')}
-                        />
-                        <p className="mt-2 text-xs text-slate-500">
-                            Gunakan format huruf kecil dan tanda hubung (-). Identifier ini digunakan oleh sistem inti.
-                        </p>
-                    </FormGroup>
-                </div>
+                <section>
+                    <h2 className="text-base font-bold text-slate-800 flex items-center gap-2 mb-3 border-b border-slate-100 pb-2">
+                        <CheckSquare className="text-emerald-600" size={18} />
+                        Informasi Role
+                    </h2>
+                    <div className="space-y-3">
+                        <FormGroup label="Identifier Nama Role" error={errors.name?.message}>
+                            <Input
+                                type="text"
+                                className="max-w-md"
+                                placeholder="contoh: kepala-bidang"
+                                error={errors.name}
+                                {...register('name')}
+                            />
+                            <p className="mt-1 text-xs text-slate-500">
+                                Gunakan format huruf kecil dan tanda hubung (-). Identifier ini digunakan oleh sistem inti.
+                            </p>
+                        </FormGroup>
+                    </div>
+                </section>
 
                 {/* Permission Matrix Section */}
-                <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
-                    <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
-                        <h2 className="font-bold text-slate-800">Matriks Hak Akses (Permission Matrix)</h2>
+                <section>
+                    <div className="flex justify-between items-center mb-3 border-b border-slate-100 pb-2">
+                        <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
+                            <Square className="text-emerald-600" size={18} />
+                            Matriks Hak Akses (Permission Matrix)
+                        </h2>
                         <Badge variant="info">
                             {selectedPermissions.length} Dipilih
                         </Badge>
                     </div>
 
-                    <div className="overflow-x-auto">
+                    <div className="overflow-x-auto border border-slate-200 rounded">
                         <table className="min-w-full divide-y divide-slate-200 text-sm">
                             <thead className="bg-slate-50">
                                 <tr>
@@ -225,20 +231,25 @@ export default function RoleForm() {
                             </tbody>
                         </table>
                     </div>
-                </div>
+                </section>
 
                 {/* Submit Actions */}
-                <div className="flex justify-end gap-3 pb-8">
+                <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
                     <Button
-                        variant="secondary"
+                        type="button"
+                        variant="outline"
+                        size="sm"
                         onClick={() => navigate('/roles')}
+                        className="border-slate-200 text-slate-600 bg-white hover:bg-slate-50"
                     >
                         Batal
                     </Button>
                     <Button
                         type="submit"
+                        size="sm"
                         isLoading={isSubmitting}
                         icon={Save}
+                        className="bg-[#0f172a] hover:bg-slate-800 text-white"
                     >
                         Simpan Konfigurasi Role
                     </Button>

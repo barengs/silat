@@ -11,13 +11,13 @@ return new class extends Migration
         Schema::create('approval_flows', function (Blueprint $table) {
             $table->id();
             $table->enum('module_name', ['sppd', 'ijazah', 'bendahara'])
-                  ->comment('Modul yang menggunakan alur persetujuan ini');
+                ->comment('Modul yang menggunakan alur persetujuan ini');
             $table->integer('step_order')->comment('Urutan langkah, dimulai dari 1');
             $table->string('step_label')->comment('Label langkah, misal: Verifikasi Berkas, Persetujuan Kabid');
             $table->unsignedBigInteger('role_id_required')
-                  ->comment('Role yang dibutuhkan untuk melakukan aksi di langkah ini');
+                ->comment('Role yang dibutuhkan untuk melakukan aksi di langkah ini');
             $table->enum('action_type', ['verify', 'approve', 'reject', 'forward'])
-                  ->default('approve');
+                ->default('approve');
             $table->boolean('is_active')->default(true);
             $table->timestamps();
 

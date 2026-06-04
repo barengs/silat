@@ -29,6 +29,22 @@ const DivisionList    = React.lazy(() => import('@/pages/divisions/DivisionList'
 const GuestBookList   = React.lazy(() => import('@/pages/guest-book/GuestBookList'));
 const GuestBookReport = React.lazy(() => import('@/pages/guest-book/GuestBookReport'));
 
+// SPPD
+const SppdList = React.lazy(() => import('@/pages/sppd/SppdList'));
+const SppdCreate = React.lazy(() => import('@/pages/sppd/SppdCreate'));
+const SppdShow = React.lazy(() => import('@/pages/sppd/SppdShow'));
+
+// Ijazah Revisions
+const IjazahList = React.lazy(() => import('@/pages/ijazah/IjazahList'));
+const IjazahCreate = React.lazy(() => import('@/pages/ijazah/IjazahCreate'));
+const IjazahShow = React.lazy(() => import('@/pages/ijazah/IjazahShow'));
+const IjazahTrack = React.lazy(() => import('@/pages/public/IjazahTrack'));
+
+// Treasurer Changes
+const TreasurerList = React.lazy(() => import('@/pages/treasurer/TreasurerList'));
+const TreasurerCreate = React.lazy(() => import('@/pages/treasurer/TreasurerCreate'));
+const TreasurerShow = React.lazy(() => import('@/pages/treasurer/TreasurerShow'));
+
 // ── Route Guards ──────────────────────────────────────────────────────────────
 
 /**
@@ -91,6 +107,9 @@ export default function Main() {
                             </PublicRoute>
                         }
                     />
+                    
+                    {/* Public Ijazah Track */}
+                    <Route path="/track-ijazah" element={<IjazahTrack />} />
 
                     {/* Protected application routes */}
                     <Route
@@ -121,6 +140,21 @@ export default function Main() {
                         {/* Guest Book */}
                         <Route path="/guest-book" element={<GuestBookList />} />
                         <Route path="/guest-book/report" element={<GuestBookReport />} />
+
+                        {/* SPPD */}
+                        <Route path="/sppd" element={<SppdList />} />
+                        <Route path="/sppd/create" element={<SppdCreate />} />
+                        <Route path="/sppd/:id" element={<SppdShow />} />
+
+                        {/* Ijazah Revisions */}
+                        <Route path="/ijazah" element={<IjazahList />} />
+                        <Route path="/ijazah/create" element={<IjazahCreate />} />
+                        <Route path="/ijazah/:id" element={<IjazahShow />} />
+
+                        {/* Treasurer Changes */}
+                        <Route path="/treasurer" element={<TreasurerList />} />
+                        <Route path="/treasurer/create" element={<TreasurerCreate />} />
+                        <Route path="/treasurer/:id" element={<TreasurerShow />} />
                     </Route>
 
                     {/* 404 */}

@@ -3,15 +3,16 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 class RolesAndPermissionsSeeder extends Seeder
 {
     public function run(): void
     {
         // Reset cached roles and permissions
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         // ── Define all permissions ─────────────────────────────────────────────
         $permissions = [
@@ -96,6 +97,28 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // 4. Approver (Kepala Bidang / Sekretaris / Kepala Dinas)
         Role::firstOrCreate(['name' => 'approver', 'guard_name' => 'api'])
+            ->syncPermissions([
+                'dashboard.view',
+                'sppd.view-all', 'sppd.approve', 'sppd.reject', 'sppd.print',
+                'ijazah.view-all', 'ijazah.approve', 'ijazah.reject', 'ijazah.notify-pickup',
+                'treasurer.view-all', 'treasurer.approve', 'treasurer.reject',
+                'treasurer.generate-letter', 'treasurer.download',
+                'reports.sppd', 'reports.ijazah', 'reports.treasurer',
+                'signatures.view', 'signatures.upload',
+            ]);
+
+        // 4a. Kabid (Kepala Bidang)
+        Role::firstOrCreate(['name' => 'kabid', 'guard_name' => 'api'])
+            ->syncPermissions([
+                'dashboard.view',
+                'sppd.view-all', 'sppd.approve', 'sppd.reject', 'sppd.print',
+                'ijazah.view-all', 'ijazah.approve', 'ijazah.reject',
+                'treasurer.view-all', 'treasurer.approve', 'treasurer.reject',
+                'reports.sppd', 'reports.ijazah', 'reports.treasurer',
+            ]);
+
+        // 4b. Kadis (Kepala Dinas)
+        Role::firstOrCreate(['name' => 'kadis', 'guard_name' => 'api'])
             ->syncPermissions([
                 'dashboard.view',
                 'sppd.view-all', 'sppd.approve', 'sppd.reject', 'sppd.print',

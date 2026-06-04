@@ -37,8 +37,8 @@ class TreasurerChange extends Model
     ];
 
     protected $casts = [
-        'submitted_at'          => 'datetime',
-        'approved_at'           => 'datetime',
+        'submitted_at' => 'datetime',
+        'approved_at' => 'datetime',
         'document_generated_at' => 'datetime',
     ];
 
@@ -62,8 +62,8 @@ class TreasurerChange extends Model
      */
     public static function generateReferenceNumber(): string
     {
-        $prefix = 'BND-' . now()->format('Ym');
-        $lastRef = static::where('reference_number', 'like', $prefix . '%')
+        $prefix = 'BND-'.now()->format('Ym');
+        $lastRef = static::where('reference_number', 'like', $prefix.'%', 'and')
             ->orderBy('reference_number', 'desc')
             ->first();
 
@@ -71,7 +71,7 @@ class TreasurerChange extends Model
             ? (int) substr($lastRef->reference_number, -3) + 1
             : 1;
 
-        return $prefix . '-' . str_pad($sequence, 3, '0', STR_PAD_LEFT);
+        return $prefix.'-'.str_pad($sequence, 3, '0', STR_PAD_LEFT);
     }
 
     public function scopeByStatus($query, string $status)

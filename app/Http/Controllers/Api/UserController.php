@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exports\UsersExport;
 use App\Http\Controllers\Controller;
+use App\Imports\UsersImport;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\UsersExport;
-use App\Imports\UsersImport;
 
 class UserController extends Controller
 {
@@ -42,8 +42,8 @@ class UserController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('nip', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('nip', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
@@ -51,7 +51,7 @@ class UserController extends Controller
 
         return response()->json([
             'success' => true,
-            'data'    => $users,
+            'data' => $users,
         ]);
     }
 
@@ -61,13 +61,13 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name'           => 'required|string|max:255',
-            'nip'            => 'required|string|unique:users,nip',
-            'email'          => 'required|email|unique:users,email',
+            'name' => 'required|string|max:255',
+            'nip' => 'required|string|unique:users,nip',
+            'email' => 'required|email|unique:users,email',
             'institution_id' => 'nullable|exists:institutions,id',
-            'division_id'    => 'nullable|exists:divisions,id',
-            'roles'          => 'required|array|min:1',
-            'roles.*'        => 'string|exists:roles,name',
+            'division_id' => 'nullable|exists:divisions,id',
+            'roles' => 'required|array|min:1',
+            'roles.*' => 'string|exists:roles,name',
         ]);
 
         DB::beginTransaction();
@@ -76,13 +76,13 @@ class UserController extends Controller
             $password = Hash::make($request->nip);
 
             $user = User::create([
-                'name'           => $request->name,
-                'nip'            => $request->nip,
-                'email'          => $request->email,
-                'password'       => $password,
+                'name' => $request->name,
+                'nip' => $request->nip,
+                'email' => $request->email,
+                'password' => $password,
                 'institution_id' => $request->institution_id,
-                'division_id'    => $request->division_id,
-                'is_active'      => true,
+                'division_id' => $request->division_id,
+                'is_active' => true,
             ]);
 
             // Assign multiple roles
@@ -93,13 +93,14 @@ class UserController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Pengguna berhasil ditambahkan. Password diset menggunakan NIP.',
-                'data'    => $user->load(['roles', 'institution', 'division']),
+                'data' => $user->load(['roles', 'institution', 'division']),
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal menambahkan pengguna: ' . $e->getMessage(),
+                'message' => 'Gagal menambahkan pengguna: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -111,7 +112,7 @@ class UserController extends Controller
     {
         return response()->json([
             'success' => true,
-            'data'    => $user->load(['roles', 'institution', 'division']),
+            'data' => $user->load(['roles', 'institution', 'division']),
         ]);
     }
 
@@ -121,19 +122,19 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
         $request->validate([
-            'name'           => 'required|string|max:255',
-            'nip'            => ['required', 'string', Rule::unique('users')->ignore($user->id)],
-            'email'          => ['required', 'email', Rule::unique('users')->ignore($user->id)],
+            'name' => 'required|string|max:255',
+            'nip' => ['required', 'string', Rule::unique('users')->ignore($user->id)],
+            'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
             'institution_id' => 'nullable|exists:institutions,id',
-            'division_id'    => 'nullable|exists:divisions,id',
-            'roles'          => 'required|array|min:1',
-            'roles.*'        => 'string|exists:roles,name',
-            'is_active'      => 'boolean',
+            'division_id' => 'nullable|exists:divisions,id',
+            'roles' => 'required|array|min:1',
+            'roles.*' => 'string|exists:roles,name',
+            'is_active' => 'boolean',
         ]);
 
         // Prevent modification of super admin unless the user has super-admin role
         // A complete auth check will be in the middleware/Gate, but doing basic protection here
-        if ($user->hasRole('super-admin') && Auth::user() && !Auth::user()->hasRole('super-admin')) {
+        if ($user->hasRole('super-admin') && Auth::user() && ! Auth::user()->hasRole('super-admin')) {
             return response()->json([
                 'success' => false,
                 'message' => 'Akses ditolak untuk memodifikasi super-admin.',
@@ -143,16 +144,16 @@ class UserController extends Controller
         DB::beginTransaction();
         try {
             $user->update([
-                'name'           => $request->name,
-                'nip'            => $request->nip,
-                'email'          => $request->email,
+                'name' => $request->name,
+                'nip' => $request->nip,
+                'email' => $request->email,
                 'institution_id' => $request->institution_id,
-                'division_id'    => $request->division_id,
-                'is_active'      => $request->has('is_active') ? $request->is_active : $user->is_active,
+                'division_id' => $request->division_id,
+                'is_active' => $request->has('is_active') ? $request->is_active : $user->is_active,
             ]);
 
             // Prevent removing super-admin role from the main super-admin user
-            if ($user->id === 1 && !in_array('super-admin', $request->roles)) {
+            if ($user->id === 1 && ! in_array('super-admin', $request->roles)) {
                 $roles = $request->roles;
                 $roles[] = 'super-admin';
                 $user->syncRoles($roles);
@@ -165,13 +166,14 @@ class UserController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Data pengguna berhasil diperbarui.',
-                'data'    => $user->load(['roles', 'institution', 'division']),
+                'data' => $user->load(['roles', 'institution', 'division']),
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal memperbarui pengguna: ' . $e->getMessage(),
+                'message' => 'Gagal memperbarui pengguna: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -197,6 +199,7 @@ class UserController extends Controller
 
         try {
             User::destroy($user->id);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Pengguna berhasil dihapus',
@@ -237,6 +240,7 @@ class UserController extends Controller
 
         try {
             Excel::import(new UsersImport, $request->file('file'));
+
             return response()->json([
                 'success' => true,
                 'message' => 'Data pengguna berhasil diimpor.',
@@ -244,7 +248,7 @@ class UserController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal mengimpor data: ' . $e->getMessage(),
+                'message' => 'Gagal mengimpor data: '.$e->getMessage(),
             ], 500);
         }
     }

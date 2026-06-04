@@ -160,21 +160,21 @@ export default function UserList() {
                 <div className="flex flex-wrap gap-2">
                     <button 
                         onClick={() => window.location.href = '/api/users/export'}
-                        className="flex items-center px-4 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-lg text-sm font-medium shadow-sm transition-colors"
+                        className="flex items-center px-4 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded text-sm font-medium shadow-sm transition-colors"
                     >
                         <FileDown size={18} className="mr-2 text-slate-400" />
                         Export Excel
                     </button>
                     <button 
                         onClick={() => setIsImportModalOpen(true)}
-                        className="flex items-center px-4 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-lg text-sm font-medium shadow-sm transition-colors"
+                        className="flex items-center px-4 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded text-sm font-medium shadow-sm transition-colors"
                     >
                         <FileUp size={18} className="mr-2 text-slate-400" />
                         Import Excel
                     </button>
                     <button 
                         onClick={() => navigate('/users/create')}
-                        className="flex items-center px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white rounded-lg text-sm font-medium shadow-sm transition-colors"
+                        className="flex items-center px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white rounded text-sm font-medium shadow-sm transition-colors"
                     >
                         <Plus size={18} className="mr-2" />
                         Tambah Pengguna

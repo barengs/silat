@@ -88,9 +88,9 @@ export default function DashboardPage() {
             {/* Stat Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {stats.map((stat, idx) => (
-                    <div key={idx} className="bg-white rounded-xl border border-slate-200 p-6 flex flex-col justify-between h-full shadow-sm hover:shadow-md transition-shadow">
+                    <div key={idx} className="bg-white rounded border border-slate-200 p-6 flex flex-col justify-between h-full shadow-sm hover:shadow-md transition-shadow">
                         <div className="flex justify-between items-start mb-4">
-                            <div className={`p-3 rounded-lg ${stat.iconBg}`}>
+                            <div className={`p-3 rounded ${stat.iconBg}`}>
                                 <stat.icon size={20} className={stat.iconColor} />
                             </div>
                             {stat.badge && (
@@ -112,22 +112,22 @@ export default function DashboardPage() {
                 <div className="xl:col-span-2 space-y-6">
                     
                     {/* Quick Actions / Layanan Terpadu */}
-                    <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+                    <div className="bg-white rounded border border-slate-200 p-6 shadow-sm">
                         <h2 className="text-lg font-bold text-slate-900 mb-6">Layanan Terpadu</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <button className="flex flex-col items-center justify-center p-6 bg-slate-50 border border-slate-100 rounded-xl hover:bg-slate-100 hover:border-slate-200 transition-all group">
+                            <button className="flex flex-col items-center justify-center p-6 bg-slate-50 border border-slate-100 rounded hover:bg-slate-100 hover:border-slate-200 transition-all group">
                                 <div className="bg-white p-3 rounded-full shadow-sm mb-4 text-teal-600 group-hover:scale-110 transition-transform">
                                     <PlaneTakeoff size={24} />
                                 </div>
                                 <span className="font-semibold text-slate-800">Buat SPPD</span>
                             </button>
-                            <button className="flex flex-col items-center justify-center p-6 bg-slate-50 border border-slate-100 rounded-xl hover:bg-slate-100 hover:border-slate-200 transition-all group">
+                            <button className="flex flex-col items-center justify-center p-6 bg-slate-50 border border-slate-100 rounded hover:bg-slate-100 hover:border-slate-200 transition-all group">
                                 <div className="bg-white p-3 rounded-full shadow-sm mb-4 text-emerald-600 group-hover:scale-110 transition-transform">
                                     <UserCheck size={24} />
                                 </div>
                                 <span className="font-semibold text-slate-800">Catat Tamu</span>
                             </button>
-                            <button className="flex flex-col items-center justify-center p-6 bg-slate-50 border border-slate-100 rounded-xl hover:bg-slate-100 hover:border-slate-200 transition-all group">
+                            <button className="flex flex-col items-center justify-center p-6 bg-slate-50 border border-slate-100 rounded hover:bg-slate-100 hover:border-slate-200 transition-all group">
                                 <div className="bg-white p-3 rounded-full shadow-sm mb-4 text-orange-600 group-hover:scale-110 transition-transform">
                                     <FileSignature size={24} />
                                 </div>
@@ -137,7 +137,7 @@ export default function DashboardPage() {
                     </div>
 
                     {/* Aktivitas Terbaru */}
-                    <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div className="bg-white rounded border border-slate-200 shadow-sm overflow-hidden">
                         <div className="flex justify-between items-center p-6 border-b border-slate-100">
                             <h2 className="text-lg font-bold text-slate-900">Aktivitas Terbaru</h2>
                             <a href="#" className="text-sm font-medium text-teal-600 hover:text-teal-700">Lihat Semua</a>
@@ -173,7 +173,7 @@ export default function DashboardPage() {
 
                 {/* Right Column (Sidebar Content) */}
                 <div className="xl:col-span-1">
-                    <div className="bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col h-full">
+                    <div className="bg-white rounded border border-slate-200 shadow-sm flex flex-col h-full">
                         <div className="p-6 border-b border-slate-100 flex items-center space-x-3">
                             <Megaphone className="text-teal-600" size={24} />
                             <h2 className="text-lg font-bold text-slate-900">Informasi & Berita</h2>

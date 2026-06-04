@@ -263,41 +263,64 @@ Sistem:
 
 ### 🔲 Phase 4C — Modul SPPD
 
-- [ ] `SppdController::store()` — validasi + conflict check
-- [ ] `SppdController::submit()` / `verify()` / `approve()` / `reject()`
-- [ ] `SppdReportController::store()` — upload LPP
-- [ ] Service: `ApprovalService` — engine multi-step approval
-- [ ] Service: `ConflictCheckService`
-- [ ] Job: `GenerateSppdPdf` — DomPDF + QR Code
-- [ ] Template: `resources/views/pdf/sppd.blade.php`
-- [ ] `pages/sppd/SppdList.jsx` — list dengan filter status
-- [ ] `pages/sppd/SppdCreate.jsx` — form pengajuan (member picker)
-- [ ] `pages/sppd/SppdShow.jsx` — detail + timeline approval
-- [ ] `pages/sppd/SppdReport.jsx` — form upload LPP
+### 🔲 Phase 4C — Modul SPPD
+
+**Backend Services & Controllers:**
+- [x] `SppdController::index()` — List SPPD dengan filter status (Draft, Verifikasi, Approved, Active, dll)
+- [x] `SppdController::store()` — Form pengajuan baru, simpan ke `sppds` dan `sppd_members`
+- [x] `SppdController::show()` — Detail SPPD beserta relasi
+- [x] `SppdController::submit()` / `verify()` / `approve()` / `reject()` — Alur persetujuan
+- [x] `SppdReportController::store()` — Upload Laporan Perjalanan Dinas (LPP)
+- [x] Service: `ApprovalService` — Engine multi-step approval dengan transisi status
+- [x] Service: `ConflictCheckService` — Mencegah pegawai memiliki 2 SPPD aktif di tanggal yang bertabrakan
+- [x] Job: `GenerateSppdPdf` — DomPDF + QR Code (Implemented inline in Controller)
+- [x] Template: `resources/views/pdf/sppd.blade.php`
+
+**Frontend React:**
+- [x] `pages/sppd/SppdList.jsx` — Replikasi UI "Daftar SPPD" dengan fitur Tabs (Semua Status) dan tabel.
+- [x] `pages/sppd/SppdCreate.jsx` — Replikasi UI "Formulir Pengajuan", termasuk:
+      * Kalkulasi otomatis Lama Perjalanan (Hari).
+      * Baris dinamis "Daftar Pengikut" (tambah/hapus baris) dengan *autocomplete* pegawai.
+- [x] `pages/sppd/SppdShow.jsx` — Replikasi UI "Detail Pengajuan" dengan Lini Masa (*Timeline*) Persetujuan di panel kanan.
+- [x] `pages/sppd/SppdReport.jsx` — form upload LPP (Integrated into SppdShow.jsx Modal)
 
 ---
 
-### 🔲 Phase 4D — Modul Revisi Ijazah
+### 🔲 Phase 4D — Modul Pengajuan Revisi Ijazah
 
-- [ ] `IjazahRevisionController` — CRUD + upload multi-file
-- [ ] Auto-generate ticket number `IJZ-YYYYMMDD-NNN`
-- [ ] Notifikasi pengambilan fisik (siap diambil)
-- [ ] `pages/ijazah/IjazahList.jsx`
-- [ ] `pages/ijazah/IjazahCreate.jsx` — form + dropzone upload
-- [ ] `pages/ijazah/IjazahShow.jsx` — tracking real-time
-- [ ] `pages/public/IjazahTrack.jsx` — tracking publik via ticket (no login)
+**Tujuan:**
+Memfasilitasi pihak sekolah atau warga untuk mengajukan revisi ijazah yang salah data, dengan mengunggah persyaratan yang dibutuhkan. Pengajuan ini akan divalidasi berlapis oleh Cabdin/Dinas, dan pendaftar bisa memantau statusnya via tiket.
+
+**Backend Services & Controllers:**
+- [x] `IjazahRevisionController::index()` — List revisi ijazah (RBAC: sekolah hanya melihat miliknya, admin dinas melihat semua).
+- [x] `IjazahRevisionController::store()` — Form pengajuan baru, *upload* dokumen persyaratan multi-file (Ijazah Asli Salah, Akte, KK, SPTJM), auto-generate nomor tiket `IJZ-YYYYMMDD-NNN`.
+- [x] `IjazahRevisionController::show()` — Detail pengajuan revisi.
+- [x] Alur Persetujuan — Menggunakan `ApprovalService` (Draft -> Verifikasi -> Approved -> Siap Diambil -> Selesai).
+- [x] Endpoint Notifikasi — Admin menandai "Siap Diambil" agar *email*/*in-app notification* terkirim ke pemohon.
+- [x] `PublicController::trackIjazah()` — Endpoint publik untuk mengecek status revisi berdasarkan Nomor Tiket.
+
+**Frontend React:**
+- [x] `pages/ijazah/IjazahList.jsx` — Daftar tiket pengajuan revisi dengan filter status.
+- [x] `pages/ijazah/IjazahCreate.jsx` — Formulir pengajuan revisi dengan dukungan unggah dokumen (termasuk validasi ukuran & ekstensi).
+- [x] `pages/ijazah/IjazahShow.jsx` — Detail revisi bagi petugas dinas dan sekolah (termasuk panel tombol persetujuan, penolakan, dan catatan).
+- [x] `pages/public/IjazahTrack.jsx` — Halaman publik bagi warga/orang tua siswa untuk melacak progres revisi ijazah tanpa harus *login*, hanya dengan memasukkan Nomor Tiket `IJZ-XXX`.
+
+> [!IMPORTANT]
+> **Pertanyaan Desain Modul Ijazah:**
+> Apakah semua persyaratan file (Akte, KK, SPTJM) bersifat **wajib** (mandatory) saat awal pengajuan, atau boleh disusulkan?
+> Jika ditolak (rejected), apakah tiket ditutup permanen atau sekolah bisa merevisi dokumen pada tiket yang sama?
 
 ---
 
-### 🔲 Phase 4E — Modul Perubahan Bendahara/Rekening
+### ✅ Phase 4E — Modul Perubahan Bendahara/Rekening
 
-- [ ] `TreasurerChangeController` — CRUD + upload SK
-- [ ] Auto-generate reference number `BND-YYYYMM-NNN`
-- [ ] Job: `GenerateRecommendationLetterPdf`
-- [ ] Template: `resources/views/pdf/recommendation_letter.blade.php`
-- [ ] `pages/treasurer/TreasurerList.jsx`
-- [ ] `pages/treasurer/TreasurerCreate.jsx` — form perubahan data
-- [ ] `pages/treasurer/TreasurerShow.jsx` — preview + download PDF
+- [x] `TreasurerChangeController` — CRUD + upload SK
+- [x] Auto-generate reference number `BND-YYYYMM-NNN`
+- [x] Job: `GenerateRecommendationLetterPdf` (dibuat inline di controller)
+- [x] Template: `resources/views/pdf/recommendation_letter.blade.php`
+- [x] `pages/treasurer/TreasurerList.jsx`
+- [x] `pages/treasurer/TreasurerCreate.jsx` — form perubahan data
+- [x] `pages/treasurer/TreasurerShow.jsx` — preview + download PDF
 
 ---
 
@@ -314,11 +337,11 @@ Sistem:
 
 ### 🔲 Phase 5 — Dynamic Approval Engine
 
-- [ ] `app/Services/ApprovalService.php` — engine multi-step terpusat
+- [x] `app/Services/ApprovalService.php` — engine multi-step terpusat
   - `getNextStep(module, currentStep)` 
-  - `advance(document, user, action, note)`
-  - `reject(document, user, note)`
-  - `isComplete(document)`
+  - `advance(document, user, action, note)` (diimplementasikan sebagai `processApproval`)
+  - `reject(document, user, note)` (diimplementasikan sebagai `processApproval` dengan status rejected)
+  - `isComplete(document)` (diverifikasi dengan status `approved`)
 - [ ] `ApprovalFlowController` — CRUD config alur per modul
 - [ ] `pages/approval-flows/ApprovalFlowConfig.jsx` — UI konfigurasi alur
 
@@ -326,11 +349,11 @@ Sistem:
 
 ### 🔲 Phase 6 — TTE, PDF & Verifikasi Publik
 
-- [ ] `app/Services/DocumentService.php`
-  - `generateSppdPdf(Sppd $sppd)` → DomPDF + QR Code
-  - `generateRecommendationPdf(TreasurerChange $tc)` → DomPDF + QR Code
-  - `generateQrToken()` → unique token
-- [ ] Template PDF:
+- [/] `app/Services/DocumentService.php` (Pembuatan PDF saat ini diletakkan langsung di dalam Controller masing-masing)
+  - [x] `generateSppdPdf(Sppd $sppd)` → DomPDF + QR Code (inline di SppdController)
+  - [x] `generateRecommendationPdf(TreasurerChange $tc)` → DomPDF + QR Code (inline di TreasurerChangeController)
+  - [x] `generateQrToken()` → unique token
+- [x] Template PDF:
   - `resources/views/pdf/sppd.blade.php`
   - `resources/views/pdf/recommendation_letter.blade.php`
 - [ ] `DocumentVerificationController::verify($token)` — publik
@@ -479,3 +502,31 @@ composer run dev
 - **React SPA:** semua routing client-side via react-router-dom, Laravel hanya catch-all di web routes
 - **Spatie medialibrary** tidak diinstall (butuh ext-exif) — gunakan Intervention Image untuk resize + Laravel filesystem untuk storage
 - **UI Design** referensi diterima per fase — integrasikan sebelum mulai fase yang bersangkutan
+
+---
+
+### 🔲 Phase 8 — Public Landing Page & Manajemen Berita
+
+**Tujuan:** 
+Menyediakan portal publik bagi sekolah atau instansi lain untuk melihat pengumuman/berita terbaru dari Dinas Pendidikan tanpa harus login, serta menyediakan fitur bagi admin dinas untuk mengelola konten berita tersebut.
+
+**Backend Services & Controllers:**
+- [ ] ArticleController::indexPublic() — Endpoint publik (GET /api/public/news) untuk mengambil artikel dengan status published dan is_public = true.
+- [ ] ArticleController (CRUD) — Endpoint *admin* untuk mengelola data artikel (Berita/Pengumuman).
+- [ ] Penyesuaian outes/api.php — Mendaftarkan rute publik tanpa *middleware* otentikasi.
+
+**Frontend React (Publik):**
+- [ ] layouts/PublicLayout.jsx — Layout khusus halaman publik dengan Topbar (Logo Dinas + Tombol Login).
+- [ ] pages/public/LandingPage.jsx — Halaman utama (/) berisi:
+      * *Hero Section* (Selamat Datang di Portal Dinas Pendidikan).
+      * *News Section* (Daftar kartu pengumuman/berita terbaru).
+- [ ] Modifikasi Main.jsx — Mengubah rute / agar merender LandingPage (bukan langsung *redirect* ke /dashboard).
+
+**Frontend React (Admin):**
+- [ ] pages/articles/ArticleList.jsx — Tabel manajemen berita untuk staf dinas.
+- [ ] pages/articles/ArticleForm.jsx — Formulir tambah/edit berita (Judul, Kategori, Konten, Status Publikasi).
+- [ ] Penambahan menu "Berita & Pengumuman" pada *Sidebar* (AppLayout.jsx).
+
+> [!IMPORTANT]
+> **Pertanyaan Desain:**
+> Apakah di halaman utama (Landing Page) ini perlu ditampilkan fitur lain selain Berita/Pengumuman? Misalnya, form Pencarian Status Surat/SPPD secara publik, atau cukup murni portal berita saja untuk saat ini?

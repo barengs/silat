@@ -55,7 +55,7 @@ export default function ImportUserModal({ isOpen, onClose, onSuccess }) {
         >
             <form onSubmit={handleSubmit} className="p-2">
                     <div className="mb-6 space-y-4">
-                        <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 text-sm text-blue-800">
+                        <div className="bg-blue-50 border border-blue-100 rounded p-4 text-sm text-blue-800">
                             <p className="font-medium mb-1">Panduan Import:</p>
                             <ul className="list-disc list-inside space-y-1 text-blue-700/80 text-xs">
                                 <li>Gunakan format file <strong>.xlsx</strong> atau <strong>.xls</strong></li>
@@ -73,7 +73,7 @@ export default function ImportUserModal({ isOpen, onClose, onSuccess }) {
 
                         <div>
                             <label className="block text-sm font-medium text-slate-700 mb-2">Pilih File Excel</label>
-                            <div className="relative border-2 border-dashed border-slate-300 rounded-lg p-6 hover:bg-slate-50 transition-colors flex flex-col items-center justify-center">
+                            <div className="relative border-2 border-dashed border-slate-300 rounded p-6 hover:bg-slate-50 transition-colors flex flex-col items-center justify-center">
                                 <input 
                                     type="file" 
                                     accept=".xlsx, .xls, .csv"

@@ -3,14 +3,15 @@
 namespace App\Exports;
 
 use App\Models\GuestBook;
+use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
-use Carbon\Carbon;
 
 class GuestBookExport implements FromQuery, WithHeadings, WithMapping
 {
     protected $startDate;
+
     protected $endDate;
 
     public function __construct($startDate = null, $endDate = null)
@@ -42,7 +43,7 @@ class GuestBookExport implements FromQuery, WithHeadings, WithMapping
             'Instansi Asal',
             'Bidang Tujuan',
             'Keperluan',
-            'Nomor HP'
+            'Nomor HP',
         ];
     }
 
@@ -55,7 +56,7 @@ class GuestBookExport implements FromQuery, WithHeadings, WithMapping
             $guest->agency ? $guest->agency->name : '-',
             $guest->targetDivision ? $guest->targetDivision->name : '-',
             $guest->purpose,
-            $guest->guest_contact ?? '-'
+            $guest->guest_contact ?? '-',
         ];
     }
 }

@@ -19,11 +19,11 @@ return new class extends Migration
             // Who performed the action
             $table->unsignedBigInteger('user_id')->nullable()->comment('The approver/verifier user');
             $table->enum('status', ['pending', 'approved', 'rejected', 'forwarded', 'revised'])
-                  ->default('pending');
+                ->default('pending');
             $table->text('note')->nullable()->comment('Catatan/alasan dari approver');
             // QR verification token — unique per document approval chain
             $table->string('qr_verification_token')->nullable()->unique()
-                  ->comment('Token acak untuk URL verifikasi publik /verify/doc/{token}');
+                ->comment('Token acak untuk URL verifikasi publik /verify/doc/{token}');
             $table->string('qr_verification_url')->nullable();
             $table->timestamp('acted_at')->nullable();
             $table->timestamps();

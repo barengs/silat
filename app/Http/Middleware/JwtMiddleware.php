@@ -4,11 +4,11 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Exception;
-use Tymon\JWTAuth\Facades\JWTAuth;
-use Tymon\JWTAuth\Exceptions\TokenExpiredException;
-use Tymon\JWTAuth\Exceptions\TokenInvalidException;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Tymon\JWTAuth\Exceptions\TokenExpiredException;
+use Tymon\JWTAuth\Exceptions\TokenInvalidException;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class JwtMiddleware
 {
@@ -21,14 +21,14 @@ class JwtMiddleware
         try {
             $user = JWTAuth::parseToken()->authenticate();
 
-            if (!$user) {
+            if (! $user) {
                 return response()->json([
                     'success' => false,
                     'message' => 'User tidak ditemukan.',
                 ], 401);
             }
 
-            if (!$user->is_active) {
+            if (! $user->is_active) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Akun Anda telah dinonaktifkan. Hubungi administrator.',
@@ -39,21 +39,21 @@ class JwtMiddleware
             return response()->json([
                 'success' => false,
                 'message' => 'Token telah kedaluwarsa. Silakan login ulang.',
-                'error'   => 'token_expired',
+                'error' => 'token_expired',
             ], 401);
 
         } catch (TokenInvalidException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Token tidak valid.',
-                'error'   => 'token_invalid',
+                'error' => 'token_invalid',
             ], 401);
 
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Token tidak ditemukan. Silakan login.',
-                'error'   => 'token_absent',
+                'error' => 'token_absent',
             ], 401);
         }
 

@@ -16,7 +16,7 @@ export default function DataTable({
     const columnsLength = table.getAllColumns().length;
 
     return (
-        <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+        <div className="bg-white rounded shadow-sm border border-slate-200 overflow-hidden">
             {/* Table Top Controls */}
             <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-50/50">
                 <TableInput 

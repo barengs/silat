@@ -27,8 +27,8 @@ class Article extends Model
     ];
 
     protected $casts = [
-        'is_pinned'    => 'boolean',
-        'is_public'    => 'boolean',
+        'is_pinned' => 'boolean',
+        'is_public' => 'boolean',
         'published_at' => 'datetime',
     ];
 
@@ -60,7 +60,7 @@ class Article extends Model
      */
     public function incrementView(): void
     {
-        $this->increment('view_count');
+        $this->increment('view_count', 1, []);
     }
 
     // ─── Scopes ───────────────────────────────────────────────────────────────
@@ -68,7 +68,7 @@ class Article extends Model
     public function scopePublished($query)
     {
         return $query->where('status', 'published')
-                     ->where('published_at', '<=', now());
+            ->where('published_at', '<=', now());
     }
 
     public function scopePublic($query)

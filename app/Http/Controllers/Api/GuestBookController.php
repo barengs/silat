@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exports\GuestBookExport;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\GuestBook;
 use App\Models\GuestAgency;
+use App\Models\GuestBook;
 use App\Models\User;
+use App\Notifications\GuestArrivalNotification;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
-use Carbon\Carbon;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\GuestBookExport;
-use App\Notifications\GuestArrivalNotification;
 
 class GuestBookController extends Controller
 {
@@ -33,15 +33,15 @@ class GuestBookController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('guest_name', 'like', "%{$search}%")
-                  ->orWhereHas('agency', function ($q2) use ($search) {
-                      $q2->where('name', 'like', "%{$search}%");
-                  });
+                    ->orWhereHas('agency', function ($q2) use ($search) {
+                        $q2->where('name', 'like', "%{$search}%");
+                    });
             });
         }
 
         // Statistics based on the selected date range
         $totalInRange = GuestBook::whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])->count();
-        
+
         $mostVisitedAgency = GuestBook::whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
             ->whereNotNull('guest_agency_id')
             ->select('guest_agency_id', DB::raw('count(*) as total'))
@@ -49,7 +49,7 @@ class GuestBookController extends Controller
             ->orderBy('total', 'desc')
             ->with('agency')
             ->first();
-            
+
         $mainTargetDivision = GuestBook::whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
             ->select('target_division_id', DB::raw('count(*) as total'))
             ->groupBy('target_division_id')
@@ -65,7 +65,7 @@ class GuestBookController extends Controller
 
         return response()->json([
             'data' => $query->paginate($request->per_page ?? 10),
-            'stats' => $stats
+            'stats' => $stats,
         ]);
     }
 
@@ -86,7 +86,7 @@ class GuestBookController extends Controller
             DB::beginTransaction();
 
             $agencyId = null;
-            if (!empty($validated['agency_name'])) {
+            if (! empty($validated['agency_name'])) {
                 $agency = GuestAgency::firstOrCreate(
                     ['name' => $validated['agency_name']]
                 );
@@ -114,11 +114,12 @@ class GuestBookController extends Controller
 
             return response()->json([
                 'message' => 'Data tamu berhasil disimpan.',
-                'data' => $guestBook
+                'data' => $guestBook,
             ], 201);
-            
+
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json(['message' => 'Terjadi kesalahan saat menyimpan data tamu.', 'error' => $e->getMessage()], 500);
         }
     }
@@ -144,7 +145,8 @@ class GuestBookController extends Controller
         $startDate = $request->start_date ? Carbon::parse($request->start_date) : null;
         $endDate = $request->end_date ? Carbon::parse($request->end_date) : null;
 
-        $filename = 'buku_tamu_' . now()->format('Ymd_His') . '.xlsx';
+        $filename = 'buku_tamu_'.now()->format('Ymd_His').'.xlsx';
+
         return Excel::download(new GuestBookExport($startDate, $endDate), $filename);
     }
 

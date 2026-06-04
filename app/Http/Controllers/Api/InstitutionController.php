@@ -23,8 +23,8 @@ class InstitutionController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('npsn', 'like', "%{$search}%")
-                  ->orWhere('city', 'like', "%{$search}%");
+                    ->orWhere('npsn', 'like', "%{$search}%")
+                    ->orWhere('city', 'like', "%{$search}%");
             });
         }
 
@@ -37,7 +37,7 @@ class InstitutionController extends Controller
 
         return response()->json([
             'success' => true,
-            'data'    => $institutions,
+            'data' => $institutions,
         ]);
     }
 
@@ -47,15 +47,15 @@ class InstitutionController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name'      => 'required|string|max:255',
-            'type'      => 'required|in:dinas,cabdin,sekolah_sma,sekolah_smk,sekolah_pkplk,other',
-            'npsn'      => 'nullable|string|max:20|unique:institutions,npsn',
-            'address'   => 'nullable|string',
-            'city'      => 'nullable|string|max:100',
-            'province'  => 'nullable|string|max:100',
-            'phone'     => 'nullable|string|max:50',
-            'email'     => 'nullable|email|max:255',
-            'website'   => 'nullable|string|max:255',
+            'name' => 'required|string|max:255',
+            'type' => 'required|in:dinas,cabdin,sekolah_sma,sekolah_smk,sekolah_pkplk,other',
+            'npsn' => 'nullable|string|max:20|unique:institutions,npsn',
+            'address' => 'nullable|string',
+            'city' => 'nullable|string|max:100',
+            'province' => 'nullable|string|max:100',
+            'phone' => 'nullable|string|max:50',
+            'email' => 'nullable|email|max:255',
+            'website' => 'nullable|string|max:255',
             'is_active' => 'boolean',
         ]);
 
@@ -64,7 +64,7 @@ class InstitutionController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Instansi berhasil ditambahkan',
-            'data'    => $institution,
+            'data' => $institution,
         ], 201);
     }
 
@@ -75,7 +75,7 @@ class InstitutionController extends Controller
     {
         return response()->json([
             'success' => true,
-            'data'    => $institution,
+            'data' => $institution,
         ]);
     }
 
@@ -85,15 +85,15 @@ class InstitutionController extends Controller
     public function update(Request $request, Institution $institution)
     {
         $validated = $request->validate([
-            'name'      => 'required|string|max:255',
-            'type'      => 'required|in:dinas,cabdin,sekolah_sma,sekolah_smk,sekolah_pkplk,other',
-            'npsn'      => 'nullable|string|max:20|unique:institutions,npsn,' . $institution->id,
-            'address'   => 'nullable|string',
-            'city'      => 'nullable|string|max:100',
-            'province'  => 'nullable|string|max:100',
-            'phone'     => 'nullable|string|max:50',
-            'email'     => 'nullable|email|max:255',
-            'website'   => 'nullable|string|max:255',
+            'name' => 'required|string|max:255',
+            'type' => 'required|in:dinas,cabdin,sekolah_sma,sekolah_smk,sekolah_pkplk,other',
+            'npsn' => 'nullable|string|max:20|unique:institutions,npsn,'.$institution->id,
+            'address' => 'nullable|string',
+            'city' => 'nullable|string|max:100',
+            'province' => 'nullable|string|max:100',
+            'phone' => 'nullable|string|max:50',
+            'email' => 'nullable|email|max:255',
+            'website' => 'nullable|string|max:255',
             'is_active' => 'boolean',
         ]);
 
@@ -102,7 +102,7 @@ class InstitutionController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Instansi berhasil diperbarui',
-            'data'    => $institution,
+            'data' => $institution,
         ]);
     }
 
@@ -121,6 +121,7 @@ class InstitutionController extends Controller
 
         try {
             Institution::destroy($institution->id);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Instansi berhasil dihapus',

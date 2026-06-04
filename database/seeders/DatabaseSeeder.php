@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             // 3. Core master data
             DivisionSeeder::class,
             MasterDataSeeder::class,
+            ApprovalFlowSeeder::class,
 
             // 4. Users (depends on institutions which is auto-created in AdminUserSeeder)
             AdminUserSeeder::class,

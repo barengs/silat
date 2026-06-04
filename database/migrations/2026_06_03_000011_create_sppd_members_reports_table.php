@@ -29,7 +29,7 @@ return new class extends Migration
             $table->date('real_end_date')->nullable();
             $table->text('report_text')->comment('Isi laporan perjalanan');
             $table->string('attachment_proof')->nullable()
-                  ->comment('Path zip/folder berisi foto, tiket, kwitansi');
+                ->comment('Path zip/folder berisi foto, tiket, kwitansi');
             $table->decimal('actual_cost', 15, 2)->nullable();
             $table->text('notes')->nullable();
             $table->unsignedBigInteger('submitted_by');

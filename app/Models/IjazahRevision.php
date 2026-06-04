@@ -35,8 +35,8 @@ class IjazahRevision extends Model
     ];
 
     protected $casts = [
-        'submitted_at'       => 'datetime',
-        'approved_at'        => 'datetime',
+        'submitted_at' => 'datetime',
+        'approved_at' => 'datetime',
         'pickup_notified_at' => 'datetime',
     ];
 
@@ -60,8 +60,8 @@ class IjazahRevision extends Model
      */
     public static function generateTicketNumber(): string
     {
-        $prefix = 'IJZ-' . now()->format('Ymd');
-        $lastTicket = static::where('ticket_number', 'like', $prefix . '%')
+        $prefix = 'IJZ-'.now()->format('Ymd');
+        $lastTicket = static::where('ticket_number', 'like', $prefix.'%')
             ->orderBy('ticket_number', 'desc')
             ->first();
 
@@ -69,7 +69,7 @@ class IjazahRevision extends Model
             ? (int) substr($lastTicket->ticket_number, -3) + 1
             : 1;
 
-        return $prefix . '-' . str_pad($sequence, 3, '0', STR_PAD_LEFT);
+        return $prefix.'-'.str_pad($sequence, 3, '0', STR_PAD_LEFT);
     }
 
     public function scopeByStatus($query, string $status)

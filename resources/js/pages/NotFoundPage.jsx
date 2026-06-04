@@ -9,7 +9,7 @@ export default function NotFoundPage() {
             <p className="mt-4 text-xl text-gray-600">Halaman tidak ditemukan</p>
             <button
                 onClick={() => navigate(-1)}
-                className="mt-6 rounded-lg bg-blue-600 px-6 py-2 text-white hover:bg-blue-700"
+                className="mt-6 rounded bg-blue-600 px-6 py-2 text-white hover:bg-blue-700"
             >
                 Kembali
             </button>

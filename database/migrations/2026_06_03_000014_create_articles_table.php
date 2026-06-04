@@ -32,9 +32,9 @@ return new class extends Migration
             $table->enum('status', ['draft', 'published', 'archived'])->default('draft');
             $table->boolean('is_pinned')->default(false)->comment('Tampil di bagian atas/featured');
             $table->boolean('is_public')->default(true)
-                  ->comment('True = bisa diakses tanpa login, False = internal saja');
+                ->comment('True = bisa diakses tanpa login, False = internal saja');
             $table->timestamp('published_at')->nullable()
-                  ->comment('Waktu publikasi terjadwal atau sudah dipublikasikan');
+                ->comment('Waktu publikasi terjadwal atau sudah dipublikasikan');
             $table->unsignedInteger('view_count')->default(0);
             $table->timestamps();
             $table->softDeletes();
