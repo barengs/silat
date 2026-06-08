@@ -29,11 +29,13 @@ import {
 import { toast } from 'sonner';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from '@/bootstrap';
+import LockScreenManager from '@/components/LockScreenManager';
 
 export default function AppLayout() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [showNotifications, setShowNotifications] = useState(false);
+    const [showProfileDropdown, setShowProfileDropdown] = useState(false);
     const { user, roles, permissions } = useSelector(state => state.auth);
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -89,6 +91,7 @@ export default function AppLayout() {
         { path: '/sppd', label: 'Manajemen SPPD', icon: Plane, permission: 'sppd.view' },
         { path: '/ijazah', label: 'Revisi Ijazah', icon: FileSignature, permission: 'ijazah.view' },
         { path: '/treasurer', label: 'Perubahan Bendahara', icon: FileSignature, permission: 'treasurer.view' },
+        { path: '/school-transfers', label: 'Mutasi Sekolah', icon: GitBranch, permission: 'school-transfers.view' },
         { path: '/articles', label: 'Portal Berita', icon: Newspaper, permission: 'articles.view' },
         { path: '/verifikasi', label: 'Verifikasi Dokumen', icon: CheckSquare, permission: 'verifikasi.view' },
         { path: '/users', label: 'Pengguna', icon: Users, permission: 'users.view' },
@@ -97,6 +100,7 @@ export default function AppLayout() {
         { path: '/institutions', label: 'Instansi / Sekolah', icon: Building2, permission: 'institutions.view' },
         { path: '/divisions', label: 'Divisi / Bidang', icon: Network, permission: 'divisions.view' },
         { path: '/settings/signatures', label: 'Tanda Tangan Pejabat', icon: PenTool, permission: 'settings.manage' },
+        { path: '/user-manual', label: 'Panduan Pengguna', icon: HelpCircle }, // Always visible for logged-in users
         { path: '/settings', label: 'Pengaturan', icon: Settings, permission: 'settings.view' },
     ];
 
@@ -112,6 +116,9 @@ export default function AppLayout() {
 
     return (
         <div className="min-h-screen bg-slate-50 flex">
+            {/* Lock Screen Manager */}
+            <LockScreenManager />
+
             {/* Mobile Sidebar Overlay */}
             {sidebarOpen && (
                 <div 
@@ -162,8 +169,10 @@ export default function AppLayout() {
 
                 {/* Navigation */}
                 <nav className="flex-1 px-3 space-y-1 overflow-y-auto custom-scrollbar">
-                    {navItems.map((item) => {
-                        const isActive = location.pathname.startsWith(item.path);
+                    {filteredNavItems.map((item) => {
+                        const isActive = item.path === '/settings'
+                            ? location.pathname === '/settings'
+                            : location.pathname.startsWith(item.path);
                         return (
                             <NavLink
                                 key={item.path}
@@ -284,13 +293,79 @@ export default function AppLayout() {
                             <HelpCircle size={20} />
                         </button>
                         <div className="h-8 w-px bg-slate-200 hidden sm:block"></div>
-                        <Link to="/profile" className="flex items-center hover:opacity-80 transition-opacity">
-                            <img 
-                                src={user?.photo_path ? (user.photo_path.startsWith('http') ? user.photo_path : `/storage/${user.photo_path}`) : `https://ui-avatars.com/api/?name=${user?.name || 'User'}&background=166534&color=fff`} 
-                                alt="Profile" 
-                                className="h-8 w-8 rounded-full border border-slate-200 object-cover"
-                            />
-                        </Link>
+                        <div className="relative">
+                            <button 
+                                className="flex items-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 rounded-full p-0.5 transition-all cursor-pointer"
+                                onClick={() => {
+                                    setShowProfileDropdown(!showProfileDropdown);
+                                    setShowNotifications(false); // Close notifications if open
+                                }}
+                            >
+                                <img 
+                                    src={user?.photo_path ? (user.photo_path.startsWith('http') ? user.photo_path : `/storage/${user.photo_path}`) : `https://ui-avatars.com/api/?name=${user?.name || 'User'}&background=166534&color=fff`} 
+                                    alt="Profile" 
+                                    className="h-8 w-8 rounded-full border border-slate-200 object-cover"
+                                />
+                            </button>
+                            
+                            {showProfileDropdown && (
+                                <>
+                                    {/* Backdrop to close dropdown on click outside */}
+                                    <div 
+                                        className="fixed inset-0 z-30" 
+                                        onClick={() => setShowProfileDropdown(false)}
+                                    />
+                                    
+                                    {/* Dropdown Menu */}
+                                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-slate-200 z-40 overflow-hidden divide-y divide-slate-100 animate-in fade-in slide-in-from-top-1 duration-150">
+                                        {/* User Details */}
+                                        <div className="px-4 py-3 bg-slate-50">
+                                            <p className="text-sm font-bold text-slate-800 truncate capitalize">{user?.name || 'User'}</p>
+                                            <p className="text-[10px] text-slate-500 truncate mt-0.5">{user?.email || 'N/A'}</p>
+                                            <p className="text-[10px] text-emerald-600 font-semibold uppercase tracking-wider mt-1 truncate">
+                                                {roles?.[0]?.replace('-', ' ') || 'Staff'}
+                                            </p>
+                                        </div>
+
+                                        {/* Menu Links */}
+                                        <div className="py-1">
+                                            <Link 
+                                                to="/profile" 
+                                                className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-emerald-700 transition-colors"
+                                                onClick={() => setShowProfileDropdown(false)}
+                                            >
+                                                <Users size={16} className="mr-3 text-slate-400" />
+                                                <span>Profil Saya</span>
+                                            </Link>
+                                            {hasPermission('settings.view') && (
+                                                <Link 
+                                                    to="/settings" 
+                                                    className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-emerald-700 transition-colors"
+                                                    onClick={() => setShowProfileDropdown(false)}
+                                                >
+                                                    <Settings size={16} className="mr-3 text-slate-400" />
+                                                    <span>Pengaturan</span>
+                                                </Link>
+                                            )}
+                                        </div>
+
+                                        {/* Logout Button */}
+                                        <div className="py-1">
+                                            <button 
+                                                onClick={() => {
+                                                    setShowProfileDropdown(false);
+                                                    handleLogout();
+                                                }}
+                                                className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors text-left cursor-pointer"
+                                            >
+                                                <LogOut size={16} className="mr-3 text-red-400" />
+                                                <span>Keluar</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+                        </div>
                     </div>
                 </header>
 

@@ -17,6 +17,7 @@ export default function SppdShow() {
     const [isReportModalOpen, setIsReportModalOpen] = useState(false);
     const [reportData, setReportData] = useState({ real_start_date: '', real_end_date: '', report_text: '', actual_cost: '', attachment: null, notes: '' });
     const [isSubmittingReport, setIsSubmittingReport] = useState(false);
+    const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
 
     const { data, isLoading } = useQuery({
         queryKey: ['sppd', id],
@@ -104,6 +105,27 @@ export default function SppdShow() {
             toast.error(err.response?.data?.message || 'Gagal mengirim laporan');
         } finally {
             setIsSubmittingReport(false);
+        }
+    };
+
+    const handleDownloadPdf = async () => {
+        setIsDownloadingPdf(true);
+        try {
+            const response = await axios.get(`/sppd/${id}/pdf`, {
+                responseType: 'blob'
+            });
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `SPPD_${sppd.user?.name || 'Document'}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            link.parentNode.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            toast.error('Gagal mengunduh dokumen PDF');
+        } finally {
+            setIsDownloadingPdf(false);
         }
     };
 
@@ -210,12 +232,12 @@ export default function SppdShow() {
                                             <td className="px-6 py-4 font-medium text-slate-900">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center font-bold text-xs">
-                                                        {member.user?.name?.substring(0,2).toUpperCase()}
+                                                        {(member.display_name || '').substring(0,2).toUpperCase()}
                                                     </div>
-                                                    {member.user?.name}
+                                                    {member.display_name}
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 text-slate-600">{member.user?.nip || '-'}</td>
+                                            <td className="px-6 py-4 text-slate-600">{member.display_nip || '-'}</td>
                                             <td className="px-6 py-4 text-slate-600">{member.role_in_trip || '-'}</td>
                                         </tr>
                                     ))}
@@ -242,8 +264,8 @@ export default function SppdShow() {
                                 </Button>
                             )}
 
-                            {/* Approval Action (Will be constrained by backend rules, but shown for UI purposes) */}
-                            {sppd.status === 'verifikasi' && (
+                            {/* Approval Action */}
+                            {['submitted', 'verifikasi'].includes(sppd.status) && data.approval_meta?.can_approve && (
                                 <>
                                     <Button 
                                         className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
@@ -263,15 +285,14 @@ export default function SppdShow() {
 
                             {/* Cetak PDF Button */}
                             {['approved', 'active', 'reported', 'closed'].includes(sppd.status) && (
-                                <a 
-                                    href={`/api/sppd/${id}/pdf`}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="w-full inline-flex items-center justify-center font-medium rounded shadow-sm border transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 px-4 py-2 text-sm bg-indigo-600 hover:bg-indigo-700 text-white"
+                                <Button 
+                                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
+                                    onClick={handleDownloadPdf}
+                                    isLoading={isDownloadingPdf}
                                 >
-                                    <FileText size={18} className="mr-2" />
+                                    <FileText size={18} className={isDownloadingPdf ? 'hidden' : 'mr-2'} />
                                     Cetak Surat Tugas (PDF)
-                                </a>
+                                </Button>
                             )}
 
                             {/* Unggah LPP Button */}

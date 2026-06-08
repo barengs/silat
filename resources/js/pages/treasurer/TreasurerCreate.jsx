@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { FileUp, Send, CheckCircle2, UserSquare2, AlertCircle, FileText, Landmark } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { useSelector } from 'react-redux';
 import axios from '@/bootstrap';
 
 export default function TreasurerCreate() {
@@ -9,8 +11,12 @@ export default function TreasurerCreate() {
     const [currentStep, setCurrentStep] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isLoadingDefaults, setIsLoadingDefaults] = useState(true);
+    const [isFetchingInfo, setIsFetchingInfo] = useState(false);
+
+    const { user } = useSelector(state => state.auth);
 
     const [form, setForm] = useState({
+        institution_id: user?.institution_id || '',
         change_type: 'both', // 'bendahara', 'rekening', 'both'
         old_treasurer_name: '',
         old_bank_account: '',
@@ -22,6 +28,12 @@ export default function TreasurerCreate() {
         bank_branch: '',
     });
 
+    useEffect(() => {
+        if (user?.institution_id) {
+            setForm(prev => ({ ...prev, institution_id: user.institution_id }));
+        }
+    }, [user]);
+
     const [files, setFiles] = useState({
         file_sk_kepsek: null,
         file_ktp_npwp: null,
@@ -30,9 +42,28 @@ export default function TreasurerCreate() {
 
     // Fetch current info to populate Old Data
     useEffect(() => {
+        if (!form.institution_id) {
+            setForm(prev => ({
+                ...prev,
+                old_treasurer_name: '',
+                old_bank_account: '',
+                old_npwp: '',
+                bank_name: 'Bank Jatim',
+                bank_branch: '',
+                new_treasurer_name: '',
+                new_bank_account: '',
+                new_npwp: '',
+            }));
+            setIsLoadingDefaults(false);
+            return;
+        }
+
         const fetchCurrentInfo = async () => {
+            setIsFetchingInfo(true);
             try {
-                const res = await axios.get('/api/treasurer/current-info');
+                const res = await axios.get('/treasurer/current-info', {
+                    params: { institution_id: form.institution_id }
+                });
                 setForm(prev => ({
                     ...prev,
                     old_treasurer_name: res.data.treasurer_name,
@@ -49,15 +80,26 @@ export default function TreasurerCreate() {
                 console.error('Failed to fetch current treasurer info:', err);
                 toast.error('Gagal mengambil data bendahara saat ini.');
             } finally {
+                setIsFetchingInfo(false);
                 setIsLoadingDefaults(false);
             }
         };
         fetchCurrentInfo();
-    }, []);
+    }, [form.institution_id]);
 
     const handleInputChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
     };
+
+    const { data: institutionsRes } = useQuery({
+        queryKey: ['institutions-options'],
+        queryFn: async () => {
+            const res = await axios.get('/institutions?per_page=1000');
+            return res.data;
+        },
+        enabled: !user?.institution_id,
+    });
+    const institutions = institutionsRes?.data?.data || [];
 
     const handleFileChange = (e, key) => {
         if (e.target.files && e.target.files[0]) {
@@ -87,7 +129,7 @@ export default function TreasurerCreate() {
                 }
             });
 
-            const res = await axios.post('/api/treasurer', formData, {
+            const res = await axios.post('/treasurer', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             
@@ -103,6 +145,10 @@ export default function TreasurerCreate() {
     const nextStep = () => {
         // Simple client-side step validation
         if (currentStep === 1) {
+            if (!user?.institution_id && !form.institution_id) {
+                toast.error('Asal sekolah wajib dipilih.');
+                return;
+            }
             if (form.change_type !== 'rekening' && !form.new_treasurer_name) {
                 toast.error('Nama bendahara baru wajib diisi.');
                 return;
@@ -145,7 +191,7 @@ export default function TreasurerCreate() {
         </div>
     );
 
-    if (isLoadingDefaults) {
+    if (isLoadingDefaults && user?.institution_id) {
         return <div className="p-8 text-center text-slate-500">Memuat data acuan...</div>;
     }
 
@@ -195,8 +241,37 @@ export default function TreasurerCreate() {
                         
                         {/* Selector Jenis Perubahan (Langkah 1 saja) */}
                         {currentStep === 1 && (
-                            <div className="bg-white border border-slate-200 rounded p-6 shadow-sm mb-4">
-                                <h3 className="text-sm font-bold text-slate-800 mb-4">Pilih Jenis Pengajuan</h3>
+                            <>
+                                <div className="bg-white border border-slate-200 rounded p-6 shadow-sm mb-4">
+                                    <h3 className="text-sm font-bold text-slate-800 mb-4">Asal Sekolah</h3>
+                                    <div className="md:col-span-2">
+                                        {user?.institution_id ? (
+                                            <input
+                                                type="text"
+                                                value={user?.institution?.name || ''}
+                                                disabled
+                                                className="w-full px-3 py-2 border border-slate-200 rounded bg-slate-100 text-slate-500 text-sm"
+                                            />
+                                        ) : (
+                                            <>
+                                                <select
+                                                    name="institution_id"
+                                                    value={form.institution_id}
+                                                    onChange={handleInputChange}
+                                                    className="w-full px-3 py-2 border border-slate-200 rounded text-sm focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 bg-amber-50"
+                                                >
+                                                    <option value="">-- Pilih Sekolah --</option>
+                                                    {institutions.filter(i => i.type.startsWith('sekolah')).map(inst => (
+                                                        <option key={inst.id} value={inst.id}>{inst.name}</option>
+                                                    ))}
+                                                </select>
+                                                <p className="text-[10px] text-amber-600 mt-2 font-medium">Sebagai admin, Anda harus memilih asal sekolah untuk pengajuan ini.</p>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="bg-white border border-slate-200 rounded p-6 shadow-sm mb-4">
+                                    <h3 className="text-sm font-bold text-slate-800 mb-4">Pilih Jenis Pengajuan</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     {[
                                         { val: 'bendahara', label: 'Pergantian Bendahara', desc: 'Mengajukan penggantian nama pejabat bendahara.' },
@@ -222,8 +297,9 @@ export default function TreasurerCreate() {
                                             <p className="text-[10px] text-slate-500 mt-2">{type.desc}</p>
                                         </label>
                                     ))}
+                                    </div>
                                 </div>
-                            </div>
+                            </>
                         )}
 
                         {/* Step 1: Data Bendahara */}
@@ -243,24 +319,28 @@ export default function TreasurerCreate() {
                                     <div className="space-y-6">
                                         {/* Bendahara Lama */}
                                         <div className="bg-slate-50/50 border border-slate-200 rounded p-4">
-                                            <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Bendahara Lama</h4>
+                                            <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Bendahara Lama {isFetchingInfo && <span className="text-[10px] text-emerald-600 lowercase font-normal ml-2">(memuat...)</span>}</h4>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                 <div>
                                                     <label className="block text-xs font-medium text-slate-600 mb-1">Nama Bendahara</label>
                                                     <input 
                                                         type="text" 
+                                                        name="old_treasurer_name"
                                                         value={form.old_treasurer_name} 
-                                                        disabled 
-                                                        className="w-full px-3 py-2 border border-slate-200 bg-slate-100 rounded text-xs text-slate-500" 
+                                                        onChange={handleInputChange}
+                                                        placeholder="Masukkan nama bendahara lama"
+                                                        className="w-full px-3 py-2 border border-slate-200 rounded text-xs focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500" 
                                                     />
                                                 </div>
                                                 <div>
                                                     <label className="block text-xs font-medium text-slate-600 mb-1">NPWP Bendahara</label>
                                                     <input 
                                                         type="text" 
+                                                        name="old_npwp"
                                                         value={form.old_npwp} 
-                                                        disabled 
-                                                        className="w-full px-3 py-2 border border-slate-200 bg-slate-100 rounded text-xs text-slate-500" 
+                                                        onChange={handleInputChange}
+                                                        placeholder="Contoh: 01.234.567.8-901.000"
+                                                        className="w-full px-3 py-2 border border-slate-200 rounded text-xs focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500" 
                                                     />
                                                 </div>
                                             </div>
@@ -343,15 +423,17 @@ export default function TreasurerCreate() {
 
                                     {/* Rekening Lama */}
                                     <div className="bg-slate-50/50 border border-slate-200 rounded p-4">
-                                        <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Data Rekening Lama</h4>
+                                        <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Data Rekening Lama {isFetchingInfo && <span className="text-[10px] text-emerald-600 lowercase font-normal ml-2">(memuat...)</span>}</h4>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div>
                                                 <label className="block text-xs font-medium text-slate-600 mb-1">Nomor Rekening Lama</label>
                                                 <input 
                                                     type="text" 
+                                                    name="old_bank_account"
                                                     value={form.old_bank_account} 
-                                                    disabled 
-                                                    className="w-full px-3 py-2 border border-slate-200 bg-slate-100 rounded text-xs text-slate-500" 
+                                                    onChange={handleInputChange}
+                                                    placeholder="Masukkan nomor rekening lama"
+                                                    className="w-full px-3 py-2 border border-slate-200 rounded text-xs focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500" 
                                                 />
                                             </div>
                                             <div>
@@ -392,9 +474,13 @@ export default function TreasurerCreate() {
                                                     <label className="block text-xs font-medium text-slate-700 mb-1">Nama Pemegang Rekening Baru <span className="text-red-500">*</span></label>
                                                     <input 
                                                         type="text" 
-                                                        value={form.change_type === 'both' ? form.new_treasurer_name : form.old_treasurer_name} 
-                                                        disabled
-                                                        className="w-full px-3 py-2 border border-slate-200 bg-slate-100 rounded text-xs text-slate-500" 
+                                                        name={form.change_type === 'rekening' ? "new_treasurer_name" : undefined}
+                                                        value={form.new_treasurer_name} 
+                                                        onChange={form.change_type === 'rekening' ? handleInputChange : undefined}
+                                                        disabled={form.change_type !== 'rekening'}
+                                                        className={`w-full px-3 py-2 border border-slate-200 rounded text-xs focus:ring-1 focus:ring-emerald-500 ${form.change_type !== 'rekening' ? 'bg-slate-100 text-slate-500' : ''}`}
+                                                        placeholder="Masukkan nama pemegang rekening baru"
+                                                        required
                                                     />
                                                 </div>
                                             </div>

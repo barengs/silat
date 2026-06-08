@@ -32,6 +32,7 @@ export default function CheckinModal({ isOpen, onClose }) {
 
     const [agencySearch, setAgencySearch] = useState('');
     const [showSuggestions, setShowSuggestions] = useState(false);
+    const [guestType, setGuestType] = useState('instansi'); // 'instansi' | 'mandiri'
 
     // Fetch Divisions
     const { data: divisions } = useQuery({
@@ -88,22 +89,33 @@ export default function CheckinModal({ isOpen, onClose }) {
 
     return (
         <div className="fixed inset-0 z-[100] bg-slate-50 flex items-center justify-center p-4 lg:p-8 animate-in fade-in zoom-in duration-300">
+            
             {/* Hidden close button - Barely visible for operators */}
             <button 
                 onClick={onClose}
-                className="absolute top-4 right-4 p-2 text-slate-300 hover:text-slate-600 transition-colors opacity-10 hover:opacity-100"
+                className="absolute top-4 right-4 z-20 p-2 text-slate-400 hover:text-slate-800 transition-colors opacity-70 hover:opacity-100"
                 title="Tutup (Kembali ke Dasbor)"
             >
-                <X size={24} />
+                <X size={32} />
             </button>
 
-            <div className="w-full max-w-4xl bg-white shadow-xl rounded-2xl overflow-hidden flex flex-col md:flex-row">
+            <div className="relative z-10 w-full max-w-4xl bg-white shadow-xl rounded overflow-hidden flex flex-col md:flex-row border border-slate-200">
                 {/* Left Side: Branding / Info */}
                 <div className="md:w-5/12 bg-[#166534] text-white p-10 flex flex-col justify-center relative overflow-hidden">
+                    {/* Batik Background */}
+                    <div 
+                        className="absolute inset-0 z-0 mix-blend-overlay"
+                        style={{
+                            backgroundImage: 'url(/images/batik.png)',
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center',
+                            opacity: 0.25
+                        }}
+                    ></div>
                     <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none"></div>
                     <div className="relative z-10">
-                        <div className="bg-white p-3 rounded-2xl inline-block mb-6 shadow-sm">
-                            <img src="/images/logo-pamekasan.png" alt="Logo" className="w-16 h-16 object-contain" onError={(e) => e.target.src='https://upload.wikimedia.org/wikipedia/commons/e/e0/Lambang_Kabupaten_Pamekasan.png'} />
+                        <div className="bg-white p-4 rounded inline-block mb-6 shadow-sm">
+                            <img src="/images/logo-pamekasan.png" alt="Logo" className="w-24 h-24 object-contain" onError={(e) => e.target.src='https://upload.wikimedia.org/wikipedia/commons/e/e0/Lambang_Kabupaten_Pamekasan.png'} />
                         </div>
                         <h2 className="text-3xl font-bold mb-2">Buku Tamu Digital</h2>
                         <p className="text-emerald-100/80 mb-8">Dinas Pendidikan Kabupaten Pamekasan</p>
@@ -132,6 +144,35 @@ export default function CheckinModal({ isOpen, onClose }) {
                     </div>
 
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+                        
+                        <div className="mb-4">
+                            <label className="block text-sm font-semibold text-slate-700 mb-2">Tipe Tamu</label>
+                            <div className="flex gap-4">
+                                <label className="flex items-center gap-2 cursor-pointer text-sm">
+                                    <input 
+                                        type="radio" 
+                                        name="guestType" 
+                                        value="instansi" 
+                                        checked={guestType === 'instansi'} 
+                                        onChange={() => setGuestType('instansi')} 
+                                        className="text-[#166534] focus:ring-[#166534]" 
+                                    />
+                                    <span>Dari Instansi/Sekolah</span>
+                                </label>
+                                <label className="flex items-center gap-2 cursor-pointer text-sm">
+                                    <input 
+                                        type="radio" 
+                                        name="guestType" 
+                                        value="mandiri" 
+                                        checked={guestType === 'mandiri'} 
+                                        onChange={() => setGuestType('mandiri')} 
+                                        className="text-[#166534] focus:ring-[#166534]" 
+                                    />
+                                    <span>Tamu Mandiri / Pribadi</span>
+                                </label>
+                            </div>
+                        </div>
+
                         <FormGroup label="Nama Lengkap Tamu" error={errors.guest_name?.message}>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -148,7 +189,7 @@ export default function CheckinModal({ isOpen, onClose }) {
                         </FormGroup>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            <FormGroup label="Asal Instansi" error={errors.agency_name?.message}>
+                            <FormGroup label={guestType === 'instansi' ? "Asal Instansi" : "Alamat Pribadi"} error={errors.agency_name?.message}>
                                 <div className="relative">
                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                         <Building2 size={18} className="text-slate-400" />
@@ -156,18 +197,20 @@ export default function CheckinModal({ isOpen, onClose }) {
                                     <Input
                                         type="text"
                                         className="pl-10"
-                                        placeholder="Ketik nama instansi..."
+                                        placeholder={guestType === 'instansi' ? "Ketik nama instansi..." : "Ketik alamat rumah/asal..."}
                                         {...register('agency_name')}
                                         onChange={(e) => {
                                             register('agency_name').onChange(e);
-                                            setAgencySearch(e.target.value);
-                                            setShowSuggestions(true);
+                                            if (guestType === 'instansi') {
+                                                setAgencySearch(e.target.value);
+                                                setShowSuggestions(true);
+                                            }
                                         }}
-                                        onFocus={() => setShowSuggestions(true)}
+                                        onFocus={() => guestType === 'instansi' && setShowSuggestions(true)}
                                         onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                                     />
                                     
-                                    {showSuggestions && agencySuggestions && agencySuggestions.length > 0 && (
+                                    {guestType === 'instansi' && showSuggestions && agencySuggestions && agencySuggestions.length > 0 && (
                                         <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded shadow-lg max-h-48 overflow-y-auto">
                                             {agencySuggestions.map(agency => (
                                                 <button

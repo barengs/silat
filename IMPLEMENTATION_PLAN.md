@@ -376,6 +376,7 @@ Memfasilitasi pihak sekolah atau warga untuk mengajukan revisi ijazah yang salah
 - [x] `pages/settings/SystemSettings.jsx` — form pengaturan global
 - [x] Notification center (bell icon + dropdown) (sudah terintegrasi di AppLayout)
 - [x] `ProfilePage.jsx` — edit profil + upload foto/TTE
+- [x] Verifikasi Dokumen — halaman antrean persetujuan terpadu (`/verifikasi`)
 - [x] Test e2e semua alur (verifikasi via browser subagent)
 
 ---

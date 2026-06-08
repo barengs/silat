@@ -8,6 +8,7 @@ use App\Models\GuestBook;
 use App\Models\Sppd;
 use App\Models\IjazahRevision;
 use App\Models\TreasurerChange;
+use App\Models\SchoolTransfer;
 use App\Models\Article;
 use App\Models\DocumentApproval;
 use App\Services\ApprovalService;
@@ -31,15 +32,18 @@ class DashboardController extends Controller
 
         // 1. STATS (role-aware)
         if ($isSekolah) {
-            $sppdCount = Sppd::where('institution_id', $institutionId)->count();
-            $sppdActive = Sppd::where('institution_id', $institutionId)->whereIn('status', ['active', 'approved'])->count();
-            $sppdPending = Sppd::where('institution_id', $institutionId)->whereIn('status', ['submitted', 'verifikasi'])->count();
+            $sppdCount = Sppd::query()->where('institution_id', $institutionId)->count();
+            $sppdActive = Sppd::query()->where('institution_id', $institutionId)->whereIn('status', ['active', 'approved'])->count();
+            $sppdPending = Sppd::query()->where('institution_id', $institutionId)->whereIn('status', ['submitted', 'verifikasi'])->count();
 
-            $ijazahCount = IjazahRevision::where('institution_id', $institutionId)->count();
-            $ijazahPending = IjazahRevision::where('institution_id', $institutionId)->whereIn('status', ['submitted', 'verifikasi'])->count();
+            $ijazahCount = IjazahRevision::query()->where('institution_id', $institutionId)->count();
+            $ijazahPending = IjazahRevision::query()->where('institution_id', $institutionId)->whereIn('status', ['submitted', 'verifikasi'])->count();
 
-            $treasurerCount = TreasurerChange::where('institution_id', $institutionId)->count();
-            $treasurerPending = TreasurerChange::where('institution_id', $institutionId)->whereIn('status', ['submitted', 'verifikasi'])->count();
+            $treasurerCount = TreasurerChange::query()->where('institution_id', $institutionId)->count();
+            $treasurerPending = TreasurerChange::query()->where('institution_id', $institutionId)->whereIn('status', ['submitted', 'verifikasi'])->count();
+
+            $transferCount = SchoolTransfer::query()->where('institution_id', $institutionId)->count();
+            $transferPending = SchoolTransfer::query()->where('institution_id', $institutionId)->whereIn('status', ['submitted', 'verifikasi'])->count();
 
             $stats = [
                 [
@@ -48,7 +52,8 @@ class DashboardController extends Controller
                     'badge' => ['text' => "$sppdActive Aktif", 'color' => 'text-blue-700 bg-blue-100'],
                     'icon' => 'Plane',
                     'iconBg' => 'bg-blue-100',
-                    'iconColor' => 'text-blue-600'
+                    'iconColor' => 'text-blue-600',
+                    'path' => '/sppd'
                 ],
                 [
                     'title' => 'SPPD Menunggu',
@@ -56,7 +61,8 @@ class DashboardController extends Controller
                     'badge' => $sppdPending > 0 ? ['text' => 'Diproses', 'color' => 'text-orange-700 bg-orange-100'] : null,
                     'icon' => 'ClipboardList',
                     'iconBg' => 'bg-orange-100',
-                    'iconColor' => 'text-orange-600'
+                    'iconColor' => 'text-orange-600',
+                    'path' => '/sppd'
                 ],
                 [
                     'title' => 'Revisi Ijazah',
@@ -64,7 +70,8 @@ class DashboardController extends Controller
                     'badge' => $ijazahPending > 0 ? ['text' => "$ijazahPending Baru", 'color' => 'text-rose-700 bg-rose-100'] : null,
                     'icon' => 'GraduationCap',
                     'iconBg' => 'bg-rose-100',
-                    'iconColor' => 'text-rose-600'
+                    'iconColor' => 'text-rose-600',
+                    'path' => '/ijazah'
                 ],
                 [
                     'title' => 'Perubahan Bendahara',
@@ -72,16 +79,27 @@ class DashboardController extends Controller
                     'badge' => $treasurerPending > 0 ? ['text' => "$treasurerPending Proses", 'color' => 'text-teal-700 bg-teal-100'] : null,
                     'icon' => 'FileSignature',
                     'iconBg' => 'bg-teal-100',
-                    'iconColor' => 'text-teal-600'
+                    'iconColor' => 'text-teal-600',
+                    'path' => '/treasurer'
+                ],
+                [
+                    'title' => 'Mutasi Siswa',
+                    'value' => $transferCount,
+                    'badge' => $transferPending > 0 ? ['text' => "$transferPending Proses", 'color' => 'text-indigo-700 bg-indigo-100'] : null,
+                    'icon' => 'GitBranch',
+                    'iconBg' => 'bg-indigo-100',
+                    'iconColor' => 'text-indigo-600',
+                    'path' => '/school-transfers'
                 ]
             ];
         } else {
             // Dinas / Admin / Resepsionis / Verifikator / Approver
-            $tamuHariIni = GuestBook::today()->count();
+            $tamuHariIni = GuestBook::query()->today()->count();
             
-            $sppdPending = Sppd::whereIn('status', ['submitted', 'verifikasi'])->count();
-            $ijazahPending = IjazahRevision::whereIn('status', ['submitted', 'verifikasi', 'ready_for_pickup'])->count();
-            $treasurerPending = TreasurerChange::whereIn('status', ['submitted', 'verifikasi'])->count();
+            $sppdPending = Sppd::query()->whereIn('status', ['submitted', 'verifikasi'])->count();
+            $ijazahPending = IjazahRevision::query()->whereIn('status', ['submitted', 'verifikasi', 'ready_for_pickup'])->count();
+            $treasurerPending = TreasurerChange::query()->whereIn('status', ['submitted', 'verifikasi'])->count();
+            $transferPending = SchoolTransfer::query()->whereIn('status', ['submitted', 'verifikasi'])->count();
 
             $stats = [
                 [
@@ -90,7 +108,8 @@ class DashboardController extends Controller
                     'badge' => null,
                     'icon' => 'Users',
                     'iconBg' => 'bg-slate-100',
-                    'iconColor' => 'text-slate-600'
+                    'iconColor' => 'text-slate-600',
+                    'path' => '/guest-book'
                 ],
                 [
                     'title' => 'SPPD Menunggu',
@@ -98,7 +117,8 @@ class DashboardController extends Controller
                     'badge' => $sppdPending > 0 ? ['text' => 'Butuh Tindakan', 'color' => 'text-rose-700 bg-rose-100'] : null,
                     'icon' => 'ClipboardList',
                     'iconBg' => 'bg-rose-100',
-                    'iconColor' => 'text-rose-600'
+                    'iconColor' => 'text-rose-600',
+                    'path' => '/sppd'
                 ],
                 [
                     'title' => 'Revisi Ijazah Baru',
@@ -106,7 +126,8 @@ class DashboardController extends Controller
                     'badge' => null,
                     'icon' => 'GraduationCap',
                     'iconBg' => 'bg-orange-100',
-                    'iconColor' => 'text-orange-600'
+                    'iconColor' => 'text-orange-600',
+                    'path' => '/ijazah'
                 ],
                 [
                     'title' => 'Perubahan Bendahara',
@@ -114,7 +135,17 @@ class DashboardController extends Controller
                     'badge' => null,
                     'icon' => 'FileSignature',
                     'iconBg' => 'bg-teal-100',
-                    'iconColor' => 'text-teal-600'
+                    'iconColor' => 'text-teal-600',
+                    'path' => '/treasurer'
+                ],
+                [
+                    'title' => 'Mutasi Siswa Menunggu',
+                    'value' => $transferPending,
+                    'badge' => $transferPending > 0 ? ['text' => 'Butuh Tindakan', 'color' => 'text-indigo-700 bg-indigo-100'] : null,
+                    'icon' => 'GitBranch',
+                    'iconBg' => 'bg-indigo-100',
+                    'iconColor' => 'text-indigo-600',
+                    'path' => '/school-transfers'
                 ]
             ];
         }
@@ -176,13 +207,31 @@ class DashboardController extends Controller
             }
         }
 
+        // School Transfer
+        $pendingTransfers = SchoolTransfer::with(['institution'])->whereIn('status', ['submitted', 'verifikasi'])->get();
+        foreach ($pendingTransfers as $doc) {
+            if ($this->approvalService->canApprove($doc, 'school_transfer', $user)) {
+                $pendingApprovalsList[] = [
+                    'id' => $doc->id,
+                    'module' => 'school_transfer',
+                    'title' => 'Mutasi Siswa - ' . $doc->student_name,
+                    'detail' => 'Tujuan: ' . $doc->target_school . ' (Kelas ' . $doc->grade . ')',
+                    'institution' => $doc->institution?->name ?? '-',
+                    'reference' => $doc->transfer_number,
+                    'date' => $doc->created_at->toISOString(),
+                    'current_step' => $doc->current_step,
+                    'status' => $doc->status,
+                ];
+            }
+        }
+
         // 3. TAMU BULANAN (grafik Recharts)
         $tamuBulanan = [];
         if (!$isSekolah) {
             for ($i = 5; $i >= 0; $i--) {
                 $date = now()->subMonths($i);
                 $monthName = $date->translatedFormat('F');
-                $count = GuestBook::whereMonth('date', $date->month)
+                $count = GuestBook::query()->whereMonth('date', $date->month)
                     ->whereYear('date', $date->year)
                     ->count();
                 $tamuBulanan[] = [
@@ -195,13 +244,15 @@ class DashboardController extends Controller
         // 4. AKTIVITAS TERBARU
         $aktivitasTerbaru = [];
         if ($isSekolah) {
-            $sppdActs = Sppd::with('user')->where('institution_id', $institutionId)->latest()->take(3)->get();
-            $ijazahActs = IjazahRevision::latest()->where('institution_id', $institutionId)->take(3)->get();
-            $treasurerActs = TreasurerChange::latest()->where('institution_id', $institutionId)->take(3)->get();
+            $sppdActs = Sppd::query()->with('user')->where('institution_id', $institutionId)->latest()->take(3)->get();
+            $ijazahActs = IjazahRevision::query()->latest()->where('institution_id', $institutionId)->take(3)->get();
+            $treasurerActs = TreasurerChange::query()->latest()->where('institution_id', $institutionId)->take(3)->get();
+            $transferActs = SchoolTransfer::query()->latest()->where('institution_id', $institutionId)->take(3)->get();
         } else {
-            $sppdActs = Sppd::with('user')->latest()->take(3)->get();
-            $ijazahActs = IjazahRevision::latest()->take(3)->get();
-            $treasurerActs = TreasurerChange::latest()->take(3)->get();
+            $sppdActs = Sppd::query()->with('user')->latest()->take(3)->get();
+            $ijazahActs = IjazahRevision::query()->latest()->take(3)->get();
+            $treasurerActs = TreasurerChange::query()->latest()->take(3)->get();
+            $transferActs = SchoolTransfer::query()->latest()->take(3)->get();
         }
 
         foreach ($sppdActs as $item) {
@@ -239,6 +290,20 @@ class DashboardController extends Controller
                 'id' => $item->id,
                 'title' => 'Bendahara - ' . $item->new_treasurer_name,
                 'type' => 'Perubahan Bendahara',
+                'status' => $statusLabel,
+                'statusColor' => $statusColor,
+                'time' => $item->created_at->diffForHumans(),
+                'timestamp' => $item->created_at->timestamp,
+            ];
+        }
+
+        foreach ($transferActs as $item) {
+            $statusLabel = $item->status === 'approved' ? 'Disetujui' : ($item->status === 'rejected' ? 'Ditolak' : 'Menunggu');
+            $statusColor = $item->status === 'approved' ? 'bg-emerald-100 text-emerald-700' : ($item->status === 'rejected' ? 'bg-rose-100 text-rose-700' : 'bg-orange-100 text-orange-700');
+            $aktivitasTerbaru[] = [
+                'id' => $item->id,
+                'title' => 'Mutasi Siswa - ' . $item->student_name,
+                'type' => 'Pindah Sekolah',
                 'status' => $statusLabel,
                 'statusColor' => $statusColor,
                 'time' => $item->created_at->diffForHumans(),

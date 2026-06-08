@@ -136,7 +136,7 @@ export default function IjazahTrack() {
                                         <div>
                                             <h4 className="font-bold text-slate-800 text-lg">Dalam Proses</h4>
                                             <p className="text-sm text-slate-600 mt-1">
-                                                Pengajuan sedang diproses dan diverifikasi oleh petugas Cabang Dinas. Mohon menunggu informasi selanjutnya.
+                                                Pengajuan sedang diproses dan diverifikasi oleh petugas Dinas Pendidikan. Mohon menunggu informasi selanjutnya.
                                             </p>
                                         </div>
                                     </>

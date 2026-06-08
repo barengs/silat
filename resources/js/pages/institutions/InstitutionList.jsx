@@ -6,7 +6,7 @@ import {
     getPaginationRowModel,
     flexRender,
 } from '@tanstack/react-table';
-import { Plus, Edit, Trash2, Building2, CheckCircle, XCircle } from 'lucide-react';
+import { Plus, Edit, Trash2, Building2, CheckCircle, XCircle, Upload, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from '@/bootstrap';
 import { useForm } from 'react-hook-form';
@@ -40,6 +40,8 @@ export default function InstitutionList() {
     // Modal State
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingId, setEditingId] = useState(null);
+    const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+    const [importFile, setImportFile] = useState(null);
 
     const { register, handleSubmit, reset, setValue, formState: { errors, isSubmitting } } = useForm({
         resolver: zodResolver(institutionSchema),
@@ -94,6 +96,31 @@ export default function InstitutionList() {
             toast.error(err.response?.data?.message || 'Gagal menghapus instansi');
         }
     });
+
+    const importMutation = useMutation({
+        mutationFn: async (formData) => {
+            return await axios.post('/institutions/import', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+        },
+        onSuccess: (res) => {
+            toast.success(res.data.message || 'Import berhasil');
+            queryClient.invalidateQueries(['institutions']);
+            setIsImportModalOpen(false);
+            setImportFile(null);
+        },
+        onError: (err) => {
+            toast.error(err.response?.data?.message || 'Gagal mengimpor data');
+        }
+    });
+
+    const handleImportSubmit = (e) => {
+        e.preventDefault();
+        if (!importFile) return toast.error('Pilih file Excel/CSV terlebih dahulu');
+        const formData = new FormData();
+        formData.append('file', importFile);
+        importMutation.mutate(formData);
+    };
 
     const openModal = (inst = null) => {
         if (inst) {
@@ -224,12 +251,22 @@ export default function InstitutionList() {
                     <h1 className="text-2xl font-bold text-slate-900">Manajemen Instansi</h1>
                     <p className="text-slate-500 text-sm">Kelola data sekolah dan cabang dinas.</p>
                 </div>
-                <Button 
-                    onClick={() => openModal()}
-                    icon={Plus}
-                >
-                    Tambah Instansi
-                </Button>
+                <div className="flex gap-2">
+                    <Button 
+                        variant="outline"
+                        onClick={() => setIsImportModalOpen(true)}
+                        icon={Upload}
+                        className="border-slate-200"
+                    >
+                        Import Excel/CSV
+                    </Button>
+                    <Button 
+                        onClick={() => openModal()}
+                        icon={Plus}
+                    >
+                        Tambah Instansi
+                    </Button>
+                </div>
             </div>
 
             <DataTable
@@ -306,6 +343,62 @@ export default function InstitutionList() {
                             isLoading={isSubmitting}
                         >
                             Simpan
+                        </Button>
+                    </div>
+                </form>
+            </Modal>
+
+            {/* Import Modal */}
+            <Modal
+                isOpen={isImportModalOpen}
+                onClose={() => { setIsImportModalOpen(false); setImportFile(null); }}
+                title="Import Data Instansi"
+            >
+                <form onSubmit={handleImportSubmit} className="space-y-4 pt-2">
+                    <div className="p-4 bg-blue-50 text-blue-800 text-sm rounded border border-blue-100">
+                        <div className="flex justify-between items-start mb-2">
+                            <p className="font-semibold">Panduan Format Import:</p>
+                            <a 
+                                href="/api/institutions/template" 
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center text-xs bg-white text-blue-600 border border-blue-200 px-2 py-1 rounded hover:bg-blue-50 transition-colors"
+                            >
+                                <Download size={14} className="mr-1" />
+                                Download Template
+                            </a>
+                        </div>
+                        <p>Format file yang didukung: <strong>.xlsx, .xls, .csv</strong>. Urutan kolom:</p>
+                        <ol className="list-decimal ml-4 mt-2 font-mono text-xs">
+                            <li>Nama Instansi (contoh: SMAN 1 Pamekasan)</li>
+                            <li>Tipe (dinas, cabdin, sekolah_sma, sekolah_smk, sekolah_pkplk, other)</li>
+                            <li>NPSN (opsional)</li>
+                            <li>Kota/Kab (opsional)</li>
+                        </ol>
+                    </div>
+
+                    <FormGroup label="Pilih File Excel/CSV">
+                        <input 
+                            type="file" 
+                            accept=".xlsx, .xls, .csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" 
+                            onChange={(e) => setImportFile(e.target.files[0])} 
+                            className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100"
+                        />
+                    </FormGroup>
+
+                    <div className="flex justify-end gap-3 pt-6">
+                        <Button
+                            type="button"
+                            variant="secondary"
+                            onClick={() => { setIsImportModalOpen(false); setImportFile(null); }}
+                        >
+                            Batal
+                        </Button>
+                        <Button
+                            type="submit"
+                            isLoading={importMutation.isPending}
+                        >
+                            Mulai Import
                         </Button>
                     </div>
                 </form>

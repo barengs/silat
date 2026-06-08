@@ -38,10 +38,8 @@ axios.interceptors.response.use(
             const errorCode = error.response.data?.error;
             // Don't redirect for explicit login attempts
             if (errorCode !== 'invalid_credentials') {
-                localStorage.removeItem('auth_token');
-                localStorage.removeItem('auth_user');
-                // Trigger redirect via custom event (caught by React Router)
-                window.dispatchEvent(new CustomEvent('auth:unauthorized'));
+                // Trigger lock screen instead of logging out immediately
+                window.dispatchEvent(new CustomEvent('auth:lock'));
             }
         }
         return Promise.reject(error);

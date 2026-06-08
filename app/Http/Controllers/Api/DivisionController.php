@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Division;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\DivisionTemplateExport;
+use App\Imports\DivisionImport;
 
 class DivisionController extends Controller
 {
@@ -127,5 +130,31 @@ class DivisionController extends Controller
                 'message' => 'Gagal menghapus divisi, kemungkinan karena data terkait (seperti pengguna atau buku tamu).',
             ], 500);
         }
+    }
+
+    /**
+     * Download Excel template for import.
+     */
+    public function template()
+    {
+        return Excel::download(new DivisionTemplateExport, 'template_import_divisi.xlsx');
+    }
+
+    /**
+     * Import divisions from Excel/CSV.
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv,txt|max:5120'
+        ]);
+
+        $import = new DivisionImport;
+        Excel::import($import, $request->file('file'));
+
+        return response()->json([
+            'success' => true,
+            'message' => "Berhasil mengimpor {$import->importedCount} divisi.",
+        ]);
     }
 }

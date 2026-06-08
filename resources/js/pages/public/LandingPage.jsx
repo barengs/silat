@@ -54,8 +54,8 @@ const LandingPage = () => {
             {/* Hero Section */}
             <section className="relative overflow-hidden bg-gradient-to-br from-blue-950 via-slate-900 to-indigo-950 text-white py-24 px-4 sm:px-6 lg:px-8 flex items-center min-h-[500px]">
                 {/* Batik background overlay */}
-                <div 
-                    className="absolute inset-0 bg-cover bg-center opacity-15 pointer-events-none" 
+                <div
+                    className="absolute inset-0 bg-cover bg-center opacity-15 pointer-events-none"
                     style={{ backgroundImage: "url('/images/batik.png')" }}
                 ></div>
                 {/* Background decorative patterns */}
@@ -75,7 +75,7 @@ const LandingPage = () => {
                             </span>
                         </h1>
                         <p className="text-lg text-slate-300 leading-relaxed mb-8 max-w-2xl">
-                            Selamat datang di SIMTAG (Sistem Manajemen Tata Kelola Terpadu) Cabang Dinas Pendidikan Provinsi Jawa Timur Wilayah Kabupaten Pamekasan. Kami berkomitmen memberikan layanan virtual yang transparan, mudah, dan akuntabel.
+                            Selamat datang di SILAT (Sistem Layanan Terpadu) Dinas Pendidikan dan Kebudayan Kabupaten Pamekasan. Kami berkomitmen memberikan layanan virtual yang transparan, mudah, dan akuntabel.
                         </p>
                         <div className="flex flex-wrap gap-4">
                             <Link
@@ -118,7 +118,7 @@ const LandingPage = () => {
                         <ServiceCard
                             icon={FileText}
                             title="Buku Tamu Digital"
-                            description="Formulir buku tamu bagi tamu eksternal yang melakukan kunjungan kerja ke kantor Cabang Dinas Pendidikan Pamekasan."
+                            description="Formulir buku tamu bagi tamu eksternal yang melakukan kunjungan kerja ke kantor Dinas Pendidikan dan Kebudayaan Kabupaten Pamekasan."
                             linkTo="/login"
                             color="bg-indigo-600 shadow-indigo-500/10"
                         />

@@ -75,7 +75,7 @@
                 @if($sppd->members->count() > 0)
                     <ol style="margin:0; padding-left:15px;">
                         @foreach($sppd->members as $member)
-                            <li>{{ $member->user->name }} ({{ $member->user->nip }})</li>
+                            <li>{{ $member->display_name }} ({{ $member->display_nip ?? '-' }})</li>
                         @endforeach
                     </ol>
                 @else
@@ -96,9 +96,13 @@
             <td>
                 Dikeluarkan di: Pamekasan<br>
                 Pada Tanggal: {{ date('d F Y') }}<br><br>
-                <strong>KEPALA DINAS PENDIDIKAN</strong><br>
+                <strong>KEPALA BIDANG</strong><br>
                 <div class="qrcode">
-                    <img src="data:image/png;base64, {{ base64_encode(QrCode::format('png')->size(80)->generate(url('/api/public/verify/doc/'.$sppd->id))) }} ">
+                    @if(isset($signatureImagePath) && file_exists($signatureImagePath))
+                        <img src="data:image/png;base64, {{ base64_encode(file_get_contents($signatureImagePath)) }}" style="max-width: 80px; max-height: 80px;">
+                    @else
+                        {!! QrCode::size(80)->generate(url('/api/public/verify/doc/'.$sppd->id)) !!}
+                    @endif
                 </div><br>
                 <strong><u>(Ditandatangani secara elektronik)</u></strong>
             </td>

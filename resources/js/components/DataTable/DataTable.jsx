@@ -12,18 +12,22 @@ export default function DataTable({
     pageSize,
     onPageSizeChange,
     searchPlaceholder = 'Cari data...',
+    filters = null,
 }) {
     const columnsLength = table.getAllColumns().length;
 
     return (
         <div className="bg-white rounded shadow-sm border border-slate-200 overflow-hidden">
             {/* Table Top Controls */}
-            <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-50/50">
-                <TableInput 
-                    value={searchTerm} 
-                    onChange={onSearchChange} 
-                    placeholder={searchPlaceholder} 
-                />
+            <div className="p-4 border-b border-slate-100 flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-4 bg-slate-50/50">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 flex-1">
+                    <TableInput 
+                        value={searchTerm} 
+                        onChange={onSearchChange} 
+                        placeholder={searchPlaceholder} 
+                    />
+                    {filters}
+                </div>
                 <TableSelect 
                     value={pageSize} 
                     onChange={onPageSizeChange} 

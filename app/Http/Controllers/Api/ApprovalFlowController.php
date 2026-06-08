@@ -34,7 +34,7 @@ class ApprovalFlowController extends Controller
      */
     public function update(Request $request, $module)
     {
-        if (!in_array($module, ['sppd', 'ijazah', 'bendahara'])) {
+        if (!in_array($module, ['sppd', 'ijazah', 'bendahara', 'school_transfer'])) {
             return response()->json(['message' => 'Modul tidak valid.'], 400);
         }
 
@@ -49,7 +49,7 @@ class ApprovalFlowController extends Controller
         DB::beginTransaction();
         try {
             // Delete existing flows for this module
-            ApprovalFlow::where('module_name', $module)->delete();
+            ApprovalFlow::query()->where('module_name', $module)->delete();
 
             $stepsData = $request->input('steps');
             $created = [];

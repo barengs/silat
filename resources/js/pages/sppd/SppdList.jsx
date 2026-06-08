@@ -16,21 +16,65 @@ export default function SppdList() {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('daftar'); // daftar | monitoring
     const [statusFilter, setStatusFilter] = useState('all');
-    const [searchQuery, setSearchQuery] = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [pageIndex, setPageIndex] = useState(0);
+    const [pageSize, setPageSize] = useState(10);
 
     const { data, isLoading } = useQuery({
-        queryKey: ['sppds', activeTab, statusFilter],
+        queryKey: ['sppds', activeTab, statusFilter, pageIndex, pageSize, searchTerm],
         queryFn: async () => {
-            let status = statusFilter;
-            if (activeTab === 'monitoring') {
-                status = 'reported'; // example
-            }
             const res = await axios.get('/sppd', {
-                params: { status }
+                params: {
+                    page: pageIndex + 1,
+                    per_page: pageSize,
+                    status: statusFilter,
+                    search: searchTerm || undefined,
+                }
             });
             return res.data;
-        }
+        },
+        keepPreviousData: true,
     });
+
+    const handleTabChange = (tab) => {
+        setActiveTab(tab);
+        setPageIndex(0);
+        if (tab === 'monitoring') {
+            setStatusFilter('monitoring');
+        } else {
+            setStatusFilter('all');
+        }
+    };
+
+    const filters = (
+        <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider shrink-0">Status:</span>
+            <select
+                className="px-3 py-2 text-sm border border-slate-200 rounded-md bg-white shadow-sm focus:ring-teal-500 focus:border-teal-500 text-slate-600 focus:outline-none w-44"
+                value={statusFilter}
+                onChange={(e) => { setStatusFilter(e.target.value); setPageIndex(0); }}
+            >
+                {activeTab === 'monitoring' ? (
+                    <>
+                        <option value="monitoring">Semua Laporan</option>
+                        <option value="reported">Menunggu Validasi</option>
+                        <option value="closed">Selesai / Valid</option>
+                    </>
+                ) : (
+                    <>
+                        <option value="all">Semua Status</option>
+                        <option value="draft">Draft</option>
+                        <option value="verifikasi">Verifikasi</option>
+                        <option value="approved">Approved</option>
+                        <option value="active">Active</option>
+                        <option value="reported">Reported</option>
+                        <option value="closed">Closed</option>
+                        <option value="rejected">Rejected</option>
+                    </>
+                )}
+            </select>
+        </div>
+    );
 
     const getStatusBadge = (status) => {
         switch (status) {
@@ -129,8 +173,17 @@ export default function SppdList() {
     const table = useReactTable({
         data: data?.data || [],
         columns,
+        pageCount: data?.last_page ?? -1,
+        state: {
+            pagination: { pageIndex, pageSize },
+        },
+        onPaginationChange: (updater) => {
+            const nextState = typeof updater === 'function' ? updater({ pageIndex, pageSize }) : updater;
+            setPageIndex(nextState.pageIndex);
+            setPageSize(nextState.pageSize);
+        },
         getCoreRowModel: getCoreRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
+        manualPagination: true,
     });
 
     return (
@@ -156,52 +209,31 @@ export default function SppdList() {
                 {/* Tabs */}
                 <div className="flex px-6 border-b border-slate-200">
                     <button 
-                        onClick={() => setActiveTab('daftar')}
+                        onClick={() => handleTabChange('daftar')}
                         className={`px-4 py-4 text-sm font-semibold border-b-2 transition-colors ${activeTab === 'daftar' ? 'border-[#0f172a] text-[#0f172a]' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
                     >
                         Daftar SPPD
                     </button>
                     <button 
-                        onClick={() => setActiveTab('monitoring')}
+                        onClick={() => handleTabChange('monitoring')}
                         className={`px-4 py-4 text-sm font-semibold border-b-2 transition-colors ${activeTab === 'monitoring' ? 'border-[#0f172a] text-[#0f172a]' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
                     >
                         Monitoring Laporan
                     </button>
                 </div>
 
-                {/* Toolbar */}
-                <div className="p-4 flex flex-col sm:flex-row gap-4 justify-between items-center bg-slate-50 border-b border-slate-100">
-                    <div className="relative w-full sm:w-96">
-                        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                        <input 
-                            type="text" 
-                            placeholder="Cari No. Dokumen..." 
-                            className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded text-sm focus:ring-2 focus:ring-[#0f172a]"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
-                    </div>
-                    <div className="flex gap-2 w-full sm:w-auto">
-                        <select 
-                            className="px-3 py-2 border border-slate-200 rounded text-sm bg-white"
-                            value={statusFilter}
-                            onChange={(e) => setStatusFilter(e.target.value)}
-                        >
-                            <option value="all">Semua Status</option>
-                            <option value="draft">Draft</option>
-                            <option value="verifikasi">Verifikasi</option>
-                            <option value="approved">Approved</option>
-                            <option value="active">Active</option>
-                            <option value="reported">Reported</option>
-                            <option value="closed">Closed</option>
-                        </select>
-                        <Button variant="outline" className="px-3" icon={Filter} />
-                    </div>
-                </div>
-
                 {/* Data Table */}
                 <div className="p-0">
-                    <DataTable table={table} isLoading={isLoading} />
+                    <DataTable 
+                        table={table} 
+                        isLoading={isLoading} 
+                        searchTerm={searchTerm}
+                        onSearchChange={(val) => { setSearchTerm(val); setPageIndex(0); }}
+                        pageSize={pageSize}
+                        onPageSizeChange={(val) => { setPageSize(val); setPageIndex(0); }}
+                        searchPlaceholder="Cari No. Dokumen atau pegawai..."
+                        filters={filters}
+                    />
                 </div>
             </div>
         </div>

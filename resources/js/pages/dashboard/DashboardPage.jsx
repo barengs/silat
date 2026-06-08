@@ -11,7 +11,8 @@ import {
     ChevronRight,
     Building2,
     AlertCircle,
-    CheckCircle
+    CheckCircle,
+    GitBranch
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import axios from '@/bootstrap';
@@ -60,7 +61,8 @@ export default function DashboardPage() {
         'ClipboardList': ClipboardList,
         'GraduationCap': GraduationCap,
         'Plane': Plane,
-        'FileSignature': FileSignature
+        'FileSignature': FileSignature,
+        'GitBranch': GitBranch
     };
 
     return (
@@ -88,8 +90,8 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {stats.map((stat, idx) => {
                     const StatIcon = iconMap[stat.icon] || ClipboardList;
-                    return (
-                        <div key={idx} className="bg-white rounded border border-slate-200 p-6 flex flex-col justify-between h-full shadow-sm hover:shadow-md transition-shadow">
+                    const CardContent = (
+                        <div className="bg-white rounded border border-slate-200 p-6 flex flex-col justify-between h-full shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-200 cursor-pointer">
                             <div className="flex justify-between items-start mb-4">
                                 <div className={`p-3 rounded ${stat.iconBg}`}>
                                     <StatIcon size={20} className={stat.iconColor} />
@@ -104,6 +106,16 @@ export default function DashboardPage() {
                                 <p className="text-slate-500 text-sm font-medium">{stat.title}</p>
                                 <h3 className="text-4xl font-bold text-slate-900 mt-1 tracking-tight">{stat.value}</h3>
                             </div>
+                        </div>
+                    );
+
+                    return stat.path ? (
+                        <Link key={idx} to={stat.path} className="block no-underline">
+                            {CardContent}
+                        </Link>
+                    ) : (
+                        <div key={idx}>
+                            {CardContent}
                         </div>
                     );
                 })}

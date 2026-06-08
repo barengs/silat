@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Sppd;
 use App\Models\IjazahRevision;
 use App\Models\TreasurerChange;
+use App\Models\SchoolTransfer;
 use App\Services\ApprovalService;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -123,6 +124,40 @@ class VerificationController extends Controller
                         'detail' => 'Tipe: ' . ($doc->change_type === 'rekening' ? 'Rekening' : ($doc->change_type === 'bendahara' ? 'Bendahara' : 'Keduanya')),
                         'institution' => $doc->institution?->name ?? '-',
                         'reference' => $doc->reference_number,
+                        'date' => $doc->created_at->toISOString(),
+                        'status' => $doc->status,
+                        'current_step' => $doc->current_step,
+                    ];
+                }
+            }
+        }
+
+        // 4. Fetch School Transfers
+        if ($module === 'all' || $module === 'school_transfer' || $module === 'school-transfers') {
+            $transfers = SchoolTransfer::with(['institution'])
+                ->whereIn('status', ['submitted', 'verifikasi'])
+                ->when($search, function ($query) use ($search) {
+                    $query->where(function($q) use ($search) {
+                        $q->where('transfer_number', 'like', "%{$search}%")
+                          ->orWhere('student_name', 'like', "%{$search}%")
+                          ->orWhere('nisn', 'like', "%{$search}%")
+                          ->orWhereHas('institution', function($qi) use ($search) {
+                              $qi->where('name', 'like', "%{$search}%");
+                          });
+                    });
+                })
+                ->get();
+
+            foreach ($transfers as $doc) {
+                if ($this->approvalService->canApprove($doc, 'school_transfer', $user)) {
+                    $items[] = [
+                        'id' => $doc->id,
+                        'module' => 'school_transfer',
+                        'module_label' => 'Mutasi Siswa',
+                        'title' => 'Mutasi Siswa - ' . $doc->student_name,
+                        'detail' => 'Tujuan: ' . $doc->target_school . ' (Kelas ' . $doc->grade . ')',
+                        'institution' => $doc->institution?->name ?? '-',
+                        'reference' => $doc->transfer_number,
                         'date' => $doc->created_at->toISOString(),
                         'status' => $doc->status,
                         'current_step' => $doc->current_step,

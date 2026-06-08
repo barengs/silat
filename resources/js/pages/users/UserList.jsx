@@ -60,6 +60,31 @@ export default function UserList() {
         }
     };
 
+    // Prefetch master data on hover to reduce wait time on the edit page
+    const prefetchMasterData = () => {
+        queryClient.prefetchQuery({
+            queryKey: ['roles-master'],
+            queryFn: async () => {
+                const res = await axios.get('/roles');
+                return res.data.data.map(r => ({ value: r.name, label: r.name }));
+            },
+            staleTime: 5 * 60 * 1000, // 5 minutes
+        });
+        queryClient.prefetchQuery({
+            queryKey: ['institutions-master'],
+            queryFn: async () => {
+                const res = await axios.get('/institutions?per_page=100');
+                return res.data.data.data.map(i => ({ value: String(i.id), label: i.name }));
+            },
+            staleTime: 5 * 60 * 1000,
+        });
+    };
+
+    // Navigate to edit and pass user data as navigation state for instant populate
+    const handleEdit = (user) => {
+        navigate(`/users/${user.id}/edit`, { state: { user } });
+    };
+
     // Table Columns
     const columns = React.useMemo(() => [
         {
@@ -116,7 +141,8 @@ export default function UserList() {
             cell: ({ row }) => (
                 <div className="flex items-center justify-end gap-2">
                     <button 
-                        onClick={() => navigate(`/users/${row.original.id}/edit`)}
+                        onClick={() => handleEdit(row.original)}
+                        onMouseEnter={prefetchMasterData}
                         className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
                         title="Edit User"
                     >

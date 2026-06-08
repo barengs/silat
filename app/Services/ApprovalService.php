@@ -40,7 +40,7 @@ class ApprovalService
         // If step requires a specific role
         if ($nextStep->role_id_required) {
             $role = Role::find($nextStep->role_id_required);
-            if ($role && ! $user->hasRole($role->name)) {
+            if ($role && ! $user->hasRole('super-admin') && ! $user->hasRole($role->name)) {
                 return false;
             }
         }
@@ -209,6 +209,9 @@ class ApprovalService
                 return 'SPPD ('.($document->document_number ?? 'Draft').')';
             case 'bendahara':
                 return "Perubahan Bendahara (#{$document->reference_number})";
+            case 'school_transfer':
+            case 'school-transfers':
+                return "Pindah Sekolah (#{$document->transfer_number})";
             default:
                 return "Dokumen (#{$document->id})";
         }
@@ -226,6 +229,9 @@ class ApprovalService
                 return "/sppd/{$document->id}";
             case 'bendahara':
                 return "/treasurer/{$document->id}";
+            case 'school_transfer':
+            case 'school-transfers':
+                return "/school-transfers/{$document->id}";
             default:
                 return '/dashboard';
         }

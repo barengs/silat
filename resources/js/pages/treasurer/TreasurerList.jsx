@@ -7,8 +7,8 @@ import SkeletonCard from '@/components/ui/SkeletonCard';
 import { useSelector } from 'react-redux';
 
 export default function TreasurerList() {
-    const { roles } = useSelector(state => state.auth);
-    const isSekolah = roles?.includes('sekolah');
+    const { roles, permissions } = useSelector(state => state.auth);
+    const canCreate = permissions?.includes('treasurer.create') || roles?.includes('super-admin');
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [page, setPage] = useState(1);
@@ -17,7 +17,7 @@ export default function TreasurerList() {
     const { data: responseData, isLoading } = useQuery({
         queryKey: ['treasurer', { search, status: statusFilter, page }],
         queryFn: async () => {
-            const res = await axios.get('/api/treasurer', {
+            const res = await axios.get('/treasurer', {
                 params: {
                     q: search,
                     status: statusFilter,
@@ -69,7 +69,7 @@ export default function TreasurerList() {
                     <h1 className="text-2xl font-bold text-slate-800">Data Pengajuan</h1>
                     <p className="text-sm">Ringkasan pengajuan perubahan bendahara dan rekening sekolah aktif.</p>
                 </div>
-                {isSekolah && (
+                {canCreate && (
                     <Link
                         to="/treasurer/create"
                         className="inline-flex items-center justify-center px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold rounded transition-colors whitespace-nowrap shadow-sm"

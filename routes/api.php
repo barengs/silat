@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\SppdReportController;
 use App\Http\Controllers\Api\TransportTypeController;
 use App\Http\Controllers\Api\SignatureController;
 use App\Http\Controllers\Api\TreasurerChangeController;
+use App\Http\Controllers\Api\SchoolTransferController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\VerificationController;
 use Illuminate\Support\Facades\Route;
@@ -115,10 +116,14 @@ Route::middleware('jwt.auth')->group(function () {
     });
 
     // ── Institutions ────────────────────────────────────────────────────────
+    Route::get('/institutions/template', [InstitutionController::class, 'template']);
+    Route::post('/institutions/import', [InstitutionController::class, 'import']);
     Route::apiResource('institutions', InstitutionController::class);
     Route::get('/institutions/search', [InstitutionController::class, 'search']);
 
     // ── Divisions ───────────────────────────────────────────────────────────
+    Route::get('/divisions/template', [DivisionController::class, 'template']);
+    Route::post('/divisions/import', [DivisionController::class, 'import']);
     Route::apiResource('divisions', DivisionController::class);
 
     // ── System Settings ─────────────────────────────────────────────────────
@@ -153,9 +158,7 @@ Route::middleware('jwt.auth')->group(function () {
     Route::put('/article-categories/{id}', [ArticleCategoryController::class, 'update'])->middleware('permission:article-categories.manage');
     Route::delete('/article-categories/{id}', [ArticleCategoryController::class, 'destroy'])->middleware('permission:article-categories.manage');
 
-    // ── RBAC & Master Data Management ───────────────────────────────────────────────
-    Route::apiResource('institutions', InstitutionController::class);
-    Route::apiResource('divisions', DivisionController::class);
+
 
     Route::prefix('guest-book')->group(function () {
         Route::get('/', [GuestBookController::class, 'index'])->middleware('permission:guest-book.view');
@@ -204,6 +207,8 @@ Route::middleware('jwt.auth')->group(function () {
     Route::prefix('treasurer')->group(function () {
         Route::get('/', [TreasurerChangeController::class, 'index']);
         Route::post('/', [TreasurerChangeController::class, 'store'])->middleware('permission:treasurer.create');
+        // Static routes must be declared BEFORE /{id} wildcard
+        Route::get('/current-info', [TreasurerChangeController::class, 'currentTreasurer']);
         Route::get('/{id}', [TreasurerChangeController::class, 'show']);
         Route::put('/{id}', [TreasurerChangeController::class, 'update'])->middleware('permission:treasurer.edit');
         Route::delete('/{id}', [TreasurerChangeController::class, 'destroy'])->middleware('permission:treasurer.delete');
@@ -212,6 +217,20 @@ Route::middleware('jwt.auth')->group(function () {
         Route::post('/{id}/approve', [TreasurerChangeController::class, 'approve'])->middleware('permission:treasurer.approve');
         Route::post('/{id}/reject', [TreasurerChangeController::class, 'reject'])->middleware('permission:treasurer.reject');
         Route::get('/{id}/pdf', [TreasurerChangeController::class, 'downloadPdf'])->middleware('permission:treasurer.download');
+    });
+
+
+    // ── Pindah Sekolah ──────────────────────────────────────────────────────
+    Route::prefix('school-transfers')->group(function () {
+        Route::get('/', [SchoolTransferController::class, 'index']);
+        Route::post('/', [SchoolTransferController::class, 'store'])->middleware('permission:school-transfers.create');
+        Route::get('/{id}', [SchoolTransferController::class, 'show']);
+        Route::put('/{id}', [SchoolTransferController::class, 'update'])->middleware('permission:school-transfers.edit');
+        Route::delete('/{id}', [SchoolTransferController::class, 'destroy'])->middleware('permission:school-transfers.delete');
+        Route::post('/{id}/submit', [SchoolTransferController::class, 'submit'])->middleware('permission:school-transfers.submit');
+        Route::post('/{id}/approve', [SchoolTransferController::class, 'approve'])->middleware('permission:school-transfers.approve');
+        Route::post('/{id}/reject', [SchoolTransferController::class, 'reject'])->middleware('permission:school-transfers.reject');
+        Route::get('/{id}/pdf', [SchoolTransferController::class, 'downloadPdf'])->middleware('permission:school-transfers.print');
     });
 
     // ── Portal Berita (CMS — authenticated) ────────────────────────────────

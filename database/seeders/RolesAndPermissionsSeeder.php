@@ -70,6 +70,12 @@ class RolesAndPermissionsSeeder extends Seeder
 
             // Verifikasi Dokumen
             'verifikasi.view',
+
+            // School Transfer
+            'school-transfers.view-own', 'school-transfers.view-all',
+            'school-transfers.create', 'school-transfers.edit', 'school-transfers.delete',
+            'school-transfers.submit', 'school-transfers.verify', 'school-transfers.approve', 'school-transfers.reject',
+            'school-transfers.print',
         ];
 
         foreach ($permissions as $permission) {
@@ -97,6 +103,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 'treasurer.view-all', 'treasurer.verify', 'treasurer.reject',
                 'reports.sppd', 'reports.ijazah', 'reports.treasurer',
                 'verifikasi.view',
+                'school-transfers.view-all', 'school-transfers.verify', 'school-transfers.reject',
             ]);
 
         // 4. Approver (Kepala Bidang / Sekretaris / Kepala Dinas)
@@ -110,6 +117,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 'reports.sppd', 'reports.ijazah', 'reports.treasurer',
                 'signatures.view', 'signatures.upload',
                 'verifikasi.view',
+                'school-transfers.view-all', 'school-transfers.approve', 'school-transfers.reject', 'school-transfers.print',
             ]);
 
         // 4a. Kabid (Kepala Bidang)
@@ -121,6 +129,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 'treasurer.view-all', 'treasurer.approve', 'treasurer.reject',
                 'reports.sppd', 'reports.ijazah', 'reports.treasurer',
                 'verifikasi.view',
+                'school-transfers.view-all', 'school-transfers.approve', 'school-transfers.reject',
             ]);
 
         // 4b. Kadis (Kepala Dinas)
@@ -134,6 +143,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 'reports.sppd', 'reports.ijazah', 'reports.treasurer',
                 'signatures.view', 'signatures.upload',
                 'verifikasi.view',
+                'school-transfers.view-all', 'school-transfers.approve', 'school-transfers.reject', 'school-transfers.print',
             ]);
 
         // 5. Humas / Pengelola Konten
@@ -153,6 +163,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 'ijazah.view-own', 'ijazah.create', 'ijazah.edit', 'ijazah.submit',
                 'treasurer.view-own', 'treasurer.create', 'treasurer.edit',
                 'treasurer.submit', 'treasurer.download',
+                'school-transfers.view-own', 'school-transfers.create', 'school-transfers.edit', 'school-transfers.submit', 'school-transfers.print',
             ]);
 
         // 7. Kepala Sekolah — school-level approval before forwarding to dinas
@@ -162,6 +173,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 'sppd.view-own', 'sppd.approve',
                 'ijazah.view-own', 'ijazah.approve',
                 'treasurer.view-own', 'treasurer.approve',
+                'school-transfers.view-own', 'school-transfers.approve', 'school-transfers.reject',
             ]);
 
         // 8. Admin Dinas — user and institution management (no super admin level)

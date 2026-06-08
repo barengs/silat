@@ -23,7 +23,7 @@ export default function IjazahShow() {
     const { id } = useParams();
     const navigate = useNavigate();
     const queryClient = useQueryClient();
-    const { user } = useSelector(state => state.auth);
+    const { user, roles, permissions } = useSelector(state => state.auth);
 
     const [isActionModalOpen, setIsActionModalOpen] = useState(false);
     const [actionType, setActionType] = useState('approve'); // 'approve', 'reject'
@@ -32,7 +32,7 @@ export default function IjazahShow() {
     const { data: ijazahRes, isLoading } = useQuery({
         queryKey: ['ijazah', id],
         queryFn: async () => {
-            const res = await axios.get(`/api/ijazah-revisions/${id}`);
+            const res = await axios.get(`/ijazah-revisions/${id}`);
             return res.data;
         }
     });
@@ -42,7 +42,7 @@ export default function IjazahShow() {
 
     const actionMutation = useMutation({
         mutationFn: async ({ action, payload }) => {
-            return await axios.post(`/api/ijazah-revisions/${id}/${action}`, payload);
+            return await axios.post(`/ijazah-revisions/${id}/${action}`, payload);
         },
         onSuccess: (res) => {
             toast.success(res.data.message);
@@ -57,7 +57,7 @@ export default function IjazahShow() {
 
     const markStatusMutation = useMutation({
         mutationFn: async (action) => {
-            return await axios.post(`/api/ijazah-revisions/${id}/${action}`);
+            return await axios.post(`/ijazah-revisions/${id}/${action}`);
         },
         onSuccess: (res) => {
             toast.success(res.data.message);
@@ -348,7 +348,7 @@ export default function IjazahShow() {
                     </div>
 
                     {/* Tindakan Verifikator */}
-                    {approvalMeta?.can_approve && ijazah.status === 'verifikasi' && (
+                    {approvalMeta?.can_approve && ['submitted', 'verifikasi'].includes(ijazah.status) && (
                         <div className="bg-white border border-slate-200 rounded shadow-sm p-6">
                             <h3 className="font-bold text-slate-800 text-sm mb-4">Tindakan Verifikator</h3>
                             <div className="space-y-3">
@@ -371,7 +371,8 @@ export default function IjazahShow() {
                     )}
 
                     {/* Admin Actions (Ready for pickup / Complete) */}
-                    {user?.roles?.includes('admin') && (
+                    {/* Visible to anyone with ijazah.notify-pickup permission (approver, kadis) or super-admin */}
+                    {(permissions?.includes('ijazah.notify-pickup') || roles?.includes('super-admin')) && (
                         <>
                             {ijazah.status === 'approved' && (
                                 <div className="bg-emerald-50 border border-emerald-200 rounded shadow-sm p-6 text-center">

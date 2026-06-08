@@ -27,7 +27,7 @@ export default function SignatureVault() {
     const { data: signers, isLoading } = useQuery({
         queryKey: ['signatures'],
         queryFn: async () => {
-            const res = await axios.get('/api/signatures');
+            const res = await axios.get('/signatures');
             return res.data.data;
         },
     });
@@ -37,7 +37,7 @@ export default function SignatureVault() {
         mutationFn: async ({ userId, file }) => {
             const formData = new FormData();
             formData.append('signature', file);
-            return await axios.post(`/api/signatures/${userId}/upload`, formData, {
+            return await axios.post(`/signatures/${userId}/upload`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
         },
@@ -54,7 +54,7 @@ export default function SignatureVault() {
     // Delete mutation
     const deleteMutation = useMutation({
         mutationFn: async (userId) => {
-            return await axios.delete(`/api/signatures/${userId}`);
+            return await axios.delete(`/signatures/${userId}`);
         },
         onSuccess: () => {
             toast.success('Tanda tangan berhasil dihapus.');

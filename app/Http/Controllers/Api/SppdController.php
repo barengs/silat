@@ -62,10 +62,26 @@ class SppdController extends Controller
         }
 
         if ($status && $status !== 'all') {
-            $query->where('status', $status);
+            if ($status === 'monitoring') {
+                $query->whereIn('status', ['reported', 'closed']);
+            } else {
+                $query->where('status', $status);
+            }
         }
 
-        $sppds = $query->latest()->paginate(10);
+        if ($search = $request->query('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('document_number', 'like', "%{$search}%")
+                  ->orWhere('purpose', 'like', "%{$search}%")
+                  ->orWhere('destination', 'like', "%{$search}%")
+                  ->orWhereHas('user', function ($qu) use ($search) {
+                      $qu->where('name', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        $perPage = $request->query('per_page', 10);
+        $sppds = $query->latest()->paginate($perPage);
 
         return response()->json($sppds);
     }
@@ -76,64 +92,58 @@ class SppdController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'purpose' => 'required|string',
-            'destination' => 'required|string',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'transport_type_id' => 'required|exists:transport_types,id',
-            'budget_source' => 'required|string',
-            'members' => 'nullable|array',
-            'members.*.user_id' => 'required|exists:users,id',
-            'members.*.role_in_trip' => 'nullable|string',
+            'purpose'                => 'required|string',
+            'destination'            => 'required|string',
+            'start_date'             => 'required|date',
+            'end_date'               => 'required|date|after_or_equal:start_date',
+            'transport_type_id'      => 'required|exists:transport_types,id',
+            'budget_source'          => 'nullable|string',
+            'members'                => 'nullable|array',
+            'members.*.name'         => 'required|string|max:255',
+            'members.*.nip'          => 'nullable|string|max:50',
+            'members.*.role_in_trip' => 'nullable|string|max:255',
         ]);
 
         $user = $request->user();
 
-        // 1. Check Unreported SPPD
+        // Deteksi jenis pengaju berdasarkan role/profil user:
+        // Jika user berasal dari sekolah (punya institution_id & bukan staff dinas) → alur sekolah
+        // Jika user adalah staff/operator dinas → langsung ke Kabid
+        $isDinasStaff = $user->hasAnyRole(['super-admin', 'admin', 'admin-disdik', 'operator-dinas', 'kabid'])
+            || ($user->division_id && !$user->institution_id);
+        $submitterType = $isDinasStaff ? 'dinas' : 'sekolah';
+
+        // Check Unreported SPPD
         if (Sppd::hasUnreportedSppd($user->id)) {
             return response()->json(['message' => 'Anda masih memiliki laporan SPPD (LPP) yang belum diselesaikan.'], 403);
         }
 
-        // 2. Conflict Check (Requester + Members)
-        $userIds = [$user->id];
-        if (! empty($validated['members'])) {
-            $userIds = array_merge($userIds, array_column($validated['members'], 'user_id'));
-        }
-
-        $conflicts = $this->conflictService->getConflictingUsers($userIds, $validated['start_date'], $validated['end_date'], null);
-        if (! empty($conflicts)) {
-            // Find names
-            $conflictNames = User::whereIn('id', $conflicts)->pluck('name')->implode(', ');
-
-            return response()->json([
-                'message' => "Terjadi bentrok jadwal perjalanan dinas untuk pegawai berikut: {$conflictNames}",
-            ], 422);
-        }
-
         DB::beginTransaction();
         try {
-            // Generate temporary document number if needed, or leave null for draft
             $sppd = Sppd::create([
-                'user_id' => $user->id,
-                'institution_id' => $user->institution_id, // Inherit from user
-                'destination' => $validated['destination'],
-                'purpose' => $validated['purpose'],
-                'start_date' => $validated['start_date'],
-                'end_date' => $validated['end_date'],
+                'user_id'           => $user->id,
+                'institution_id'    => $user->institution_id,
+                'submitter_type'    => $submitterType,
+                'destination'       => $validated['destination'],
+                'purpose'           => $validated['purpose'],
+                'start_date'        => $validated['start_date'],
+                'end_date'          => $validated['end_date'],
                 'transport_type_id' => $validated['transport_type_id'],
-                'budget_source' => $validated['budget_source'],
-                'status' => 'draft',
-                'current_step' => 0,
+                'budget_source'     => $validated['budget_source'] ?? null,
+                'status'            => 'draft',
+                'current_step'      => $submitterType === 'dinas' ? 1 : 0,
             ]);
 
             if (! empty($validated['members'])) {
                 $membersData = array_map(function ($m) use ($sppd) {
                     return [
-                        'sppd_id' => $sppd->id,
-                        'user_id' => $m['user_id'],
+                        'sppd_id'      => $sppd->id,
+                        'user_id'      => null,
+                        'member_name'  => $m['name'],
+                        'member_nip'   => $m['nip'] ?? null,
                         'role_in_trip' => $m['role_in_trip'] ?? null,
-                        'created_at' => now(),
-                        'updated_at' => now(),
+                        'created_at'   => now(),
+                        'updated_at'   => now(),
                     ];
                 }, $validated['members']);
                 SppdMember::insert($membersData);
@@ -169,10 +179,22 @@ class SppdController extends Controller
         // Access check could be added here
 
         $approvalFlows = ApprovalFlow::getFlowForModule('SPPD');
+        if ($sppd->submitter_type === 'dinas') {
+            $approvalFlows = $approvalFlows->filter(function($flow) {
+                return $flow->step_order > 1;
+            })->values();
+        }
+
+        $nextStep = $this->approvalService->getNextStep('sppd', $sppd->current_step ?? 0);
+        $canApprove = $this->approvalService->canApprove($sppd, 'sppd', $user);
 
         return response()->json([
             'sppd' => $sppd,
             'approval_flows' => $approvalFlows,
+            'approval_meta' => [
+                'next_step' => $nextStep,
+                'can_approve' => $canApprove,
+            ],
         ]);
     }
 
@@ -187,14 +209,29 @@ class SppdController extends Controller
             return response()->json(['message' => 'Hanya draft SPPD yang bisa di-submit.'], 422);
         }
 
+        // Jika pengaju dari dinas, lewati step verifikasi (step 1)
+        // dan langsung masuk ke step persetujuan Kabid
+        if ($sppd->submitter_type === 'dinas') {
+            $skipToStep = \App\Models\ApprovalFlow::where('module_name', 'sppd')
+                ->where('is_active', true)
+                ->where('step_order', '>', 1)
+                ->orderBy('step_order', 'asc')
+                ->first();
+            // Set current_step ke step sebelum step Kabid agar getNextStep() mengembalikan step Kabid
+            $sppd->current_step = $skipToStep ? ($skipToStep->step_order - 1) : 0;
+        }
+
         $sppd->status = 'submitted';
-        // Give it a temp number or official number depending on rule. We leave it null or generate
         $sppd->save();
 
-        // Send notification to the first approver
+        // Kirim notifikasi ke approver yang sesuai jalur
         $this->approvalService->notifyNextApprovers($sppd, 'sppd');
 
-        return response()->json(['message' => 'SPPD berhasil diajukan untuk verifikasi.']);
+        $message = $sppd->submitter_type === 'dinas'
+            ? 'SPPD berhasil diajukan dan langsung diteruskan ke Kepala Bidang untuk persetujuan.'
+            : 'SPPD berhasil diajukan untuk verifikasi admin.';
+
+        return response()->json(['message' => $message]);
     }
 
     /**
@@ -282,6 +319,7 @@ class SppdController extends Controller
             'institution',
             'transportType',
             'members.user',
+            'approvals.user', // ensure approvals and their users are loaded
         ])->findOrFail($id);
 
         // Only approved or active SPPD can be downloaded
@@ -289,7 +327,18 @@ class SppdController extends Controller
             return response()->json(['message' => 'SPPD belum disetujui, tidak dapat mengunduh PDF.'], 403);
         }
 
-        $pdf = Pdf::loadView('pdf.sppd', compact('sppd'));
+        // Get the Kabid signer
+        $kabidApproval = $sppd->approvals->filter(function($appr) {
+            return $appr->user && $appr->user->hasRole('kabid') && $appr->status === 'approved';
+        })->first();
+
+        $signer = $kabidApproval ? $kabidApproval->user : \App\Models\User::role('kabid')->where('is_active', true)->first();
+
+        $signatureImagePath = $signer && $signer->signature_image_path
+            ? storage_path('app/public/' . $signer->signature_image_path)
+            : null;
+
+        $pdf = Pdf::loadView('pdf.sppd', compact('sppd', 'signer', 'signatureImagePath'));
 
         return $pdf->download('SPPD_'.$sppd->user->name.'.pdf');
     }

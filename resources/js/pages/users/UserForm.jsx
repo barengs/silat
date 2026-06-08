@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import Select from 'react-select';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import axios from '@/bootstrap';
 import { toast } from 'sonner';
-import { Save, ArrowLeft, Loader2, User, Shield } from 'lucide-react';
+import { Save, ArrowLeft, User, Shield } from 'lucide-react';
 
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -29,8 +29,11 @@ export default function UserForm() {
     const { id } = useParams();
     const isEditMode = !!id;
     const navigate = useNavigate();
+    const location = useLocation();
     const queryClient = useQueryClient();
-    const [isLoadingInit, setIsLoadingInit] = useState(isEditMode);
+
+    // Try to get user data passed via navigation state (instant — no loading needed)
+    const navUser = location.state?.user;
 
     const {
         register,
@@ -51,46 +54,57 @@ export default function UserForm() {
         },
     });
 
-    // Fetch master data: Roles
+    // Fetch master data: Roles (will be instant if prefetched on hover)
     const { data: rolesData } = useQuery({
         queryKey: ['roles-master'],
         queryFn: async () => {
             const res = await axios.get('/roles');
             return res.data.data.map(r => ({ value: r.name, label: r.name }));
-        }
+        },
+        staleTime: 5 * 60 * 1000,
     });
 
-    // Fetch master data: Institutions
+    // Fetch master data: Institutions (will be instant if prefetched on hover)
     const { data: institutionsData } = useQuery({
         queryKey: ['institutions-master'],
         queryFn: async () => {
-            // Simplified fetch, ideally we have a specific endpoint or infinite scroll for many schools
             const res = await axios.get('/institutions?per_page=100');
             return res.data.data.data.map(i => ({ value: String(i.id), label: i.name }));
-        }
+        },
+        staleTime: 5 * 60 * 1000,
     });
 
-    // Fetch user if edit mode
+    // Populate form as soon as master data is ready
+    // If navUser exists (clicked from list), use it immediately — no extra API call needed
+    // If opened directly via URL, fetch the user data as fallback
     useEffect(() => {
-        if (isEditMode) {
-            axios.get(`/users/${id}`).then((res) => {
-                const user = res.data.data;
-                reset({
-                    name: user.name,
-                    nip: user.nip,
-                    email: user.email,
-                    institution_id: user.institution_id ? String(user.institution_id) : '',
-                    division_id: user.division_id ? String(user.division_id) : '',
-                    roles: user.roles.map(r => r.name),
-                    is_active: user.is_active,
-                });
-                setIsLoadingInit(false);
-            }).catch(() => {
-                toast.error('Gagal memuat data pengguna');
-                navigate('/users');
+        if (!isEditMode) return;
+
+        const populateForm = (user) => {
+            reset({
+                name: user.name,
+                nip: user.nip,
+                email: user.email,
+                institution_id: user.institution_id ? String(user.institution_id) : '',
+                division_id: user.division_id ? String(user.division_id) : '',
+                roles: user.roles?.map(r => r.name) ?? [],
+                is_active: user.is_active,
             });
+        };
+
+        if (navUser && rolesData && institutionsData) {
+            // Instant path: data came from navigation state
+            populateForm(navUser);
+        } else if (!navUser && rolesData && institutionsData) {
+            // Fallback path: opened directly via URL, fetch from API
+            axios.get(`/users/${id}`)
+                .then((res) => populateForm(res.data.data))
+                .catch(() => {
+                    toast.error('Gagal memuat data pengguna');
+                    navigate('/users');
+                });
         }
-    }, [id, isEditMode, reset, navigate]);
+    }, [id, isEditMode, navUser, rolesData, institutionsData, reset, navigate]);
 
     const mutation = useMutation({
         mutationFn: async (data) => {
@@ -120,13 +134,6 @@ export default function UserForm() {
         mutation.mutate(data);
     };
 
-    if (isLoadingInit) {
-        return (
-            <div className="flex justify-center items-center h-64">
-                <Loader2 className="animate-spin text-teal-600" size={32} />
-            </div>
-        );
-    }
 
     return (
         <div className="max-w-4xl mx-auto space-y-6">

@@ -30,7 +30,7 @@ export default function DocumentVerify() {
         setSearched(true);
 
         try {
-            const res = await axios.get(`/api/verify/doc/${tokenToVerify.trim()}`);
+            const res = await axios.get(`/verify/doc/${tokenToVerify.trim()}`);
             setResult(res.data);
         } catch (err) {
             if (err.response?.status === 404) {

@@ -16,11 +16,12 @@ class SignatureController extends Controller
      */
     public function index(): JsonResponse
     {
-        $signerRoles = ['kadis', 'sekretaris', 'kabid', 'super-admin'];
-
-        $signers = User::where('is_active', '=', true)
-            ->whereHas('roles', function ($q) use ($signerRoles) {
-                $q->whereIn('name', $signerRoles);
+        $signers = User::query()->where('is_active', true)
+            ->where(function ($query) {
+                $query->permission('signatures.upload')
+                    ->orWhereHas('roles', function ($q) {
+                        $q->where('name', 'super-admin');
+                    });
             })
             ->with('roles:id,name')
             ->select('id', 'name', 'nip', 'email', 'signature_image_path', 'photo_path')
@@ -105,7 +106,7 @@ class SignatureController extends Controller
      */
     public function getActiveSigner(): JsonResponse
     {
-        $signer = User::where('is_active', '=', true)
+        $signer = User::query()->where('is_active', true)
             ->whereNotNull('signature_image_path')
             ->whereHas('roles', function ($q) {
                 $q->where('name', 'kadis');

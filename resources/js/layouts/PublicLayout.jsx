@@ -44,10 +44,10 @@ const PublicLayout = () => {
                         />
                         <div className="flex flex-col">
                             <span className="font-bold text-slate-900 text-base leading-tight tracking-wide group-hover:text-blue-900 transition-colors">
-                                CABANG DINAS PENDIDIKAN
+                                DINAS PENDIDIKAN DAN KEBUDAYAAN
                             </span>
                             <span className="text-xs text-slate-500 font-medium leading-normal">
-                                Wilayah Kabupaten Pamekasan
+                                Kabupaten Pamekasan
                             </span>
                         </div>
                     </Link>
@@ -56,11 +56,10 @@ const PublicLayout = () => {
                     <nav className="hidden md:flex items-center gap-8">
                         <Link
                             to="/"
-                            className={`font-semibold text-sm transition-colors relative py-2 ${
-                                isActive('/')
-                                    ? 'text-blue-600'
-                                    : 'text-slate-600 hover:text-slate-900'
-                            }`}
+                            className={`font-semibold text-sm transition-colors relative py-2 ${isActive('/')
+                                ? 'text-blue-600'
+                                : 'text-slate-600 hover:text-slate-900'
+                                }`}
                         >
                             Beranda
                             {isActive('/') && (
@@ -69,11 +68,10 @@ const PublicLayout = () => {
                         </Link>
                         <Link
                             to="/news"
-                            className={`font-semibold text-sm transition-colors relative py-2 ${
-                                isActive('/news')
-                                    ? 'text-blue-600'
-                                    : 'text-slate-600 hover:text-slate-900'
-                            }`}
+                            className={`font-semibold text-sm transition-colors relative py-2 ${isActive('/news')
+                                ? 'text-blue-600'
+                                : 'text-slate-600 hover:text-slate-900'
+                                }`}
                         >
                             Portal Berita
                             {isActive('/news') && (
@@ -82,11 +80,10 @@ const PublicLayout = () => {
                         </Link>
                         <Link
                             to="/track-ijazah"
-                            className={`font-semibold text-sm transition-colors relative py-2 ${
-                                isActive('/track-ijazah')
-                                    ? 'text-blue-600'
-                                    : 'text-slate-600 hover:text-slate-900'
-                            }`}
+                            className={`font-semibold text-sm transition-colors relative py-2 ${isActive('/track-ijazah')
+                                ? 'text-blue-600'
+                                : 'text-slate-600 hover:text-slate-900'
+                                }`}
                         >
                             Lacak Ijazah
                             {isActive('/track-ijazah') && (
@@ -137,10 +134,10 @@ const PublicLayout = () => {
                                 />
                                 <div className="flex flex-col">
                                     <span className="font-bold text-white text-sm tracking-wider">
-                                        CABANG DINAS PENDIDIKAN
+                                        DINAS PENDIDIKAN DAN KEBUDAYAAN
                                     </span>
                                     <span className="text-xs text-slate-500 font-semibold">
-                                        Wilayah Kabupaten Pamekasan
+                                        Kabupaten Pamekasan
                                     </span>
                                 </div>
                             </div>
@@ -206,8 +203,8 @@ const PublicLayout = () => {
                     </div>
 
                     <div className="border-t border-slate-800 mt-12 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs">
-                        <p>&copy; {new Date().getFullYear()} Cabang Dinas Pendidikan Wilayah Pamekasan. Hak Cipta Dilindungi.</p>
-                        <p className="text-slate-500">SIMTAG Disdik Pamekasan v1.0</p>
+                        <p>&copy; {new Date().getFullYear()} Dinas Pendidikan dan Kebudayaan Kabupaten Pamekasan. Hak Cipta Dilindungi.</p>
+                        <p className="text-slate-500">SILAT Disdikbud Pamekasan v1.0</p>
                     </div>
                 </div>
             </footer>

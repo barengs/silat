@@ -5,7 +5,7 @@ import {
     getCoreRowModel,
     getPaginationRowModel,
 } from '@tanstack/react-table';
-import { Plus, Users, Building2, Network, Download, BarChart2 } from 'lucide-react';
+import { Plus, Users, Building2, Network, Download, BarChart2, Calendar } from 'lucide-react';
 import axios from '@/bootstrap';
 import { useNavigate } from 'react-router-dom';
 import DataTable from '@/components/DataTable/DataTable';
@@ -55,12 +55,12 @@ export default function GuestBookList() {
             cell: ({ getValue }) => <span className="font-semibold text-slate-900">{getValue()}</span>
         },
         {
-            header: 'ASAL INSTANSI',
+            header: 'ASAL',
             accessorKey: 'agency.name',
             cell: ({ row }) => <span className="text-slate-600">{row.original.agency?.name || '-'}</span>
         },
         {
-            header: 'TUJUAN DIVISI',
+            header: 'TUJUAN',
             accessorKey: 'target_division.name',
             cell: ({ row }) => <span className="text-slate-600">{row.original.target_division?.name || '-'}</span>
         },
@@ -115,6 +115,47 @@ export default function GuestBookList() {
         }
     };
 
+    const dateFilters = (
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider shrink-0">Dari:</span>
+                <div className="relative w-full sm:w-44">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Calendar size={16} className="text-slate-400" />
+                    </div>
+                    <input
+                        type="date"
+                        value={startDate}
+                        onChange={(e) => { setStartDate(e.target.value); setPageIndex(0); }}
+                        className="block w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-md focus:ring-teal-500 focus:border-teal-500 bg-white shadow-sm text-slate-600 focus:outline-none"
+                    />
+                </div>
+            </div>
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider shrink-0">Sampai:</span>
+                <div className="relative w-full sm:w-44">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Calendar size={16} className="text-slate-400" />
+                    </div>
+                    <input
+                        type="date"
+                        value={endDate}
+                        onChange={(e) => { setEndDate(e.target.value); setPageIndex(0); }}
+                        className="block w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-md focus:ring-teal-500 focus:border-teal-500 bg-white shadow-sm text-slate-600 focus:outline-none"
+                    />
+                </div>
+            </div>
+            {(startDate || endDate) && (
+                <button
+                    className="text-xs font-semibold text-rose-600 hover:text-rose-700 transition-colors self-center sm:self-auto px-2"
+                    onClick={() => { setStartDate(''); setEndDate(''); setPageIndex(0); }}
+                >
+                    Reset Filter
+                </button>
+            )}
+        </div>
+    );
+
     return (
         <div className="space-y-6">
             {/* Header */}
@@ -124,7 +165,7 @@ export default function GuestBookList() {
                     <p className="text-slate-500 text-sm">Kelola daftar kunjungan dan tamu instansi.</p>
                 </div>
                 <div className="flex gap-2 w-full sm:w-auto">
-                    <Button 
+                    <Button
                         onClick={() => navigate('/guest-book/report')}
                         icon={BarChart2}
                         variant="outline"
@@ -132,7 +173,7 @@ export default function GuestBookList() {
                     >
                         Grafik Laporan
                     </Button>
-                    <Button 
+                    <Button
                         onClick={handleExport}
                         icon={Download}
                         variant="outline"
@@ -140,7 +181,7 @@ export default function GuestBookList() {
                     >
                         Export Excel
                     </Button>
-                    <Button 
+                    <Button
                         onClick={() => setIsCheckinOpen(true)}
                         icon={Plus}
                         className="bg-[#0F172A] hover:bg-slate-800"
@@ -150,36 +191,7 @@ export default function GuestBookList() {
                 </div>
             </div>
 
-            {/* Date Filters */}
-            <div className="bg-white border border-slate-200 rounded p-4 flex flex-col sm:flex-row gap-4 items-end shadow-sm">
-                <div className="w-full sm:w-auto">
-                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Mulai Tanggal</label>
-                    <input 
-                        type="date" 
-                        value={startDate}
-                        onChange={(e) => { setStartDate(e.target.value); setPageIndex(0); }}
-                        className="w-full sm:w-48 px-3 py-2 border border-slate-200 rounded text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
-                    />
-                </div>
-                <div className="w-full sm:w-auto">
-                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Sampai Tanggal</label>
-                    <input 
-                        type="date" 
-                        value={endDate}
-                        onChange={(e) => { setEndDate(e.target.value); setPageIndex(0); }}
-                        className="w-full sm:w-48 px-3 py-2 border border-slate-200 rounded text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
-                    />
-                </div>
-                {(startDate || endDate) && (
-                    <Button 
-                        variant="ghost" 
-                        className="text-slate-500 hover:text-slate-700 h-9 px-3"
-                        onClick={() => { setStartDate(''); setEndDate(''); setPageIndex(0); }}
-                    >
-                        Reset Filter
-                    </Button>
-                )}
-            </div>
+
 
             {/* Dashboard Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -228,15 +240,16 @@ export default function GuestBookList() {
                         pageSize={pageSize}
                         onPageSizeChange={(val) => { setPageSize(val); setPageIndex(0); }}
                         searchPlaceholder="Cari nama tamu atau instansi..."
+                        filters={dateFilters}
                         hideTitle
                     />
                 </div>
             </div>
 
             {/* Check-in Fullscreen Modal */}
-            <CheckinModal 
-                isOpen={isCheckinOpen} 
-                onClose={() => setIsCheckinOpen(false)} 
+            <CheckinModal
+                isOpen={isCheckinOpen}
+                onClose={() => setIsCheckinOpen(false)}
             />
         </div>
     );

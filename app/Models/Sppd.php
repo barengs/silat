@@ -17,6 +17,7 @@ class Sppd extends Model
         'document_number',
         'user_id',
         'institution_id',
+        'submitter_type',
         'destination',
         'purpose',
         'base_letter',

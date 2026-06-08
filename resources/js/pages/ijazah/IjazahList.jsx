@@ -13,8 +13,8 @@ import {
 import { useSelector } from 'react-redux';
 
 export default function IjazahList() {
-    const { user, roles } = useSelector(state => state.auth);
-    const isSekolah = roles?.includes('sekolah');
+    const { user, roles, permissions } = useSelector(state => state.auth);
+    const canCreate = permissions?.includes('ijazah.create') || roles?.includes('super-admin');
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [page, setPage] = useState(1);
@@ -23,7 +23,7 @@ export default function IjazahList() {
     const { data: ijazahs, isLoading } = useQuery({
         queryKey: ['ijazah', { search, status: statusFilter, page }],
         queryFn: async () => {
-            const res = await axios.get('/api/ijazah-revisions', {
+            const res = await axios.get('/ijazah-revisions', {
                 params: {
                     q: search,
                     status: statusFilter,
@@ -73,7 +73,7 @@ export default function IjazahList() {
                         Lacak proses revisi ijazah, perbaikan data, atau penggantian ijazah hilang/rusak.
                     </p>
                 </div>
-                {isSekolah && (
+                {canCreate && (
                     <Link
                         to="/ijazah/create"
                         className="inline-flex items-center justify-center px-4 py-2.5 bg-[#0f172a] hover:bg-slate-800 text-white text-sm font-medium rounded transition-colors whitespace-nowrap"

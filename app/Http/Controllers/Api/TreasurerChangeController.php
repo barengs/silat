@@ -28,8 +28,8 @@ class TreasurerChangeController extends Controller
         $user = $request->user();
         $query = TreasurerChange::with(['institution', 'submittedBy']);
 
-        // School users can only see their own institution's requests
-        if ($user->hasRole('sekolah')) {
+        // Users without view-all permission can only see their own institution's requests
+        if (! $user->hasRole('super-admin') && ! $user->hasPermissionTo('treasurer.view-all')) {
             $query->where('institution_id', $user->institution_id);
         }
 
@@ -52,27 +52,37 @@ class TreasurerChangeController extends Controller
 
     /**
      * Get details of the current treasurer for autofill in new requests.
+     * Superadmin or users without an institution will receive empty defaults.
      */
     public function currentTreasurer(Request $request)
     {
         $user = $request->user();
-        if (! $user->institution_id) {
-            return response()->json(['message' => 'Akun Anda belum ditautkan ke instansi sekolah mana pun.'], 400);
+        $institutionId = $request->query('institution_id') ?: $user->institution_id;
+
+        // If no institution_id was found or provided, return empty defaults
+        if (! $institutionId) {
+            return response()->json([
+                'treasurer_name' => '',
+                'bank_account'   => '',
+                'npwp'           => '',
+                'bank_name'      => 'Bank Jatim',
+                'bank_branch'    => '',
+            ]);
         }
 
         // Get the latest completed change request
-        $latest = TreasurerChange::where('institution_id', $user->institution_id)
+        $latest = TreasurerChange::query()->where('institution_id', $institutionId)
             ->where('status', 'completed')
             ->latest('approved_at')
             ->first();
 
         // Return current values or defaults if none exist yet
         return response()->json([
-            'treasurer_name' => $latest ? $latest->new_treasurer_name : 'Budi Santoso, S.Pd',
-            'bank_account' => $latest ? $latest->new_bank_account : '0012983745',
-            'npwp' => $latest ? $latest->new_npwp : '01.234.567.8-901.000',
-            'bank_name' => $latest ? $latest->bank_name : 'Bank Jatim',
-            'bank_branch' => $latest ? $latest->bank_branch : 'Cabang Pamekasan',
+            'treasurer_name' => $latest ? $latest->new_treasurer_name : '',
+            'bank_account'   => $latest ? $latest->new_bank_account : '',
+            'npwp'           => $latest ? $latest->new_npwp : '',
+            'bank_name'      => $latest ? $latest->bank_name : 'Bank Jatim',
+            'bank_branch'    => $latest ? $latest->bank_branch : '',
         ]);
     }
 
@@ -83,12 +93,9 @@ class TreasurerChangeController extends Controller
     {
         $user = $request->user();
 
-        if (! $user->hasRole('sekolah')) {
-            return response()->json(['message' => 'Hanya pihak sekolah yang dapat mengajukan perubahan bendahara/rekening.'], 403);
-        }
-
-        if (! $user->institution_id) {
-            return response()->json(['message' => 'Akun Anda belum ditautkan ke instansi sekolah mana pun.'], 400);
+        // For superadmin/dinas (without institution_id), they must provide an institution_id
+        if (! $user->institution_id && ! $request->has('institution_id')) {
+            return response()->json(['message' => 'Pilih sekolah terlebih dahulu.'], 400);
         }
 
         $validated = $request->validate([
@@ -96,7 +103,7 @@ class TreasurerChangeController extends Controller
             'old_treasurer_name' => 'required|string|max:255',
             'old_bank_account' => 'required|string|max:50',
             'old_npwp' => 'required|string|max:50',
-            'new_treasurer_name' => 'required_if:change_type,bendahara,both|nullable|string|max:255',
+            'new_treasurer_name' => 'required|string|max:255',
             'new_bank_account' => 'required_if:change_type,rekening,both|nullable|string|max:50',
             'new_npwp' => 'required_if:change_type,bendahara,both|nullable|string|max:50',
             'bank_name' => 'required|string|max:100',
@@ -111,7 +118,7 @@ class TreasurerChangeController extends Controller
 
             $change = new TreasurerChange;
             $change->reference_number = TreasurerChange::generateReferenceNumber();
-            $change->institution_id = $user->institution_id;
+            $change->institution_id = $user->institution_id ?: $request->input('institution_id');
             $change->change_type = $validated['change_type'];
 
             // Set old values
@@ -120,9 +127,7 @@ class TreasurerChangeController extends Controller
             $change->old_npwp = $validated['old_npwp'];
 
             // Set new values or copy old ones if unchanged
-            $change->new_treasurer_name = $validated['change_type'] === 'rekening'
-                ? $validated['old_treasurer_name']
-                : $validated['new_treasurer_name'];
+            $change->new_treasurer_name = $validated['new_treasurer_name'];
             $change->new_bank_account = $validated['change_type'] === 'bendahara'
                 ? $validated['old_bank_account']
                 : $validated['new_bank_account'];
@@ -179,7 +184,7 @@ class TreasurerChangeController extends Controller
             'approvals.step',
         ])->findOrFail($id);
 
-        if ($user->hasRole('sekolah') && $change->institution_id !== $user->institution_id) {
+        if ($user->isSekolah() && $change->institution_id !== $user->institution_id) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -203,7 +208,7 @@ class TreasurerChangeController extends Controller
         $user = $request->user();
         $change = TreasurerChange::findOrFail($id);
 
-        if ($change->submitted_by !== $user->id) {
+        if (! $user->hasRole('super-admin') && $change->submitted_by !== $user->id) {
             return response()->json(['message' => 'Hanya pembuat pengajuan yang dapat mengubah draft.'], 403);
         }
 
@@ -216,7 +221,7 @@ class TreasurerChangeController extends Controller
             'old_treasurer_name' => 'required|string|max:255',
             'old_bank_account' => 'required|string|max:50',
             'old_npwp' => 'required|string|max:50',
-            'new_treasurer_name' => 'required_if:change_type,bendahara,both|nullable|string|max:255',
+            'new_treasurer_name' => 'required|string|max:255',
             'new_bank_account' => 'required_if:change_type,rekening,both|nullable|string|max:50',
             'new_npwp' => 'required_if:change_type,bendahara,both|nullable|string|max:50',
             'bank_name' => 'required|string|max:100',
@@ -234,9 +239,7 @@ class TreasurerChangeController extends Controller
             $change->old_bank_account = $validated['old_bank_account'];
             $change->old_npwp = $validated['old_npwp'];
 
-            $change->new_treasurer_name = $validated['change_type'] === 'rekening'
-                ? $validated['old_treasurer_name']
-                : $validated['new_treasurer_name'];
+            $change->new_treasurer_name = $validated['new_treasurer_name'];
             $change->new_bank_account = $validated['change_type'] === 'bendahara'
                 ? $validated['old_bank_account']
                 : $validated['new_bank_account'];
@@ -385,7 +388,7 @@ class TreasurerChangeController extends Controller
         $change->document_generated_at = now();
         $change->save();
 
-        return Storage::disk('public')->download($change->recommendation_letter_path);
+        return response()->download(storage_path('app/public/' . $change->recommendation_letter_path));
     }
 
     /**
@@ -411,13 +414,18 @@ class TreasurerChangeController extends Controller
         }
 
         // Get the active Kadis signer for TTE
-        $signer = \App\Models\User::where('is_active', true)
-            ->whereHas('roles', fn ($q) => $q->where('name', 'kadis'))
+        $signer = \App\Models\User::query()
+            ->where('is_active', true)
+            ->whereRelation('roles', 'name', 'kadis')
             ->first();
 
-        $signerName = $signer?->name ?? 'MOHAMMAD ALWI, M.Pd';
-        $signerNip  = $signer?->nip ?? '19680512 199303 1 005';
-        $signatureImagePath = $signer?->signature_image_path
+        if (! $signer) {
+            throw new \Exception('Penandatangan Kepala Dinas tidak ditemukan atau tidak aktif.');
+        }
+
+        $signerName = $signer->name;
+        $signerNip  = $signer->nip;
+        $signatureImagePath = $signer->signature_image_path
             ? storage_path('app/public/' . $signer->signature_image_path)
             : null;
 

@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { FileUp, Save, Send, UserSquare2, AlertCircle, FileText } from 'lucide-react';
 import axios from '@/bootstrap';
+import { useQuery } from '@tanstack/react-query';
 import { useSelector } from 'react-redux';
 
 export default function IjazahCreate() {
@@ -11,6 +12,7 @@ export default function IjazahCreate() {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [form, setForm] = useState({
+        institution_id: user?.institution_id || '',
         student_name: '',
         nisn: '',
         graduation_year: '',
@@ -18,6 +20,12 @@ export default function IjazahCreate() {
         wrong_data_description: '',
         correct_data_description: '',
     });
+
+    useEffect(() => {
+        if (user?.institution_id) {
+            setForm(prev => ({ ...prev, institution_id: user.institution_id }));
+        }
+    }, [user]);
 
     const [files, setFiles] = useState({
         file_ijazah_wrong: null,
@@ -30,6 +38,16 @@ export default function IjazahCreate() {
         setForm({ ...form, [e.target.name]: e.target.value });
     };
 
+    const { data: institutionsRes } = useQuery({
+        queryKey: ['institutions-options'],
+        queryFn: async () => {
+            const res = await axios.get('/institutions?per_page=1000');
+            return res.data;
+        },
+        enabled: !user?.institution_id,
+    });
+    const institutions = institutionsRes?.data?.data || [];
+
     const handleFileChange = (e, key) => {
         if (e.target.files && e.target.files[0]) {
             setFiles({ ...files, [key]: e.target.files[0] });
@@ -38,6 +56,12 @@ export default function IjazahCreate() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
+        if (!user?.institution_id && !form.institution_id) {
+            toast.error('Asal sekolah wajib dipilih.');
+            return;
+        }
+
         setIsSubmitting(true);
 
         try {
@@ -49,7 +73,7 @@ export default function IjazahCreate() {
                 }
             });
 
-            await axios.post('/api/ijazah-revisions', formData, {
+            await axios.post('/ijazah-revisions', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             
@@ -99,6 +123,32 @@ export default function IjazahCreate() {
                         Data Siswa
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="md:col-span-2">
+                            <label className="block text-xs font-medium text-slate-700 mb-1">Asal Sekolah <span className="text-red-500">*</span></label>
+                            {user?.institution_id ? (
+                                <input
+                                    type="text"
+                                    value={user?.institution?.name || ''}
+                                    disabled
+                                    className="w-full px-3 py-2 border border-slate-200 rounded bg-slate-100 text-slate-500 text-sm"
+                                />
+                            ) : (
+                                <>
+                                    <select
+                                        name="institution_id"
+                                        value={form.institution_id}
+                                        onChange={handleInputChange}
+                                        className="w-full px-3 py-2 border border-slate-200 rounded text-sm focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 bg-amber-50"
+                                    >
+                                        <option value="">-- Pilih Sekolah --</option>
+                                        {institutions.filter(i => i.type.startsWith('sekolah')).map(inst => (
+                                            <option key={inst.id} value={inst.id}>{inst.name}</option>
+                                        ))}
+                                    </select>
+                                    <p className="text-[10px] text-amber-600 mt-1 font-medium">Sebagai admin, Anda harus memilih asal sekolah untuk pengajuan ini.</p>
+                                </>
+                            )}
+                        </div>
                         <div>
                             <label className="block text-xs font-medium text-slate-700 mb-1">Nama Lengkap (Sesuai Ijazah)</label>
                             <input 

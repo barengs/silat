@@ -23,8 +23,8 @@ class IjazahRevisionController extends Controller
 
         $query = IjazahRevision::with(['institution', 'submittedBy']);
 
-        // Only school can see their own
-        if ($user->hasRole('sekolah')) {
+        // Users without view-all permission can only see their own institution's requests
+        if (! $user->hasRole('super-admin') && ! $user->hasPermissionTo('ijazah.view-all')) {
             $query->where('institution_id', $user->institution_id);
         }
 
@@ -49,13 +49,9 @@ class IjazahRevisionController extends Controller
     {
         $user = $request->user();
 
-        // Only schools are allowed to submit
-        if (! $user->hasRole('sekolah')) {
-            return response()->json(['message' => 'Hanya pihak sekolah yang dapat mengajukan revisi ijazah.'], 403);
-        }
-
-        if (! $user->institution_id) {
-            return response()->json(['message' => 'Akun Anda belum ditautkan ke instansi sekolah mana pun.'], 400);
+        // For superadmin/dinas (without institution_id), they must provide an institution_id
+        if (! $user->institution_id && ! $request->has('institution_id')) {
+            return response()->json(['message' => 'Pilih sekolah terlebih dahulu.'], 400);
         }
 
         $validated = $request->validate([
@@ -77,7 +73,7 @@ class IjazahRevisionController extends Controller
 
             $ijazah = new IjazahRevision;
             $ijazah->ticket_number = IjazahRevision::generateTicketNumber();
-            $ijazah->institution_id = $user->institution_id;
+            $ijazah->institution_id = $user->institution_id ?: $request->input('institution_id');
             $ijazah->student_name = $validated['student_name'];
             $ijazah->nisn = $validated['nisn'];
             $ijazah->graduation_year = $validated['graduation_year'];
@@ -132,7 +128,7 @@ class IjazahRevisionController extends Controller
             'approvals.step',
         ])->findOrFail($id);
 
-        if ($user->hasRole('sekolah') && $ijazah->institution_id !== $user->institution_id) {
+        if ($user->isSekolah() && $ijazah->institution_id !== $user->institution_id) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 

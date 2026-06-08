@@ -19,7 +19,7 @@ import {
 
 export default function ApprovalFlowConfig() {
     const queryClient = useQueryClient();
-    const [activeTab, setActiveTab] = useState('sppd'); // 'sppd', 'ijazah', 'bendahara'
+    const [activeTab, setActiveTab] = useState('sppd'); // 'sppd', 'ijazah', 'bendahara', 'school_transfer'
     const [localSteps, setLocalSteps] = useState([]);
     
     // Load config from backend
@@ -203,7 +203,8 @@ export default function ApprovalFlowConfig() {
                     {[
                         { id: 'sppd', label: 'Surat Perintah Perjalanan Dinas (SPPD)' },
                         { id: 'ijazah', label: 'Revisi Ijazah (Virtual Loket)' },
-                        { id: 'bendahara', label: 'Perubahan Bendahara' }
+                        { id: 'bendahara', label: 'Perubahan Bendahara' },
+                        { id: 'school_transfer', label: 'Mutasi Sekolah' }
                     ].map(tab => (
                         <button
                             key={tab.id}

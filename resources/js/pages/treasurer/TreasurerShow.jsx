@@ -22,16 +22,17 @@ export default function TreasurerShow() {
     const { id } = useParams();
     const navigate = useNavigate();
     const queryClient = useQueryClient();
-    const { user } = useSelector(state => state.auth);
+    const { user, roles } = useSelector(state => state.auth);
 
     const [isActionModalOpen, setIsActionModalOpen] = useState(false);
     const [actionType, setActionType] = useState('approve'); // 'approve', 'reject'
+    const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
     const [note, setNote] = useState('');
 
     const { data: responseData, isLoading } = useQuery({
         queryKey: ['treasurer', id],
         queryFn: async () => {
-            const res = await axios.get(`/api/treasurer/${id}`);
+            const res = await axios.get(`/treasurer/${id}`);
             return res.data;
         }
     });
@@ -41,7 +42,7 @@ export default function TreasurerShow() {
 
     const submitMutation = useMutation({
         mutationFn: async () => {
-            return await axios.post(`/api/treasurer/${id}/submit`);
+            return await axios.post(`/treasurer/${id}/submit`);
         },
         onSuccess: (res) => {
             toast.success(res.data.message);
@@ -54,7 +55,7 @@ export default function TreasurerShow() {
 
     const actionMutation = useMutation({
         mutationFn: async ({ action, payload }) => {
-            return await axios.post(`/api/treasurer/${id}/${action}`, payload);
+            return await axios.post(`/treasurer/${id}/${action}`, payload);
         },
         onSuccess: (res) => {
             toast.success(res.data.message);
@@ -75,12 +76,28 @@ export default function TreasurerShow() {
         });
     };
 
-    const handleDownload = () => {
-        window.open(`/api/treasurer/${id}/pdf`, '_blank');
-        // Invalidate query to update status from 'ready_to_print' to 'completed'
-        setTimeout(() => {
+    const handleDownloadPdf = async () => {
+        setIsDownloadingPdf(true);
+        try {
+            const response = await axios.get(`/treasurer/${id}/pdf`, {
+                responseType: 'blob'
+            });
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `Rekomendasi_Bendahara_${change.institution?.name || 'Sekolah'}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            link.parentNode.removeChild(link);
+            window.URL.revokeObjectURL(url);
+            
+            // Refetch since status becomes completed after download
             queryClient.invalidateQueries(['treasurer', id]);
-        }, 1500);
+        } catch (error) {
+            toast.error('Gagal mengunduh dokumen PDF');
+        } finally {
+            setIsDownloadingPdf(false);
+        }
     };
 
     if (isLoading) {
@@ -272,7 +289,7 @@ export default function TreasurerShow() {
                 <div className="space-y-6">
                     
                     {/* Tindakan Diperlukan */}
-                    {change.status === 'draft' && user?.id === change.submitted_by && (
+                    {change.status === 'draft' && (user?.id === change.submitted_by?.id || user?.id === change.submitted_by || roles?.includes('super-admin')) && (
                         <div className="bg-white border border-slate-200 rounded shadow-sm p-6 text-center">
                             <Send className="mx-auto mb-2 text-slate-400" size={32} />
                             <h3 className="font-bold text-slate-800 text-sm mb-1">Ajukan Pengajuan?</h3>
@@ -287,7 +304,7 @@ export default function TreasurerShow() {
                         </div>
                     )}
 
-                    {approvalMeta?.can_approve && change.status === 'verifikasi' && (
+                    {approvalMeta?.can_approve && ['submitted', 'verifikasi'].includes(change.status) && (
                         <div className="bg-white border border-slate-200 rounded shadow-sm p-6">
                             <h3 className="font-bold text-slate-800 text-xs uppercase tracking-wider mb-4 border-b border-slate-100 pb-2">Tindakan Diperlukan</h3>
                             <p className="text-xs text-slate-500 mb-4">Silakan tinjau berkas pengajuan di sebelah kiri sebelum mengambil keputusan.</p>
@@ -316,11 +333,12 @@ export default function TreasurerShow() {
                             <h3 className="font-bold text-emerald-800 text-sm mb-1">Cetak Dokumen Rekomendasi</h3>
                             <p className="text-xs text-emerald-600 mb-4">Pengajuan telah disetujui. Silakan cetak Surat Rekomendasi untuk diserahkan ke Bank Jatim.</p>
                             <button 
-                                onClick={handleDownload}
-                                className="w-full flex justify-center items-center px-4 py-2.5 bg-emerald-700 hover:bg-emerald-850 text-white text-xs font-bold rounded transition-colors shadow-sm"
+                                className="w-full flex justify-center items-center px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded transition-colors shadow-sm"
+                                onClick={handleDownloadPdf}
+                                disabled={isDownloadingPdf}
                             >
-                                <Download size={14} className="mr-2" />
-                                Cetak Surat Rekomendasi
+                                <FileText size={14} className={isDownloadingPdf ? 'hidden' : 'mr-2'} />
+                                {isDownloadingPdf ? 'Memproses...' : 'Cetak Surat Rekomendasi (PDF)'}
                             </button>
                         </div>
                     )}

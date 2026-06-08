@@ -2,7 +2,8 @@ import React, { useEffect } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { Toaster } from 'sonner';
-import { clearAuth } from '@/store/slices/authSlice';
+import { clearAuth, setRolesAndPermissions } from '@/store/slices/authSlice';
+import authService from '@/services/authService';
 import useAuth from '@/hooks/useAuth';
 import AppLayout from '@/layouts/AppLayout';
 
@@ -46,6 +47,11 @@ const TreasurerList = React.lazy(() => import('@/pages/treasurer/TreasurerList')
 const TreasurerCreate = React.lazy(() => import('@/pages/treasurer/TreasurerCreate'));
 const TreasurerShow = React.lazy(() => import('@/pages/treasurer/TreasurerShow'));
 
+// School Transfers
+const SchoolTransferList = React.lazy(() => import('@/pages/school-transfers/SchoolTransferList'));
+const SchoolTransferCreate = React.lazy(() => import('@/pages/school-transfers/SchoolTransferCreate'));
+const SchoolTransferShow = React.lazy(() => import('@/pages/school-transfers/SchoolTransferShow'));
+
 // Portal Berita CMS (Admin)
 const ArticleList = React.lazy(() => import('@/pages/articles/ArticleList'));
 const ArticleForm = React.lazy(() => import('@/pages/articles/ArticleForm'));
@@ -63,6 +69,7 @@ const SignatureVault = React.lazy(() => import('@/pages/settings/SignatureVault'
 const SystemSettings = React.lazy(() => import('@/pages/settings/SystemSettings'));
 const ProfilePage    = React.lazy(() => import('@/pages/profile/ProfilePage'));
 const DocumentVerificationQueue = React.lazy(() => import('@/pages/verifikasi/DocumentVerificationQueue'));
+const UserManual      = React.lazy(() => import('@/pages/manual/UserManual'));
 
 // ── Route Guards ──────────────────────────────────────────────────────────────
 
@@ -87,6 +94,25 @@ const PublicRoute = ({ children }) => {
 export default function Main() {
     const dispatch  = useDispatch();
     const navigate  = useNavigate();
+    const { token } = useAuth();
+
+    // Sync roles and permissions from backend if token exists
+    useEffect(() => {
+        if (token) {
+            authService.me()
+                .then(data => {
+                    if (data.success) {
+                        dispatch(setRolesAndPermissions({
+                            roles: data.roles,
+                            permissions: data.permissions
+                        }));
+                    }
+                })
+                .catch(err => {
+                    console.error('Failed to sync profile on boot:', err);
+                });
+        }
+    }, [token, dispatch]);
 
     // Listen for global unauthorized events (JWT expired)
     useEffect(() => {
@@ -183,6 +209,11 @@ export default function Main() {
                         <Route path="/treasurer/create" element={<TreasurerCreate />} />
                         <Route path="/treasurer/:id" element={<TreasurerShow />} />
 
+                        {/* School Transfers */}
+                        <Route path="/school-transfers" element={<SchoolTransferList />} />
+                        <Route path="/school-transfers/create" element={<SchoolTransferCreate />} />
+                        <Route path="/school-transfers/:id" element={<SchoolTransferShow />} />
+
                         {/* Portal Berita (CMS Admin) */}
                         <Route path="/articles" element={<ArticleList />} />
                         <Route path="/articles/create" element={<ArticleForm />} />
@@ -191,6 +222,9 @@ export default function Main() {
 
                         {/* Verifikasi Dokumen */}
                         <Route path="/verifikasi" element={<DocumentVerificationQueue />} />
+
+                        {/* User Manual */}
+                        <Route path="/user-manual" element={<UserManual />} />
 
                         {/* Settings */}
                         <Route path="/settings/signatures" element={<SignatureVault />} />

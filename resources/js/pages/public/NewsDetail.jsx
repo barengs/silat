@@ -188,7 +188,7 @@ const NewsDetail = () => {
                                 Layanan Virtual Loket
                             </h3>
                             <p className="text-xs text-slate-300 leading-relaxed mb-6">
-                                Ajukan perbaikan ijazah Anda yang salah ketik atau salah data dengan mudah secara digital melalui SIMTAG virtual loket.
+                                Ajukan perbaikan ijazah Anda yang salah ketik atau salah data dengan mudah secara digital melalui SILAT virtual loket.
                             </p>
                             <Link
                                 to="/track-ijazah"
