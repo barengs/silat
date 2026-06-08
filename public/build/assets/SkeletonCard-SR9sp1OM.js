@@ -1,0 +1,1 @@
+import{n as e,r as t}from"./createLucideIcon-X_kUInbS.js";t();var n=e(),r=({width:e=`100%`,height:t=`1rem`,className:r=``})=>(0,n.jsx)(`div`,{className:`bg-slate-200 animate-pulse rounded ${r}`,style:{width:e,height:t}});export{r as t};
