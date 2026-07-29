@@ -307,15 +307,27 @@ class GuestBookController extends Controller
 
     public function destroy(Request $request, $id)
     {
-        $request->validate([
-            'password' => 'required|string',
-        ]);
+        $password = $request->input('password') 
+            ?? $request->query('password') 
+            ?? $request->header('X-Confirm-Password');
+
+        if (!$password) {
+            return response()->json([
+                'message' => 'Konfirmasi password wajib diisi.',
+                'errors' => [
+                    'password' => ['Konfirmasi password wajib diisi.']
+                ]
+            ], 422);
+        }
 
         $user = $request->user();
 
-        if (!Hash::check($request->password, $user->password)) {
+        if (!Hash::check($password, $user->password)) {
             return response()->json([
                 'message' => 'Konfirmasi password salah.',
+                'errors' => [
+                    'password' => ['Konfirmasi password salah.']
+                ]
             ], 422);
         }
 

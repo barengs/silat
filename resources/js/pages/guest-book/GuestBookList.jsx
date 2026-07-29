@@ -70,7 +70,8 @@ export default function GuestBookList() {
     const deleteMutation = useMutation({
         mutationFn: async ({ id, password }) => {
             const res = await axios.delete(`/guest-book/${id}`, {
-                data: { password }
+                data: { password },
+                headers: { 'X-Confirm-Password': password }
             });
             return res.data;
         },
