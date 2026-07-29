@@ -22,6 +22,7 @@ class GuestBookController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
+
         $query = GuestBook::with(['agency', 'targetDivision', 'registeredBy'])
             ->orderBy('created_at', 'desc');
 
@@ -29,10 +30,12 @@ class GuestBookController extends Controller
             $query->where('target_division_id', $user->division_id);
         }
 
-        $startDate = $request->start_date ? Carbon::parse($request->start_date)->startOfDay() : Carbon::today();
-        $endDate = $request->end_date ? Carbon::parse($request->end_date)->endOfDay() : Carbon::today()->endOfDay();
-
-        $query->whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')]);
+        if ($request->filled('start_date')) {
+            $query->where('date', '>=', Carbon::parse($request->start_date)->format('Y-m-d'));
+        }
+        if ($request->filled('end_date')) {
+            $query->where('date', '<=', Carbon::parse($request->end_date)->format('Y-m-d'));
+        }
 
         if ($request->has('search')) {
             $search = $request->search;
@@ -44,7 +47,10 @@ class GuestBookController extends Controller
             });
         }
 
-        // Statistics based on the selected date range and division restriction
+        // Statistics based on the selected date range (defaults to today if not provided)
+        $startDate = $request->start_date ? Carbon::parse($request->start_date)->startOfDay() : Carbon::today();
+        $endDate = $request->end_date ? Carbon::parse($request->end_date)->endOfDay() : Carbon::today()->endOfDay();
+
         $statsQuery = GuestBook::whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')]);
         if (!$user->can('guest-book.view-all')) {
             $statsQuery->where('target_division_id', $user->division_id);

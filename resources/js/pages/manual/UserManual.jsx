@@ -157,7 +157,7 @@ export default function UserManual() {
                     <div>
                         <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2">Pencatatan Buku Tamu Kantor Dinas</h3>
                         <p className="text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
-                            Menggantikan buku besar kertas resepsionis dengan log tamu digital. Resepsionis dapat memasukkan kunjungan instansi dan keperluan. Tamu yang check-in akan memicu notifikasi instan ke staff dinas terkait.
+                            Sistem menggantikan buku besar kertas resepsionis dengan log tamu digital yang interaktif. Resepsionis menginput detail kunjungan seperti nama tamu, nomor HP, instansi asal, bidang/divisi tujuan, dan keperluan kunjungan. Pendaftaran tamu baru akan memicu notifikasi instan ke staff dinas di bidang terkait.
                         </p>
 
                         <div className="border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden my-4 bg-slate-50 dark:bg-slate-900">
@@ -173,9 +173,23 @@ export default function UserManual() {
                     </div>
 
                     <div>
-                        <h4 className="font-bold text-slate-800 dark:text-slate-100 mb-2">Ekspor excel & rekapitulasi</h4>
+                        <h4 className="font-bold text-slate-800 dark:text-slate-100 mb-2">Status Kunjungan Dinamis & Fitur Check Out</h4>
+                        <p className="text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
+                            Setiap tamu yang baru didaftarkan akan berstatus <span className="px-2 py-0.5 bg-amber-100 text-amber-700 rounded border text-xs font-semibold">Sedang Berkunjung</span>. Ketika kunjungan telah selesai, petugas resepsionis atau admin dinas/super-admin dapat mengklik tombol <strong>Check Out</strong> langsung pada tabel untuk mencatat waktu keluar tamu secara akurat, mengubah status tamu menjadi <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded border text-xs font-semibold">Selesai</span>.
+                        </p>
+                    </div>
+
+                    <div>
+                        <h4 className="font-bold text-slate-800 dark:text-slate-100 mb-2">Otorisasi & Keamanan Data Buku Tamu</h4>
+                        <p className="text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
+                            Untuk menjaga privasi kunjungan masing-masing bidang, daftar buku tamu disaring secara otomatis berdasarkan bidang/divisi user yang login. Staf hanya dapat melihat daftar tamu yang ditujukan ke bidangnya. Otorisasi melihat seluruh data kunjungan ke semua divisi dikendalikan secara dinamis menggunakan izin khusus <code>guest-book.view-all</code> yang disematkan ke peran resepsionis, admin dinas, dan super-admin.
+                        </p>
+                    </div>
+
+                    <div>
+                        <h4 className="font-bold text-slate-800 dark:text-slate-100 mb-2">Ekspor Laporan Mingguan & Bulanan</h4>
                         <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
-                            Log buku tamu dapat difilter berdasarkan divisi tujuan atau rentang tanggal tertentu, kemudian diekspor langsung ke format Microsoft Excel (.xlsx) untuk kebutuhan pelaporan mingguan/bulanan.
+                            Logs buku tamu yang terfilter dapat langsung diekspor ke dalam format Microsoft Excel (.xlsx) dengan menekan tombol <strong>Export Excel</strong>.
                         </p>
                     </div>
                 </div>
@@ -203,6 +217,20 @@ export default function UserManual() {
                                 Gambar 5.1: Daftar monitoring pengajuan perjalanan dinas beserta status alurnya
                             </div>
                         </div>
+                    </div>
+
+                    <div>
+                        <h4 className="font-bold text-slate-800 dark:text-slate-100 mb-2">Akses Navigasi Cepat & Lini Masa Persetujuan</h4>
+                        <p className="text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
+                            Pengguna dapat masuk ke detail informasi SPPD secara instan cukup dengan mengklik baris data SPPD pada tabel. Halaman detail memuat <strong>Lini Masa Persetujuan</strong> yang menyajikan status alur persetujuan secara visual (mulai dari pembuatan draf, verifikasi oleh Kabid/Kadis, hingga status pengunggahan dan validasi LPP).
+                        </p>
+                    </div>
+
+                    <div>
+                        <h4 className="font-bold text-slate-800 dark:text-slate-100 mb-2">Pelaporan LPP & Preview Bukti Terintegrasi</h4>
+                        <p className="text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
+                            Setelah perjalanan dinas selesai, pelaksana wajib mengunggah Laporan Perjalanan Dinas (LPP) beserta berkas bukti riil pengeluaran/kegiatan. Staff dinas terkait dapat langsung meninjau isi laporan dan melakukan peninjauan (preview) berkas dokumen pendukung secara langsung (in-app preview) tanpa harus mengunduh file terlebih dahulu.
+                        </p>
                     </div>
 
                     <div>
@@ -289,6 +317,20 @@ export default function UserManual() {
                                 Gambar 7.1: Log tiket pengajuan revisi ijazah berstatus dinamis
                             </div>
                         </div>
+                    </div>
+
+                    <div>
+                        <h4 className="font-bold text-slate-800 dark:text-slate-100 mb-2">Unggah Berkas Lebih Cepat & Valid</h4>
+                        <p className="text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
+                            Proses pengunggahan berkas syarat kini dilengkapi validasi ekstensi berkas secara ketat di sisi server (mencegah kesalahan pendeteksian mime-type browser) dan validasi programmatic di frontend yang mempermudah pengisian formulir.
+                        </p>
+                    </div>
+
+                    <div>
+                        <h4 className="font-bold text-slate-800 dark:text-slate-100 mb-2">In-App Preview Berkas Lampiran</h4>
+                        <p className="text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
+                            Verifikator dan pimpinan dinas dapat langsung memverifikasi syarat berkas pendukung (Scan Ijazah Asli, Akte, KK, SPTJM) secara visual melalui fitur **Dokumen Lampiran Preview** tanpa perlu berpindah tab atau mengunduh dokumen secara manual.
+                        </p>
                     </div>
 
                     <div>
