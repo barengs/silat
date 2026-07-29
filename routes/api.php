@@ -180,13 +180,14 @@ Route::middleware('jwt.auth')->group(function () {
         Route::put('/{id}', [SppdController::class, 'update'])->middleware('permission:sppd.edit');
         Route::delete('/{id}', [SppdController::class, 'destroy'])->middleware('permission:sppd.delete');
         Route::post('/{id}/submit', [SppdController::class, 'submit'])->middleware('permission:sppd.submit');
-        Route::post('/{id}/approve', [SppdController::class, 'approve'])->middleware('permission:sppd.approve');
-        Route::post('/{id}/reject', [SppdController::class, 'reject'])->middleware('permission:sppd.reject');
+        Route::post('/{id}/approve', [SppdController::class, 'approve']);
+        Route::post('/{id}/reject', [SppdController::class, 'reject']);
         Route::post('/{id}/verify', [SppdController::class, 'verify'])->middleware('permission:sppd.verify');
         Route::get('/{id}/pdf', [SppdController::class, 'downloadPdf'])->middleware('permission:sppd.print');
         // Laporan Perjalanan Dinas
         Route::post('/{id}/report', [SppdReportController::class, 'store'])->middleware('permission:sppd.report-upload');
         Route::get('/{id}/report', [SppdReportController::class, 'show']);
+        Route::post('/{id}/validate-report', [SppdReportController::class, 'validateReport']);
     });
 
     // ── Revisi Ijazah ───────────────────────────────────────────────────────

@@ -35,11 +35,13 @@ export default function SppdShow() {
             toast.success(res.data.message);
             setIsActionModalOpen(false);
             setActionNotes('');
+            setActionType('');
             queryClient.invalidateQueries(['sppd', id]);
         },
         onError: (err) => {
             toast.error(err.response?.data?.message || 'Terjadi kesalahan saat memproses data');
             setIsActionModalOpen(false);
+            setActionType('');
         }
     });
 
@@ -71,8 +73,11 @@ export default function SppdShow() {
 
     const handleActionClick = (type) => {
         if (type === 'submit') {
-            // Submit doesn't necessarily need notes for now
+            setActionType('submit');
             actionMutation.mutate({ action: 'submit', notes: '' });
+        } else if (type === 'validate-report') {
+            setActionType('validate-report');
+            actionMutation.mutate({ action: 'validate-report', notes: '' });
         } else {
             setActionType(type);
             setIsActionModalOpen(true);
@@ -310,6 +315,7 @@ export default function SppdShow() {
                                 <Button 
                                     className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
                                     onClick={() => handleActionClick('validate-report')}
+                                    isLoading={actionMutation.isPending && actionType === 'validate-report'}
                                 >
                                     Validasi Laporan (Selesai)
                                 </Button>

@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from '@/bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Trash2, Calendar, MapPin, Building, Info, Send, Users, Car, Wallet } from 'lucide-react';
@@ -29,6 +29,7 @@ const sppdSchema = z.object({
 
 export default function SppdCreate() {
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
 
     const { data: transportTypes } = useQuery({
         queryKey: ['transport-types'],
@@ -93,6 +94,7 @@ export default function SppdCreate() {
         },
         onSuccess: () => {
             toast.success('Pengajuan SPPD berhasil disimpan sebagai Draft');
+            queryClient.invalidateQueries(['sppds']);
             navigate('/sppd');
         },
         onError: (error) => {

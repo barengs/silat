@@ -44,9 +44,9 @@ class SppdReportController extends Controller
                     'real_start_date' => $validated['real_start_date'],
                     'real_end_date' => $validated['real_end_date'],
                     'report_text' => $validated['report_text'],
-                    'actual_cost' => $validated['actual_cost'],
+                    'actual_cost' => $validated['actual_cost'] ?? null,
                     'attachment_proof' => $attachmentPath,
-                    'notes' => $validated['notes'],
+                    'notes' => $validated['notes'] ?? null,
                     'submitted_by' => $request->user()->id,
                     'submitted_at' => now(),
                 ]
