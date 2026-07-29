@@ -18,21 +18,55 @@ const schema = z.object({
     target_division_id: z.string().min(1, 'Bidang/Divisi wajib dipilih'),
     purpose: z.string().min(5, 'Tuliskan keperluan dengan jelas'),
     guest_contact: z.string().optional(),
+    notes: z.string().optional(),
+    status: z.string().optional(),
 });
 
-export default function CheckinModal({ isOpen, onClose }) {
+export default function CheckinModal({ isOpen, onClose, guest = null }) {
     const queryClient = useQueryClient();
+    const isEdit = !!guest;
     
     const { register, handleSubmit, reset, watch, setValue, formState: { errors } } = useForm({
         resolver: zodResolver(schema),
         defaultValues: {
-            guest_name: '', agency_name: '', target_division_id: '', purpose: '', guest_contact: ''
+            guest_name: '', agency_name: '', target_division_id: '', purpose: '', guest_contact: '', notes: '', status: 'menunggu'
         }
     });
 
     const [agencySearch, setAgencySearch] = useState('');
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [guestType, setGuestType] = useState('instansi'); // 'instansi' | 'mandiri'
+
+    // Prepopulate form on edit
+    useEffect(() => {
+        if (isOpen) {
+            if (guest) {
+                reset({
+                    guest_name: guest.guest_name || '',
+                    agency_name: guest.agency?.name || '',
+                    target_division_id: guest.target_division_id ? String(guest.target_division_id) : '',
+                    purpose: guest.purpose || '',
+                    guest_contact: guest.guest_contact || '',
+                    notes: guest.notes || '',
+                    status: guest.status || 'menunggu',
+                });
+                setGuestType(guest.agency?.name ? 'instansi' : 'mandiri');
+                setAgencySearch(guest.agency?.name || '');
+            } else {
+                reset({
+                    guest_name: '',
+                    agency_name: '',
+                    target_division_id: '',
+                    purpose: '',
+                    guest_contact: '',
+                    notes: '',
+                    status: 'menunggu',
+                });
+                setGuestType('instansi');
+                setAgencySearch('');
+            }
+        }
+    }, [guest, isOpen, reset]);
 
     // Fetch Divisions
     const { data: divisions } = useQuery({
@@ -51,7 +85,8 @@ export default function CheckinModal({ isOpen, onClose }) {
                 params: { per_page: 2 }
             });
             return res.data.data.data || [];
-        }
+        },
+        enabled: !isEdit,
     });
 
     // Autocomplete Agencies
@@ -67,17 +102,23 @@ export default function CheckinModal({ isOpen, onClose }) {
 
     const mutation = useMutation({
         mutationFn: async (data) => {
+            if (isEdit) {
+                return await axios.put(`/guest-book/${guest.id}`, data);
+            }
             return await axios.post('/guest-book', data);
         },
         onSuccess: () => {
-            toast.success('Kedatangan tamu berhasil dicatat');
-            reset();
-            setAgencySearch('');
+            toast.success(isEdit ? 'Data tamu berhasil diperbarui' : 'Kedatangan tamu berhasil dicatat');
             queryClient.invalidateQueries(['guest-books']);
-            // Do NOT close automatically, so the receptionist is ready for the next guest
+            if (isEdit) {
+                onClose();
+            } else {
+                reset();
+                setAgencySearch('');
+            }
         },
         onError: (err) => {
-            toast.error(err.response?.data?.message || 'Gagal mencatat kedatangan');
+            toast.error(err.response?.data?.message || (isEdit ? 'Gagal memperbarui data' : 'Gagal mencatat kedatangan'));
         }
     });
 
@@ -139,8 +180,8 @@ export default function CheckinModal({ isOpen, onClose }) {
                 {/* Right Side: Form */}
                 <div className="md:w-7/12 p-10 lg:p-12">
                     <div className="mb-8">
-                        <h3 className="text-2xl font-bold text-slate-900">Formulir Kedatangan</h3>
-                        <p className="text-slate-500 text-sm mt-1">Silakan isi formulir di bawah ini untuk mencatat tamu.</p>
+                        <h3 className="text-2xl font-bold text-slate-900">{isEdit ? 'Ubah Data Tamu' : 'Formulir Kedatangan'}</h3>
+                        <p className="text-slate-500 text-sm mt-1">{isEdit ? 'Silakan perbarui informasi tamu di bawah ini.' : 'Silakan isi formulir di bawah ini untuk mencatat tamu.'}</p>
                     </div>
 
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
@@ -270,49 +311,82 @@ export default function CheckinModal({ isOpen, onClose }) {
                             </div>
                         </FormGroup>
 
-                        <div className="pt-4">
+                        {isEdit && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <FormGroup label="Status Kunjungan" error={errors.status?.message}>
+                                    <Select {...register('status')} error={errors.status}>
+                                        <option value="menunggu">Menunggu</option>
+                                        <option value="berkunjung">Sedang Berkunjung</option>
+                                        <option value="selesai">Selesai</option>
+                                    </Select>
+                                </FormGroup>
+
+                                <FormGroup label="Catatan / Tindak Lanjut" error={errors.notes?.message}>
+                                    <Textarea
+                                        rows="2"
+                                        placeholder="Catatan tambahan (opsional)"
+                                        {...register('notes')}
+                                        error={errors.notes}
+                                    />
+                                </FormGroup>
+                            </div>
+                        )}
+
+                        <div className="pt-4 flex gap-3">
+                            {isEdit && (
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={onClose}
+                                    className="w-1/3 py-3.5 text-base border-slate-200 text-slate-700 bg-white hover:bg-slate-50"
+                                >
+                                    Batal
+                                </Button>
+                            )}
                             <Button
                                 type="submit"
                                 isLoading={mutation.isPending}
-                                className="w-full py-3.5 text-base shadow-sm"
+                                className={`${isEdit ? 'w-2/3' : 'w-full'} py-3.5 text-base shadow-sm`}
                                 icon={Save}
                             >
-                                Simpan Kedatangan
+                                {isEdit ? 'Perbarui Data Tamu' : 'Simpan Kedatangan'}
                             </Button>
                         </div>
                     </form>
 
-                    {/* Recent Guests Table */}
-                    <div className="mt-8 border-t border-slate-100 pt-6">
-                        <h4 className="text-sm font-semibold text-slate-700 mb-3">Tamu Terakhir Didaftarkan</h4>
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-xs text-left">
-                                <thead>
-                                    <tr className="text-slate-400 border-b border-slate-100">
-                                        <th className="pb-2 font-medium w-24">Waktu</th>
-                                        <th className="pb-2 font-medium">Nama Tamu</th>
-                                        <th className="pb-2 font-medium">Instansi</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {recentGuests?.map(guest => (
-                                        <tr key={guest.id} className="border-b border-slate-50 last:border-0">
-                                            <td className="py-2.5 text-slate-500">{guest.check_in_time} WIB</td>
-                                            <td className="py-2.5 font-medium text-slate-700">{guest.guest_name}</td>
-                                            <td className="py-2.5 text-slate-500">
-                                                <span className="line-clamp-1">{guest.agency?.name || '-'}</span>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                    {(!recentGuests || recentGuests.length === 0) && (
-                                        <tr>
-                                            <td colSpan="3" className="py-4 text-center text-slate-400 italic">Belum ada data tamu</td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                     {/* Recent Guests Table */}
+                     {!isEdit && (
+                         <div className="mt-8 border-t border-slate-100 pt-6">
+                             <h4 className="text-sm font-semibold text-slate-700 mb-3">Tamu Terakhir Didaftarkan</h4>
+                             <div className="overflow-x-auto">
+                                 <table className="w-full text-xs text-left">
+                                     <thead>
+                                         <tr className="text-slate-400 border-b border-slate-100">
+                                             <th className="pb-2 font-medium w-24">Waktu</th>
+                                             <th className="pb-2 font-medium">Nama Tamu</th>
+                                             <th className="pb-2 font-medium">Instansi</th>
+                                         </tr>
+                                     </thead>
+                                     <tbody>
+                                         {recentGuests?.map(guest => (
+                                             <tr key={guest.id} className="border-b border-slate-50 last:border-0">
+                                                 <td className="py-2.5 text-slate-500">{guest.check_in_time} WIB</td>
+                                                 <td className="py-2.5 font-medium text-slate-700">{guest.guest_name}</td>
+                                                 <td className="py-2.5 text-slate-500">
+                                                     <span className="line-clamp-1">{guest.agency?.name || '-'}</span>
+                                                 </td>
+                                             </tr>
+                                         ))}
+                                         {(!recentGuests || recentGuests.length === 0) && (
+                                             <tr>
+                                                 <td colSpan="3" className="py-4 text-center text-slate-400 italic">Belum ada data tamu</td>
+                                             </tr>
+                                         )}
+                                     </tbody>
+                                 </table>
+                             </div>
+                         </div>
+                     )}
                 </div>
             </div>
         </div>

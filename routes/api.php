@@ -167,6 +167,9 @@ Route::middleware('jwt.auth')->group(function () {
         Route::get('/export', [GuestBookController::class, 'export'])->middleware('permission:guest-book.view');
         Route::get('/agencies/search', [GuestBookController::class, 'searchAgencies'])->middleware('permission:guest-book.create');
         Route::get('/{id}', [GuestBookController::class, 'show'])->middleware('permission:guest-book.view');
+        Route::put('/{id}', [GuestBookController::class, 'update'])->middleware('permission:guest-book.edit');
+        Route::delete('/{id}', [GuestBookController::class, 'destroy'])->middleware('permission:guest-book.delete');
+        Route::patch('/{id}/visit', [GuestBookController::class, 'visit'])->middleware('permission:guest-book.create');
         Route::patch('/{id}/checkout', [GuestBookController::class, 'checkout'])->middleware('permission:guest-book.create');
     });
 

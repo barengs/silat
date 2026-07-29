@@ -19,6 +19,7 @@ class GuestBook extends Model
         'target_division_id',
         'registered_by',
         'notes',
+        'status',
     ];
 
     protected $casts = [

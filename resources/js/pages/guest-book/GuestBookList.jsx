@@ -18,6 +18,8 @@ import CheckinModal from './CheckinModal';
 export default function GuestBookList() {
     const { roles, permissions } = useSelector(state => state.auth);
     const canCreate = permissions.includes('guest-book.create') || roles.includes('super-admin');
+    const canEdit = permissions.includes('guest-book.edit') || roles.includes('super-admin');
+    const canDelete = permissions.includes('guest-book.delete') || roles.includes('super-admin');
 
     const [pageIndex, setPageIndex] = useState(0);
     const [pageSize, setPageSize] = useState(10);
@@ -27,6 +29,22 @@ export default function GuestBookList() {
     const [isCheckinOpen, setIsCheckinOpen] = useState(false);
     const navigate = useNavigate();
     const queryClient = useQueryClient();
+
+    const [editingGuest, setEditingGuest] = useState(null);
+
+    const visitMutation = useMutation({
+        mutationFn: async (id) => {
+            const res = await axios.patch(`/guest-book/${id}/visit`);
+            return res.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries(['guest-books']);
+            toast.success('Tamu mulai melakukan kunjungan.');
+        },
+        onError: (err) => {
+            toast.error(err.response?.data?.message || 'Gagal merubah status kunjungan.');
+        }
+    });
 
     const checkoutMutation = useMutation({
         mutationFn: async (id) => {
@@ -41,6 +59,26 @@ export default function GuestBookList() {
             toast.error(err.response?.data?.message || 'Gagal melakukan check-out.');
         }
     });
+
+    const deleteMutation = useMutation({
+        mutationFn: async (id) => {
+            const res = await axios.delete(`/guest-book/${id}`);
+            return res.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries(['guest-books']);
+            toast.success('Data tamu berhasil dihapus.');
+        },
+        onError: (err) => {
+            toast.error(err.response?.data?.message || 'Gagal menghapus data tamu.');
+        }
+    });
+
+    const handleDelete = (id) => {
+        if (window.confirm('Apakah Anda yakin ingin menghapus data tamu ini?')) {
+            deleteMutation.mutate(id);
+        }
+    };
 
     // Fetch Guest Books with Stats
     const { data, isLoading } = useQuery({
@@ -93,18 +131,39 @@ export default function GuestBookList() {
             header: 'STATUS / AKSI',
             id: 'status',
             cell: ({ row }) => {
-                const isCheckedOut = !!row.original.check_out_time;
+                const status = row.original.status || (row.original.check_out_time ? 'selesai' : 'berkunjung');
+                const isWaiting = status === 'menunggu';
+                const isVisiting = status === 'berkunjung';
+                const isCompleted = status === 'selesai';
+                
                 return (
-                    <div className="flex items-center gap-2">
-                        {isCheckedOut ? (
-                            <Badge variant="success">Selesai</Badge>
-                        ) : (
-                            <Badge variant="warning" className="bg-amber-100 text-amber-700 border-amber-200">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                        {isWaiting && (
+                            <Badge variant="warning" className="bg-orange-100 text-orange-700 border-orange-200">
+                                Menunggu
+                            </Badge>
+                        )}
+                        {isVisiting && (
+                            <Badge variant="info" className="bg-blue-100 text-blue-700 border-blue-200">
                                 Sedang Berkunjung
                             </Badge>
                         )}
+                        {isCompleted && (
+                            <Badge variant="success">Selesai</Badge>
+                        )}
                         
-                        {!isCheckedOut && canCreate && (
+                        {isWaiting && canCreate && (
+                            <Button 
+                                size="xs" 
+                                className="bg-indigo-600 hover:bg-indigo-700 text-white py-1 px-2 text-xs font-semibold rounded shrink-0"
+                                onClick={() => visitMutation.mutate(row.original.id)}
+                                isLoading={visitMutation.isPending && visitMutation.variables === row.original.id}
+                            >
+                                Arahkan
+                            </Button>
+                        )}
+                        
+                        {isVisiting && canCreate && (
                             <Button 
                                 size="xs" 
                                 className="bg-rose-600 hover:bg-rose-700 text-white py-1 px-2 text-xs font-semibold rounded shrink-0"
@@ -114,11 +173,36 @@ export default function GuestBookList() {
                                 Check Out
                             </Button>
                         )}
+
+                        {canEdit && (
+                            <Button 
+                                size="xs" 
+                                variant="outline"
+                                className="border-slate-200 text-slate-700 hover:bg-slate-50 py-1 px-2 text-xs font-semibold rounded shrink-0"
+                                onClick={() => {
+                                    setEditingGuest(row.original);
+                                    setIsCheckinOpen(true);
+                                }}
+                            >
+                                Edit
+                            </Button>
+                        )}
+
+                        {canDelete && (
+                            <Button 
+                                size="xs" 
+                                className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-1 px-2 text-xs font-semibold rounded shrink-0"
+                                onClick={() => handleDelete(row.original.id)}
+                                isLoading={deleteMutation.isPending && deleteMutation.variables === row.original.id}
+                            >
+                                Hapus
+                            </Button>
+                        )}
                     </div>
                 );
             }
         }
-    ], [canCreate, checkoutMutation]);
+    ], [canCreate, canEdit, canDelete, checkoutMutation, visitMutation, deleteMutation, setEditingGuest, setIsCheckinOpen, handleDelete]);
 
     const table = useReactTable({
         data: guests,
@@ -224,7 +308,10 @@ export default function GuestBookList() {
                         Export Excel
                     </Button>
                     <Button
-                        onClick={() => setIsCheckinOpen(true)}
+                        onClick={() => {
+                            setEditingGuest(null);
+                            setIsCheckinOpen(true);
+                        }}
                         icon={Plus}
                         className="bg-[#0F172A] hover:bg-slate-800"
                     >
@@ -291,7 +378,11 @@ export default function GuestBookList() {
             {/* Check-in Fullscreen Modal */}
             <CheckinModal
                 isOpen={isCheckinOpen}
-                onClose={() => setIsCheckinOpen(false)}
+                guest={editingGuest}
+                onClose={() => {
+                    setIsCheckinOpen(false);
+                    setEditingGuest(null);
+                }}
             />
         </div>
     );

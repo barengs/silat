@@ -125,6 +125,7 @@ class GuestBookController extends Controller
                 'guest_agency_id' => $agencyId,
                 'target_division_id' => $validated['target_division_id'],
                 'registered_by' => request()->user()->id ?? null,
+                'status' => 'menunggu',
             ]);
 
             // Send notification to users in target division
@@ -234,10 +235,104 @@ class GuestBookController extends Controller
         }
 
         $guestBook->check_out_time = Carbon::now()->format('H:i:s');
+        $guestBook->status = 'selesai';
         $guestBook->save();
 
         return response()->json([
             'message' => 'Tamu berhasil check-out.',
+            'data' => $guestBook,
+        ]);
+    }
+
+    /**
+     * Update the specified guest book resource.
+     */
+    public function update(Request $request, $id)
+    {
+        $guestBook = GuestBook::findOrFail($id);
+
+        $validated = $request->validate([
+            'guest_name' => 'required|string|max:255',
+            'agency_name' => 'nullable|string|max:255',
+            'target_division_id' => 'required|exists:divisions,id',
+            'purpose' => 'required|string',
+            'guest_contact' => 'nullable|string|max:20',
+            'notes' => 'nullable|string',
+            'status' => 'required|string|in:menunggu,berkunjung,selesai',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $agencyId = null;
+            if (! empty($validated['agency_name'])) {
+                $agency = GuestAgency::firstOrCreate(
+                    ['name' => $validated['agency_name']]
+                );
+                $agencyId = $agency->id;
+            }
+
+            $guestBook->update([
+                'guest_name' => $validated['guest_name'],
+                'guest_contact' => $validated['guest_contact'],
+                'purpose' => $validated['purpose'],
+                'guest_agency_id' => $agencyId,
+                'target_division_id' => $validated['target_division_id'],
+                'notes' => $validated['notes'] ?? null,
+                'status' => $validated['status'],
+            ]);
+
+            // Handle transition states for check_out_time
+            if ($validated['status'] === 'selesai' && $guestBook->check_out_time === null) {
+                $guestBook->check_out_time = Carbon::now()->format('H:i:s');
+                $guestBook->save();
+            } elseif ($validated['status'] !== 'selesai' && $guestBook->check_out_time !== null) {
+                $guestBook->check_out_time = null;
+                $guestBook->save();
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Data tamu berhasil diperbarui.',
+                'data' => $guestBook->load(['agency', 'targetDivision']),
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['message' => 'Terjadi kesalahan saat memperbarui data tamu.', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Delete the specified guest book resource.
+     */
+    public function destroy($id)
+    {
+        $guestBook = GuestBook::findOrFail($id);
+        $guestBook->delete();
+
+        return response()->json([
+            'message' => 'Data tamu berhasil dihapus.',
+        ]);
+    }
+
+    /**
+     * Change status from 'menunggu' to 'berkunjung'.
+     */
+    public function visit(Request $request, $id)
+    {
+        $guestBook = GuestBook::findOrFail($id);
+
+        if ($guestBook->status !== 'menunggu') {
+            return response()->json(['message' => 'Hanya tamu dengan status menunggu yang bisa mulai berkunjung.'], 422);
+        }
+
+        $guestBook->status = 'berkunjung';
+        $guestBook->save();
+
+        return response()->json([
+            'message' => 'Tamu diarahkan ke divisi tujuan (status berkunjung).',
             'data' => $guestBook,
         ]);
     }
