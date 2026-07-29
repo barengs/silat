@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
     useReactTable,
     getCoreRowModel,
@@ -8,12 +8,17 @@ import {
 import { Plus, Users, Building2, Network, Download, BarChart2, Calendar } from 'lucide-react';
 import axios from '@/bootstrap';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { toast } from 'sonner';
 import DataTable from '@/components/DataTable/DataTable';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import CheckinModal from './CheckinModal';
 
 export default function GuestBookList() {
+    const { roles, permissions } = useSelector(state => state.auth);
+    const canCreate = permissions.includes('guest-book.create') || roles.includes('super-admin');
+
     const [pageIndex, setPageIndex] = useState(0);
     const [pageSize, setPageSize] = useState(10);
     const [searchTerm, setSearchTerm] = useState('');
@@ -21,6 +26,21 @@ export default function GuestBookList() {
     const [endDate, setEndDate] = useState('');
     const [isCheckinOpen, setIsCheckinOpen] = useState(false);
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
+
+    const checkoutMutation = useMutation({
+        mutationFn: async (id) => {
+            const res = await axios.patch(`/guest-book/${id}/checkout`);
+            return res.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries(['guest-books']);
+            toast.success('Tamu berhasil check-out.');
+        },
+        onError: (err) => {
+            toast.error(err.response?.data?.message || 'Gagal melakukan check-out.');
+        }
+    });
 
     // Fetch Guest Books with Stats
     const { data, isLoading } = useQuery({
@@ -70,13 +90,35 @@ export default function GuestBookList() {
             cell: ({ getValue }) => <span className="text-sm text-slate-500 line-clamp-1" title={getValue()}>{getValue()}</span>
         },
         {
-            header: 'STATUS',
+            header: 'STATUS / AKSI',
             id: 'status',
-            cell: () => (
-                <Badge variant="success">Selesai</Badge>
-            )
+            cell: ({ row }) => {
+                const isCheckedOut = !!row.original.check_out_time;
+                return (
+                    <div className="flex items-center gap-2">
+                        {isCheckedOut ? (
+                            <Badge variant="success">Selesai</Badge>
+                        ) : (
+                            <Badge variant="warning" className="bg-amber-100 text-amber-700 border-amber-200">
+                                Sedang Berkunjung
+                            </Badge>
+                        )}
+                        
+                        {!isCheckedOut && canCreate && (
+                            <Button 
+                                size="xs" 
+                                className="bg-rose-600 hover:bg-rose-700 text-white py-1 px-2 text-xs font-semibold rounded shrink-0"
+                                onClick={() => checkoutMutation.mutate(row.original.id)}
+                                isLoading={checkoutMutation.isPending && checkoutMutation.variables === row.original.id}
+                            >
+                                Check Out
+                            </Button>
+                        )}
+                    </div>
+                );
+            }
         }
-    ], []);
+    ], [canCreate, checkoutMutation]);
 
     const table = useReactTable({
         data: guests,

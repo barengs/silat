@@ -215,4 +215,24 @@ class GuestBookController extends Controller
             'division_stats' => $divisionStats,
         ]);
     }
+
+    /**
+     * Check out a guest by setting check_out_time.
+     */
+    public function checkout(Request $request, $id)
+    {
+        $guestBook = GuestBook::findOrFail($id);
+
+        if ($guestBook->check_out_time !== null) {
+            return response()->json(['message' => 'Tamu sudah melakukan check-out.'], 422);
+        }
+
+        $guestBook->check_out_time = Carbon::now()->format('H:i:s');
+        $guestBook->save();
+
+        return response()->json([
+            'message' => 'Tamu berhasil check-out.',
+            'data' => $guestBook,
+        ]);
+    }
 }

@@ -13,6 +13,7 @@ export default function DataTable({
     onPageSizeChange,
     searchPlaceholder = 'Cari data...',
     filters = null,
+    onRowClick = null,
 }) {
     const columnsLength = table.getAllColumns().length;
 
@@ -76,7 +77,19 @@ export default function DataTable({
                             </tr>
                         ) : (
                             table.getRowModel().rows.map(row => (
-                                <tr key={row.id} className="hover:bg-slate-50/70 transition-colors">
+                                <tr 
+                                    key={row.id} 
+                                    className={`hover:bg-slate-50/70 transition-colors ${onRowClick ? 'cursor-pointer' : ''}`}
+                                    onClick={(e) => {
+                                        const target = e.target;
+                                        if (target.closest('button') || target.closest('a') || target.closest('input') || target.closest('select')) {
+                                            return;
+                                        }
+                                        if (onRowClick) {
+                                            onRowClick(row.original);
+                                        }
+                                    }}
+                                >
                                     {row.getVisibleCells().map(cell => (
                                         <td key={cell.id} className="px-4 py-2.5 align-middle">
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}

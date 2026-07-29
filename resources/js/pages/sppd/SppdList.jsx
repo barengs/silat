@@ -233,6 +233,7 @@ export default function SppdList() {
                         onPageSizeChange={(val) => { setPageSize(val); setPageIndex(0); }}
                         searchPlaceholder="Cari No. Dokumen atau pegawai..."
                         filters={filters}
+                        onRowClick={(row) => navigate(`/sppd/${row.id}`)}
                     />
                 </div>
             </div>
