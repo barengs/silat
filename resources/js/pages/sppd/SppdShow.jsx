@@ -461,6 +461,56 @@ export default function SppdShow() {
                                 </div>
                             )}
 
+                            {/* Step: LPP Dilaporkan */}
+                            <div className="relative pl-6">
+                                <div className={`absolute -left-2 top-0.5 w-4 h-4 rounded-full flex items-center justify-center
+                                    ${['reported', 'closed'].includes(sppd.status) ? 'bg-emerald-500' : 
+                                      ['approved', 'active'].includes(sppd.status) ? 'bg-amber-500 ring-4 ring-amber-50' : 
+                                      'bg-slate-200'}`}
+                                >
+                                    {['reported', 'closed'].includes(sppd.status) && <Check size={10} className="text-white" />}
+                                    {['approved', 'active'].includes(sppd.status) && <Clock size={10} className="text-white" />}
+                                </div>
+                                <div>
+                                    <p className={`text-sm font-bold ${
+                                        ['reported', 'closed'].includes(sppd.status) ? 'text-emerald-700' : 
+                                        ['approved', 'active'].includes(sppd.status) ? 'text-amber-700' : 
+                                        'text-slate-700'}`}>
+                                        Laporan Perjalanan Dinas (LPP) Diunggah
+                                    </p>
+                                    <p className="text-xs text-slate-500 mt-0.5">Pemohon Utama</p>
+                                    {sppd.report && (
+                                        <p className="text-[10px] text-slate-400 mt-1">
+                                            Dilaporkan: {new Date(sppd.report.submitted_at).toLocaleString('id-ID')}
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Step: Validasi LPP & Selesai */}
+                            <div className="relative pl-6">
+                                <div className={`absolute -left-2 top-0.5 w-4 h-4 rounded-full flex items-center justify-center
+                                    ${sppd.status === 'closed' ? 'bg-emerald-500' : 
+                                      sppd.status === 'reported' ? 'bg-amber-500 ring-4 ring-amber-50' : 
+                                      'bg-slate-200'}`}
+                                >
+                                    {sppd.status === 'closed' && <Check size={10} className="text-white" />}
+                                    {sppd.status === 'reported' && <Clock size={10} className="text-white" />}
+                                </div>
+                                <div>
+                                    <p className={`text-sm font-bold ${
+                                        sppd.status === 'closed' ? 'text-emerald-700' : 
+                                        sppd.status === 'reported' ? 'text-amber-700' : 
+                                        'text-slate-700'}`}>
+                                        Validasi Laporan & Selesai
+                                    </p>
+                                    <p className="text-xs text-slate-500 mt-0.5">Admin Disdik / Kabid</p>
+                                    {sppd.status === 'closed' && (
+                                        <p className="text-xs font-semibold text-emerald-600 mt-1">SPPD Selesai & Ditutup</p>
+                                    )}
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                 </div>

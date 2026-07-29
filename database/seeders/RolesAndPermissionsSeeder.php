@@ -41,7 +41,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'approval-flows.view', 'approval-flows.edit',
 
             // Guest Book
-            'guest-book.view', 'guest-book.create', 'guest-book.report',
+            'guest-book.view', 'guest-book.view-all', 'guest-book.create', 'guest-book.report',
 
             // SPPD
             'sppd.view-own', 'sppd.view-all',
@@ -91,7 +91,7 @@ class RolesAndPermissionsSeeder extends Seeder
         Role::firstOrCreate(['name' => 'resepsionis', 'guard_name' => 'api'])
             ->syncPermissions([
                 'dashboard.view',
-                'guest-book.view', 'guest-book.create',
+                'guest-book.view', 'guest-book.view-all', 'guest-book.create',
             ]);
 
         // 3. Verifikator — verify submissions from all modules
@@ -184,7 +184,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 'institutions.view', 'institutions.create', 'institutions.edit',
                 'divisions.view',
                 'reports.guest-book', 'reports.sppd', 'reports.ijazah', 'reports.treasurer',
-                'guest-book.view', 'guest-book.report',
+                'guest-book.view', 'guest-book.view-all', 'guest-book.report',
             ]);
     }
 }

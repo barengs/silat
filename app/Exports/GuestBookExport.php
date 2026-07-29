@@ -14,10 +14,13 @@ class GuestBookExport implements FromQuery, WithHeadings, WithMapping
 
     protected $endDate;
 
-    public function __construct($startDate = null, $endDate = null)
+    protected $divisionId;
+
+    public function __construct($startDate = null, $endDate = null, $divisionId = null)
     {
         $this->startDate = $startDate;
         $this->endDate = $endDate;
+        $this->divisionId = $divisionId;
     }
 
     public function query()
@@ -29,6 +32,9 @@ class GuestBookExport implements FromQuery, WithHeadings, WithMapping
         }
         if ($this->endDate) {
             $query->whereDate('date', '<=', clone $this->endDate);
+        }
+        if ($this->divisionId) {
+            $query->where('target_division_id', $this->divisionId);
         }
 
         return $query;

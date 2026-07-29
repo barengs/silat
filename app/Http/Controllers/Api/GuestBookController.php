@@ -21,8 +21,13 @@ class GuestBookController extends Controller
      */
     public function index(Request $request)
     {
+        $user = $request->user();
         $query = GuestBook::with(['agency', 'targetDivision', 'registeredBy'])
             ->orderBy('created_at', 'desc');
+
+        if (!$user->can('guest-book.view-all')) {
+            $query->where('target_division_id', $user->division_id);
+        }
 
         $startDate = $request->start_date ? Carbon::parse($request->start_date)->startOfDay() : Carbon::today();
         $endDate = $request->end_date ? Carbon::parse($request->end_date)->endOfDay() : Carbon::today()->endOfDay();
@@ -39,18 +44,30 @@ class GuestBookController extends Controller
             });
         }
 
-        // Statistics based on the selected date range
-        $totalInRange = GuestBook::whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])->count();
+        // Statistics based on the selected date range and division restriction
+        $statsQuery = GuestBook::whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')]);
+        if (!$user->can('guest-book.view-all')) {
+            $statsQuery->where('target_division_id', $user->division_id);
+        }
+        $totalInRange = $statsQuery->count();
 
-        $mostVisitedAgency = GuestBook::whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
-            ->whereNotNull('guest_agency_id')
+        $mostVisitedAgencyQuery = GuestBook::whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
+            ->whereNotNull('guest_agency_id');
+        if (!$user->can('guest-book.view-all')) {
+            $mostVisitedAgencyQuery->where('target_division_id', $user->division_id);
+        }
+        $mostVisitedAgency = $mostVisitedAgencyQuery
             ->select('guest_agency_id', DB::raw('count(*) as total'))
             ->groupBy('guest_agency_id')
             ->orderBy('total', 'desc')
             ->with('agency')
             ->first();
 
-        $mainTargetDivision = GuestBook::whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
+        $mainTargetDivisionQuery = GuestBook::whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')]);
+        if (!$user->can('guest-book.view-all')) {
+            $mainTargetDivisionQuery->where('target_division_id', $user->division_id);
+        }
+        $mainTargetDivision = $mainTargetDivisionQuery
             ->select('target_division_id', DB::raw('count(*) as total'))
             ->groupBy('target_division_id')
             ->orderBy('total', 'desc')
@@ -142,12 +159,18 @@ class GuestBookController extends Controller
      */
     public function export(Request $request)
     {
+        $user = $request->user();
         $startDate = $request->start_date ? Carbon::parse($request->start_date) : null;
         $endDate = $request->end_date ? Carbon::parse($request->end_date) : null;
 
+        $divisionId = null;
+        if (!$user->can('guest-book.view-all')) {
+            $divisionId = $user->division_id;
+        }
+
         $filename = 'buku_tamu_'.now()->format('Ymd_His').'.xlsx';
 
-        return Excel::download(new GuestBookExport($startDate, $endDate), $filename);
+        return Excel::download(new GuestBookExport($startDate, $endDate, $divisionId), $filename);
     }
 
     /**
@@ -155,18 +178,27 @@ class GuestBookController extends Controller
      */
     public function report(Request $request)
     {
+        $user = $request->user();
         $startDate = $request->start_date ? Carbon::parse($request->start_date)->startOfDay() : Carbon::now()->subDays(30)->startOfDay();
         $endDate = $request->end_date ? Carbon::parse($request->end_date)->endOfDay() : Carbon::now()->endOfDay();
 
         // 1. Trend Kunjungan Harian (Line Chart)
-        $dailyTrend = GuestBook::whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
+        $dailyTrendQuery = GuestBook::whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')]);
+        if (!$user->can('guest-book.view-all')) {
+            $dailyTrendQuery->where('target_division_id', $user->division_id);
+        }
+        $dailyTrend = $dailyTrendQuery
             ->select('date', DB::raw('count(*) as total'))
             ->groupBy('date')
             ->orderBy('date', 'asc')
             ->get();
 
         // 2. Kunjungan per Divisi (Bar/Pie Chart)
-        $divisionStats = GuestBook::whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
+        $divisionStatsQuery = GuestBook::whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')]);
+        if (!$user->can('guest-book.view-all')) {
+            $divisionStatsQuery->where('target_division_id', $user->division_id);
+        }
+        $divisionStats = $divisionStatsQuery
             ->select('target_division_id', DB::raw('count(*) as total'))
             ->groupBy('target_division_id')
             ->with('targetDivision')
