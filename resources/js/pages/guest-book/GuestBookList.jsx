@@ -14,6 +14,9 @@ import DataTable from '@/components/DataTable/DataTable';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import CheckinModal from './CheckinModal';
+import Modal from '@/components/ui/Modal';
+import Input from '@/components/ui/Input';
+import FormGroup from '@/components/ui/FormGroup';
 
 export default function GuestBookList() {
     const { roles, permissions } = useSelector(state => state.auth);
@@ -60,14 +63,23 @@ export default function GuestBookList() {
         }
     });
 
+    const [deleteId, setDeleteId] = useState(null);
+    const [deletePassword, setDeletePassword] = useState('');
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
     const deleteMutation = useMutation({
-        mutationFn: async (id) => {
-            const res = await axios.delete(`/guest-book/${id}`);
+        mutationFn: async ({ id, password }) => {
+            const res = await axios.delete(`/guest-book/${id}`, {
+                data: { password }
+            });
             return res.data;
         },
         onSuccess: () => {
             queryClient.invalidateQueries(['guest-books']);
             toast.success('Data tamu berhasil dihapus.');
+            setIsDeleteModalOpen(false);
+            setDeleteId(null);
+            setDeletePassword('');
         },
         onError: (err) => {
             toast.error(err.response?.data?.message || 'Gagal menghapus data tamu.');
@@ -75,9 +87,9 @@ export default function GuestBookList() {
     });
 
     const handleDelete = (id) => {
-        if (window.confirm('Apakah Anda yakin ingin menghapus data tamu ini?')) {
-            deleteMutation.mutate(id);
-        }
+        setDeleteId(id);
+        setDeletePassword('');
+        setIsDeleteModalOpen(true);
     };
 
     // Fetch Guest Books with Stats
@@ -384,6 +396,66 @@ export default function GuestBookList() {
                     setEditingGuest(null);
                 }}
             />
+
+            {/* Delete Confirmation Password Modal */}
+            <Modal
+                isOpen={isDeleteModalOpen}
+                onClose={() => {
+                    setIsDeleteModalOpen(false);
+                    setDeleteId(null);
+                    setDeletePassword('');
+                }}
+                title="Konfirmasi Penghapusan Tamu"
+                maxWidth="max-w-md"
+            >
+                <form 
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        if (!deletePassword) {
+                            toast.error('Password konfirmasi wajib diisi.');
+                            return;
+                        }
+                        deleteMutation.mutate({ id: deleteId, password: deletePassword });
+                    }} 
+                    className="space-y-4"
+                >
+                    <p className="text-sm text-slate-600">
+                        Untuk menghapus data tamu ini, silakan masukkan password akun Anda untuk verifikasi keamanan.
+                    </p>
+                    <FormGroup label="Password Akun Anda">
+                        <Input
+                            type="password"
+                            placeholder="Masukkan password Anda"
+                            value={deletePassword}
+                            onChange={(e) => setDeletePassword(e.target.value)}
+                            required
+                        />
+                    </FormGroup>
+                    <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                                setIsDeleteModalOpen(false);
+                                setDeleteId(null);
+                                setDeletePassword('');
+                            }}
+                            className="border-slate-200 text-slate-600 bg-white hover:bg-slate-50"
+                        >
+                            Batal
+                        </Button>
+                        <Button
+                            type="submit"
+                            size="sm"
+                            isLoading={deleteMutation.isPending}
+                            className="bg-rose-600 hover:bg-rose-700 text-white"
+                        >
+                            Konfirmasi Hapus
+                        </Button>
+                    </div>
+                </form>
+            </Modal>
         </div>
     );
 }

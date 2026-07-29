@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Facades\Excel;
 
 class GuestBookController extends Controller
@@ -304,11 +305,20 @@ class GuestBookController extends Controller
         }
     }
 
-    /**
-     * Delete the specified guest book resource.
-     */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
+        $request->validate([
+            'password' => 'required|string',
+        ]);
+
+        $user = $request->user();
+
+        if (!Hash::check($request->password, $user->password)) {
+            return response()->json([
+                'message' => 'Konfirmasi password salah.',
+            ], 422);
+        }
+
         $guestBook = GuestBook::findOrFail($id);
         $guestBook->delete();
 
