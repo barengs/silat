@@ -9,6 +9,7 @@ import {
 import { Plus, Edit, Trash2, Building2, CheckCircle, XCircle, Upload, Download, Layers } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from '@/bootstrap';
+import { useSelector } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -31,6 +32,11 @@ const institutionSchema = z.object({
 
 export default function InstitutionList() {
     const queryClient = useQueryClient();
+    const { roles, permissions } = useSelector(state => state.auth);
+    const canManageTypes = permissions.includes('institution-types.view') || roles.includes('super-admin');
+    const canCreateType = permissions.includes('institution-types.create') || roles.includes('super-admin');
+    const canEditType = permissions.includes('institution-types.edit') || roles.includes('super-admin');
+    const canDeleteType = permissions.includes('institution-types.delete') || roles.includes('super-admin');
 
     // Table State
     const [pageIndex, setPageIndex] = useState(0);
@@ -315,14 +321,16 @@ export default function InstitutionList() {
                     >
                         Import Excel/CSV
                     </Button>
-                    <Button 
-                        variant="outline"
-                        onClick={() => setIsTypeModalOpen(true)}
-                        icon={Layers}
-                        className="border-slate-200"
-                    >
-                        Kelola Tipe Instansi
-                    </Button>
+                    {canManageTypes && (
+                        <Button 
+                            variant="outline"
+                            onClick={() => setIsTypeModalOpen(true)}
+                            icon={Layers}
+                            className="border-slate-200"
+                        >
+                            Kelola Tipe Instansi
+                        </Button>
+                    )}
                     <Button 
                         onClick={() => openModal()}
                         icon={Plus}
@@ -489,91 +497,93 @@ export default function InstitutionList() {
             >
                 <div className="space-y-6 pt-2">
                     {/* Form Input */}
-                    <form 
-                        onSubmit={(e) => {
-                            e.preventDefault();
-                            if (!typeName) {
-                                toast.error('Nama tipe instansi wajib diisi.');
-                                return;
-                            }
-                            typeMutation.mutate({
-                                name: typeName,
-                                group: typeGroup,
-                                school_level: typeGroup === 'sekolah' ? (typeLevel || null) : null
-                            });
-                        }}
-                        className="p-4 bg-slate-50 border border-slate-100 rounded-lg space-y-4"
-                    >
-                        <h4 className="text-sm font-bold text-slate-800">
-                            {editingType ? 'Edit Tipe Instansi' : 'Tambah Tipe Instansi Baru'}
-                        </h4>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <FormGroup label="Nama Tipe">
-                                <Input
-                                    type="text"
-                                    placeholder="Contoh: SMA, SMP, cabdin"
-                                    value={typeName}
-                                    onChange={(e) => setTypeName(e.target.value)}
-                                    required
-                                />
-                            </FormGroup>
+                    {((!editingType && canCreateType) || (editingType && canEditType)) && (
+                        <form 
+                            onSubmit={(e) => {
+                                e.preventDefault();
+                                if (!typeName) {
+                                    toast.error('Nama tipe instansi wajib diisi.');
+                                    return;
+                                }
+                                typeMutation.mutate({
+                                    name: typeName,
+                                    group: typeGroup,
+                                    school_level: typeGroup === 'sekolah' ? (typeLevel || null) : null
+                                });
+                            }}
+                            className="p-4 bg-slate-50 border border-slate-100 rounded-lg space-y-4"
+                        >
+                            <h4 className="text-sm font-bold text-slate-800">
+                                {editingType ? 'Edit Tipe Instansi' : 'Tambah Tipe Instansi Baru'}
+                            </h4>
                             
-                            <FormGroup label="Grup">
-                                <Select
-                                    value={typeGroup}
-                                    onChange={(e) => setTypeGroup(e.target.value)}
-                                    disabled={editingType && ['dinas', 'cabdin', 'sekolah_sma', 'sekolah_smk', 'sekolah_pkplk', 'other'].includes(editingType.code)}
-                                >
-                                    <option value="sekolah">Sekolah</option>
-                                    <option value="dinas">Dinas</option>
-                                    <option value="external">External / Lainnya</option>
-                                </Select>
-                            </FormGroup>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <FormGroup label="Nama Tipe">
+                                    <Input
+                                        type="text"
+                                        placeholder="Contoh: SMA, SMP, cabdin"
+                                        value={typeName}
+                                        onChange={(e) => setTypeName(e.target.value)}
+                                        required
+                                    />
+                                </FormGroup>
+                                
+                                <FormGroup label="Grup">
+                                    <Select
+                                        value={typeGroup}
+                                        onChange={(e) => setTypeGroup(e.target.value)}
+                                        disabled={editingType && ['dinas', 'cabdin', 'sekolah_sma', 'sekolah_smk', 'sekolah_pkplk', 'other'].includes(editingType.code)}
+                                    >
+                                        <option value="sekolah">Sekolah</option>
+                                        <option value="dinas">Dinas</option>
+                                        <option value="external">External / Lainnya</option>
+                                    </Select>
+                                </FormGroup>
 
-                            <FormGroup label="Jenjang (Khusus Sekolah)">
-                                <Select
-                                    value={typeLevel}
-                                    onChange={(e) => setTypeLevel(e.target.value)}
-                                    disabled={typeGroup !== 'sekolah' || (editingType && ['dinas', 'cabdin', 'sekolah_sma', 'sekolah_smk', 'sekolah_pkplk', 'other'].includes(editingType.code))}
-                                >
-                                    <option value="">-- Tanpa Jenjang --</option>
-                                    <option value="TK">TK</option>
-                                    <option value="SD">SD</option>
-                                    <option value="SMP">SMP</option>
-                                    <option value="SMA">SMA</option>
-                                    <option value="SMK">SMK</option>
-                                    <option value="SLB">SLB</option>
-                                </Select>
-                            </FormGroup>
-                        </div>
+                                <FormGroup label="Jenjang (Khusus Sekolah)">
+                                    <Select
+                                        value={typeLevel}
+                                        onChange={(e) => setTypeLevel(e.target.value)}
+                                        disabled={typeGroup !== 'sekolah' || (editingType && ['dinas', 'cabdin', 'sekolah_sma', 'sekolah_smk', 'sekolah_pkplk', 'other'].includes(editingType.code))}
+                                    >
+                                        <option value="">-- Tanpa Jenjang --</option>
+                                        <option value="TK">TK</option>
+                                        <option value="SD">SD</option>
+                                        <option value="SMP">SMP</option>
+                                        <option value="SMA">SMA</option>
+                                        <option value="SMK">SMK</option>
+                                        <option value="SLB">SLB</option>
+                                    </Select>
+                                </FormGroup>
+                            </div>
 
-                        <div className="flex justify-end gap-2 pt-2">
-                            {editingType && (
+                            <div className="flex justify-end gap-2 pt-2">
+                                {editingType && (
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                            setEditingType(null);
+                                            setTypeName('');
+                                            setTypeGroup('sekolah');
+                                            setTypeLevel('');
+                                        }}
+                                        className="border-slate-200 text-slate-700 bg-white hover:bg-slate-50"
+                                    >
+                                        Batal Edit
+                                    </Button>
+                                )}
                                 <Button
-                                    type="button"
-                                    variant="outline"
+                                    type="submit"
                                     size="sm"
-                                    onClick={() => {
-                                        setEditingType(null);
-                                        setTypeName('');
-                                        setTypeGroup('sekolah');
-                                        setTypeLevel('');
-                                    }}
-                                    className="border-slate-200 text-slate-700 bg-white hover:bg-slate-50"
+                                    isLoading={typeMutation.isPending}
                                 >
-                                    Batal Edit
+                                    {editingType ? 'Perbarui Tipe' : 'Tambah Tipe'}
                                 </Button>
-                            )}
-                            <Button
-                                type="submit"
-                                size="sm"
-                                isLoading={typeMutation.isPending}
-                            >
-                                {editingType ? 'Perbarui Tipe' : 'Tambah Tipe'}
-                            </Button>
-                        </div>
-                    </form>
+                            </div>
+                        </form>
+                    )}
 
                     {/* List Table */}
                     <div className="space-y-3">
@@ -600,19 +610,21 @@ export default function InstitutionList() {
                                                 <td className="px-4 py-3">{type.school_level || '-'}</td>
                                                 <td className="px-4 py-3 text-right">
                                                     <div className="flex justify-end gap-2">
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => {
-                                                                setEditingType(type);
-                                                                setTypeName(type.name);
-                                                                setTypeGroup(type.group);
-                                                                setTypeLevel(type.school_level || '');
-                                                            }}
-                                                            className="text-blue-600 hover:text-blue-800 text-xs font-semibold"
-                                                        >
-                                                            Edit
-                                                        </button>
-                                                        {!isSystem && (
+                                                        {canEditType && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setEditingType(type);
+                                                                    setTypeName(type.name);
+                                                                    setTypeGroup(type.group);
+                                                                    setTypeLevel(type.school_level || '');
+                                                                }}
+                                                                className="text-blue-600 hover:text-blue-800 text-xs font-semibold"
+                                                            >
+                                                                Edit
+                                                            </button>
+                                                        )}
+                                                        {!isSystem && canDeleteType && (
                                                             <button
                                                                 type="button"
                                                                 onClick={() => {

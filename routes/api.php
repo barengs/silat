@@ -121,7 +121,10 @@ Route::middleware('jwt.auth')->group(function () {
     Route::post('/institutions/import', [InstitutionController::class, 'import']);
     Route::apiResource('institutions', InstitutionController::class);
     Route::get('/institutions/search', [InstitutionController::class, 'search']);
-    Route::apiResource('institution-types', InstitutionTypeController::class);
+    Route::get('/institution-types', [InstitutionTypeController::class, 'index'])->middleware('permission:institution-types.view');
+    Route::post('/institution-types', [InstitutionTypeController::class, 'store'])->middleware('permission:institution-types.create');
+    Route::put('/institution-types/{id}', [InstitutionTypeController::class, 'update'])->middleware('permission:institution-types.edit');
+    Route::delete('/institution-types/{id}', [InstitutionTypeController::class, 'destroy'])->middleware('permission:institution-types.delete');
 
     // ── Divisions ───────────────────────────────────────────────────────────
     Route::get('/divisions/template', [DivisionController::class, 'template']);
