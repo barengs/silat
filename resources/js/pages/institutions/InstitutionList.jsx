@@ -6,7 +6,7 @@ import {
     getPaginationRowModel,
     flexRender,
 } from '@tanstack/react-table';
-import { Plus, Edit, Trash2, Building2, CheckCircle, XCircle, Upload, Download } from 'lucide-react';
+import { Plus, Edit, Trash2, Building2, CheckCircle, XCircle, Upload, Download, Layers } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from '@/bootstrap';
 import { useForm } from 'react-hook-form';
@@ -23,7 +23,7 @@ import Badge from '@/components/ui/Badge';
 
 const institutionSchema = z.object({
     name: z.string().min(1, 'Nama instansi wajib diisi'),
-    type: z.enum(['dinas', 'cabdin', 'sekolah_sma', 'sekolah_smk', 'sekolah_pkplk', 'other']),
+    type: z.string().min(1, 'Tipe instansi wajib dipilih'),
     npsn: z.string().nullable().optional(),
     city: z.string().nullable().optional(),
     is_active: z.boolean().default(true),
@@ -43,10 +43,61 @@ export default function InstitutionList() {
     const [isImportModalOpen, setIsImportModalOpen] = useState(false);
     const [importFile, setImportFile] = useState(null);
 
+    // Dynamic Institution Type Manager States
+    const [isTypeModalOpen, setIsTypeModalOpen] = useState(false);
+    const [editingType, setEditingType] = useState(null);
+    const [typeName, setTypeName] = useState('');
+    const [typeGroup, setTypeGroup] = useState('sekolah');
+    const [typeLevel, setTypeLevel] = useState('');
+
     const { register, handleSubmit, reset, setValue, formState: { errors, isSubmitting } } = useForm({
         resolver: zodResolver(institutionSchema),
         defaultValues: {
             name: '', type: 'sekolah_sma', npsn: '', city: '', is_active: true
+        }
+    });
+
+    // Fetch Dynamic Institution Types
+    const { data: institutionTypes, refetch: refetchTypes } = useQuery({
+        queryKey: ['institution-types'],
+        queryFn: async () => {
+            const res = await axios.get('/institution-types');
+            return res.data?.data || [];
+        }
+    });
+
+    // Create or Update InstitutionType Mutation
+    const typeMutation = useMutation({
+        mutationFn: async (data) => {
+            if (editingType) {
+                return await axios.put(`/institution-types/${editingType.id}`, data);
+            }
+            return await axios.post('/institution-types', data);
+        },
+        onSuccess: (res) => {
+            toast.success(res.data?.message || 'Tipe instansi berhasil disimpan.');
+            refetchTypes();
+            setEditingType(null);
+            setTypeName('');
+            setTypeGroup('sekolah');
+            setTypeLevel('');
+        },
+        onError: (err) => {
+            toast.error(err.response?.data?.message || 'Gagal menyimpan tipe instansi.');
+        }
+    });
+
+    // Delete InstitutionType Mutation
+    const deleteTypeMutation = useMutation({
+        mutationFn: async (id) => {
+            return await axios.delete(`/institution-types/${id}`);
+        },
+        onSuccess: (res) => {
+            toast.success(res.data?.message || 'Tipe instansi berhasil dihapus.');
+            refetchTypes();
+        },
+        onError: (err) => {
+            toast.error(err.response?.data?.message || 'Gagal menghapus tipe instansi.');
         }
     });
 
@@ -153,7 +204,11 @@ export default function InstitutionList() {
         mutation.mutate(data);
     };
 
-    const getTypeLabel = (type) => {
+    const getTypeLabel = (typeCode) => {
+        if (institutionTypes) {
+            const matched = institutionTypes.find(t => t.code === typeCode);
+            if (matched) return matched.name;
+        }
         const types = {
             'dinas': 'Dinas Pendidikan',
             'cabdin': 'Cabang Dinas',
@@ -162,7 +217,7 @@ export default function InstitutionList() {
             'sekolah_pkplk': 'PKPLK',
             'other': 'Lainnya'
         };
-        return types[type] || type;
+        return types[typeCode] || typeCode;
     };
 
     const columns = useMemo(() => [
@@ -261,6 +316,14 @@ export default function InstitutionList() {
                         Import Excel/CSV
                     </Button>
                     <Button 
+                        variant="outline"
+                        onClick={() => setIsTypeModalOpen(true)}
+                        icon={Layers}
+                        className="border-slate-200"
+                    >
+                        Kelola Tipe Instansi
+                    </Button>
+                    <Button 
                         onClick={() => openModal()}
                         icon={Plus}
                     >
@@ -297,12 +360,19 @@ export default function InstitutionList() {
                     <div className="grid grid-cols-2 gap-4">
                         <FormGroup label="Tipe">
                             <Select {...register('type')}>
-                                <option value="dinas">Dinas Pendidikan</option>
-                                <option value="cabdin">Cabang Dinas</option>
-                                <option value="sekolah_sma">SMA</option>
-                                <option value="sekolah_smk">SMK</option>
-                                <option value="sekolah_pkplk">PKPLK</option>
-                                <option value="other">Lainnya</option>
+                                {institutionTypes?.map(type => (
+                                    <option key={type.id} value={type.code}>{type.name}</option>
+                                ))}
+                                {(!institutionTypes || institutionTypes.length === 0) && (
+                                    <>
+                                        <option value="dinas">Dinas Pendidikan</option>
+                                        <option value="cabdin">Cabang Dinas</option>
+                                        <option value="sekolah_sma">SMA</option>
+                                        <option value="sekolah_smk">SMK</option>
+                                        <option value="sekolah_pkplk">PKPLK</option>
+                                        <option value="other">Lainnya</option>
+                                    </>
+                                )}
                             </Select>
                         </FormGroup>
                         <FormGroup label="NPSN (Khusus Sekolah)" error={errors.npsn?.message}>
@@ -402,6 +472,176 @@ export default function InstitutionList() {
                         </Button>
                     </div>
                 </form>
+            </Modal>
+
+            {/* Modal Kelola Tipe Instansi */}
+            <Modal
+                isOpen={isTypeModalOpen}
+                onClose={() => {
+                    setIsTypeModalOpen(false);
+                    setEditingType(null);
+                    setTypeName('');
+                    setTypeGroup('sekolah');
+                    setTypeLevel('');
+                }}
+                title="Kelola Tipe Instansi"
+                maxWidth="max-w-2xl"
+            >
+                <div className="space-y-6 pt-2">
+                    {/* Form Input */}
+                    <form 
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            if (!typeName) {
+                                toast.error('Nama tipe instansi wajib diisi.');
+                                return;
+                            }
+                            typeMutation.mutate({
+                                name: typeName,
+                                group: typeGroup,
+                                school_level: typeGroup === 'sekolah' ? (typeLevel || null) : null
+                            });
+                        }}
+                        className="p-4 bg-slate-50 border border-slate-100 rounded-lg space-y-4"
+                    >
+                        <h4 className="text-sm font-bold text-slate-800">
+                            {editingType ? 'Edit Tipe Instansi' : 'Tambah Tipe Instansi Baru'}
+                        </h4>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <FormGroup label="Nama Tipe">
+                                <Input
+                                    type="text"
+                                    placeholder="Contoh: SMA, SMP, cabdin"
+                                    value={typeName}
+                                    onChange={(e) => setTypeName(e.target.value)}
+                                    required
+                                />
+                            </FormGroup>
+                            
+                            <FormGroup label="Grup">
+                                <Select
+                                    value={typeGroup}
+                                    onChange={(e) => setTypeGroup(e.target.value)}
+                                    disabled={editingType && ['dinas', 'cabdin', 'sekolah_sma', 'sekolah_smk', 'sekolah_pkplk', 'other'].includes(editingType.code)}
+                                >
+                                    <option value="sekolah">Sekolah</option>
+                                    <option value="dinas">Dinas</option>
+                                    <option value="external">External / Lainnya</option>
+                                </Select>
+                            </FormGroup>
+
+                            <FormGroup label="Jenjang (Khusus Sekolah)">
+                                <Select
+                                    value={typeLevel}
+                                    onChange={(e) => setTypeLevel(e.target.value)}
+                                    disabled={typeGroup !== 'sekolah' || (editingType && ['dinas', 'cabdin', 'sekolah_sma', 'sekolah_smk', 'sekolah_pkplk', 'other'].includes(editingType.code))}
+                                >
+                                    <option value="">-- Tanpa Jenjang --</option>
+                                    <option value="TK">TK</option>
+                                    <option value="SD">SD</option>
+                                    <option value="SMP">SMP</option>
+                                    <option value="SMA">SMA</option>
+                                    <option value="SMK">SMK</option>
+                                    <option value="SLB">SLB</option>
+                                </Select>
+                            </FormGroup>
+                        </div>
+
+                        <div className="flex justify-end gap-2 pt-2">
+                            {editingType && (
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                        setEditingType(null);
+                                        setTypeName('');
+                                        setTypeGroup('sekolah');
+                                        setTypeLevel('');
+                                    }}
+                                    className="border-slate-200 text-slate-700 bg-white hover:bg-slate-50"
+                                >
+                                    Batal Edit
+                                </Button>
+                            )}
+                            <Button
+                                type="submit"
+                                size="sm"
+                                isLoading={typeMutation.isPending}
+                            >
+                                {editingType ? 'Perbarui Tipe' : 'Tambah Tipe'}
+                            </Button>
+                        </div>
+                    </form>
+
+                    {/* List Table */}
+                    <div className="space-y-3">
+                        <h4 className="text-sm font-bold text-slate-800">Daftar Tipe Instansi</h4>
+                        <div className="overflow-x-auto border border-slate-100 rounded-lg">
+                            <table className="w-full text-sm text-left text-slate-500">
+                                <thead className="text-xs text-slate-700 uppercase bg-slate-50 border-b border-slate-100">
+                                    <tr>
+                                        <th className="px-4 py-3 font-semibold">Nama Tipe</th>
+                                        <th className="px-4 py-3 font-semibold">Kode</th>
+                                        <th className="px-4 py-3 font-semibold">Grup</th>
+                                        <th className="px-4 py-3 font-semibold">Jenjang</th>
+                                        <th className="px-4 py-3 font-semibold text-right">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {institutionTypes?.map(type => {
+                                        const isSystem = ['dinas', 'cabdin', 'sekolah_sma', 'sekolah_smk', 'sekolah_pkplk', 'other'].includes(type.code);
+                                        return (
+                                            <tr key={type.id} className="bg-white border-b border-slate-50 hover:bg-slate-50">
+                                                <td className="px-4 py-3 font-medium text-slate-900">{type.name}</td>
+                                                <td className="px-4 py-3 font-mono text-xs">{type.code}</td>
+                                                <td className="px-4 py-3 capitalize">{type.group}</td>
+                                                <td className="px-4 py-3">{type.school_level || '-'}</td>
+                                                <td className="px-4 py-3 text-right">
+                                                    <div className="flex justify-end gap-2">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                setEditingType(type);
+                                                                setTypeName(type.name);
+                                                                setTypeGroup(type.group);
+                                                                setTypeLevel(type.school_level || '');
+                                                            }}
+                                                            className="text-blue-600 hover:text-blue-800 text-xs font-semibold"
+                                                        >
+                                                            Edit
+                                                        </button>
+                                                        {!isSystem && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    if (window.confirm(`Hapus tipe instansi "${type.name}"?`)) {
+                                                                        deleteTypeMutation.mutate(type.id);
+                                                                    }
+                                                                }}
+                                                                className="text-rose-600 hover:text-rose-800 text-xs font-semibold"
+                                                            >
+                                                                Hapus
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                    {(!institutionTypes || institutionTypes.length === 0) && (
+                                        <tr>
+                                            <td colSpan="5" className="px-4 py-6 text-center text-slate-400 italic">
+                                                Memuat tipe instansi...
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </Modal>
         </div>
     );

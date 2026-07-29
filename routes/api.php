@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\DivisionController;
 use App\Http\Controllers\Api\GuestBookController;
 use App\Http\Controllers\Api\IjazahRevisionController;
 use App\Http\Controllers\Api\InstitutionController;
+use App\Http\Controllers\Api\InstitutionTypeController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\PermissionController;
 use App\Http\Controllers\Api\ProfileController;
@@ -120,6 +121,7 @@ Route::middleware('jwt.auth')->group(function () {
     Route::post('/institutions/import', [InstitutionController::class, 'import']);
     Route::apiResource('institutions', InstitutionController::class);
     Route::get('/institutions/search', [InstitutionController::class, 'search']);
+    Route::apiResource('institution-types', InstitutionTypeController::class);
 
     // ── Divisions ───────────────────────────────────────────────────────────
     Route::get('/divisions/template', [DivisionController::class, 'template']);

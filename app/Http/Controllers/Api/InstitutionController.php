@@ -16,22 +16,27 @@ class InstitutionController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Institution::query();
+        $query = Institution::with('institutionType');
 
         if ($request->has('type')) {
             $type = $request->type;
-            if ($type === 'sekolah_sma') {
-                $query->where('type', 'sekolah')->where('school_level', 'SMA');
-            } elseif ($type === 'sekolah_smk') {
-                $query->where('type', 'sekolah')->where('school_level', 'SMK');
-            } elseif ($type === 'sekolah_pkplk') {
-                $query->where('type', 'sekolah')->where('school_level', 'SLB');
-            } elseif ($type === 'dinas') {
-                $query->where('type', 'dinas');
-            } elseif ($type === 'cabdin' || $type === 'other') {
-                $query->where('type', 'external');
+            $instType = \App\Models\InstitutionType::where('code', $type)->first();
+            if ($instType) {
+                $query->where('institution_type_id', $instType->id);
             } else {
-                $query->where('type', $type);
+                if ($type === 'sekolah_sma') {
+                    $query->where('type', 'sekolah')->where('school_level', 'SMA');
+                } elseif ($type === 'sekolah_smk') {
+                    $query->where('type', 'sekolah')->where('school_level', 'SMK');
+                } elseif ($type === 'sekolah_pkplk') {
+                    $query->where('type', 'sekolah')->where('school_level', 'SLB');
+                } elseif ($type === 'dinas') {
+                    $query->where('type', 'dinas');
+                } elseif ($type === 'cabdin' || $type === 'other') {
+                    $query->where('type', 'external');
+                } else {
+                    $query->where('type', $type);
+                }
             }
         }
 
@@ -54,16 +59,20 @@ class InstitutionController extends Controller
         // Map fields for frontend compatibility
         $institutions->getCollection()->transform(function ($item) {
             $item->npsn = $item->npsn_code;
-            if ($item->type === 'sekolah') {
-                if ($item->school_level === 'SMK') {
-                    $item->type = 'sekolah_smk';
-                } elseif ($item->school_level === 'SLB') {
-                    $item->type = 'sekolah_pkplk';
-                } else {
-                    $item->type = 'sekolah_sma';
+            if ($item->institutionType) {
+                $item->type = $item->institutionType->code;
+            } else {
+                if ($item->type === 'sekolah') {
+                    if ($item->school_level === 'SMK') {
+                        $item->type = 'sekolah_smk';
+                    } elseif ($item->school_level === 'SLB') {
+                        $item->type = 'sekolah_pkplk';
+                    } else {
+                        $item->type = 'sekolah_sma';
+                    }
+                } elseif ($item->type === 'external') {
+                    $item->type = 'cabdin';
                 }
-            } elseif ($item->type === 'external') {
-                $item->type = 'cabdin';
             }
             return $item;
         });
@@ -81,7 +90,7 @@ class InstitutionController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'type' => 'required|in:dinas,cabdin,sekolah_sma,sekolah_smk,sekolah_pkplk,other',
+            'type' => 'required|string|max:100',
             'npsn' => 'nullable|string|max:20|unique:institutions,npsn_code',
             'address' => 'nullable|string',
             'city' => 'nullable|string|max:100',
@@ -97,21 +106,29 @@ class InstitutionController extends Controller
         unset($dbData['npsn']);
 
         $frontendType = $validated['type'];
-        if ($frontendType === 'sekolah_sma') {
-            $dbData['type'] = 'sekolah';
-            $dbData['school_level'] = 'SMA';
-        } elseif ($frontendType === 'sekolah_smk') {
-            $dbData['type'] = 'sekolah';
-            $dbData['school_level'] = 'SMK';
-        } elseif ($frontendType === 'sekolah_pkplk') {
-            $dbData['type'] = 'sekolah';
-            $dbData['school_level'] = 'SLB';
-        } elseif ($frontendType === 'dinas') {
-            $dbData['type'] = 'dinas';
-            $dbData['school_level'] = null;
+        $instType = \App\Models\InstitutionType::where('code', $frontendType)->first();
+
+        if ($instType) {
+            $dbData['institution_type_id'] = $instType->id;
+            $dbData['type'] = $instType->group;
+            $dbData['school_level'] = $instType->school_level;
         } else {
-            $dbData['type'] = 'external';
-            $dbData['school_level'] = null;
+            if ($frontendType === 'sekolah_sma') {
+                $dbData['type'] = 'sekolah';
+                $dbData['school_level'] = 'SMA';
+            } elseif ($frontendType === 'sekolah_smk') {
+                $dbData['type'] = 'sekolah';
+                $dbData['school_level'] = 'SMK';
+            } elseif ($frontendType === 'sekolah_pkplk') {
+                $dbData['type'] = 'sekolah';
+                $dbData['school_level'] = 'SLB';
+            } elseif ($frontendType === 'dinas') {
+                $dbData['type'] = 'dinas';
+                $dbData['school_level'] = null;
+            } else {
+                $dbData['type'] = 'external';
+                $dbData['school_level'] = null;
+            }
         }
 
         $institution = Institution::create($dbData);
@@ -131,17 +148,22 @@ class InstitutionController extends Controller
      */
     public function show(Institution $institution)
     {
+        $institution->load('institutionType');
         $institution->npsn = $institution->npsn_code;
-        if ($institution->type === 'sekolah') {
-            if ($institution->school_level === 'SMK') {
-                $institution->type = 'sekolah_smk';
-            } elseif ($institution->school_level === 'SLB') {
-                $institution->type = 'sekolah_pkplk';
-            } else {
-                $institution->type = 'sekolah_sma';
+        if ($institution->institutionType) {
+            $institution->type = $institution->institutionType->code;
+        } else {
+            if ($institution->type === 'sekolah') {
+                if ($institution->school_level === 'SMK') {
+                    $institution->type = 'sekolah_smk';
+                } elseif ($institution->school_level === 'SLB') {
+                    $institution->type = 'sekolah_pkplk';
+                } else {
+                    $institution->type = 'sekolah_sma';
+                }
+            } elseif ($institution->type === 'external') {
+                $institution->type = 'cabdin';
             }
-        } elseif ($institution->type === 'external') {
-            $institution->type = 'cabdin';
         }
 
         return response()->json([
@@ -157,7 +179,7 @@ class InstitutionController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'type' => 'required|in:dinas,cabdin,sekolah_sma,sekolah_smk,sekolah_pkplk,other',
+            'type' => 'required|string|max:100',
             'npsn' => 'nullable|string|max:20|unique:institutions,npsn_code,'.$institution->id,
             'address' => 'nullable|string',
             'city' => 'nullable|string|max:100',
@@ -173,21 +195,29 @@ class InstitutionController extends Controller
         unset($dbData['npsn']);
 
         $frontendType = $validated['type'];
-        if ($frontendType === 'sekolah_sma') {
-            $dbData['type'] = 'sekolah';
-            $dbData['school_level'] = 'SMA';
-        } elseif ($frontendType === 'sekolah_smk') {
-            $dbData['type'] = 'sekolah';
-            $dbData['school_level'] = 'SMK';
-        } elseif ($frontendType === 'sekolah_pkplk') {
-            $dbData['type'] = 'sekolah';
-            $dbData['school_level'] = 'SLB';
-        } elseif ($frontendType === 'dinas') {
-            $dbData['type'] = 'dinas';
-            $dbData['school_level'] = null;
+        $instType = \App\Models\InstitutionType::where('code', $frontendType)->first();
+
+        if ($instType) {
+            $dbData['institution_type_id'] = $instType->id;
+            $dbData['type'] = $instType->group;
+            $dbData['school_level'] = $instType->school_level;
         } else {
-            $dbData['type'] = 'external';
-            $dbData['school_level'] = null;
+            if ($frontendType === 'sekolah_sma') {
+                $dbData['type'] = 'sekolah';
+                $dbData['school_level'] = 'SMA';
+            } elseif ($frontendType === 'sekolah_smk') {
+                $dbData['type'] = 'sekolah';
+                $dbData['school_level'] = 'SMK';
+            } elseif ($frontendType === 'sekolah_pkplk') {
+                $dbData['type'] = 'sekolah';
+                $dbData['school_level'] = 'SLB';
+            } elseif ($frontendType === 'dinas') {
+                $dbData['type'] = 'dinas';
+                $dbData['school_level'] = null;
+            } else {
+                $dbData['type'] = 'external';
+                $dbData['school_level'] = null;
+            }
         }
 
         $institution->update($dbData);

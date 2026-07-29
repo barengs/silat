@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Institution extends Model
@@ -26,6 +27,7 @@ class Institution extends Model
         'email',
         'principal_name',
         'is_active',
+        'institution_type_id',
     ];
 
     protected $casts = [
@@ -38,6 +40,14 @@ class Institution extends Model
     public function users(): HasMany
     {
         return $this->hasMany(User::class);
+    }
+
+    /**
+     * Get the type details for this institution.
+     */
+    public function institutionType(): BelongsTo
+    {
+        return $this->belongsTo(InstitutionType::class, 'institution_type_id');
     }
 
     /**
