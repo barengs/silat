@@ -72,10 +72,10 @@ class SchoolTransferController extends Controller
             'target_school' => 'required|string|max:255',
             'target_school_address' => 'required|string',
             'reason' => 'required|string',
-            'file_request_letter' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'file_report_card' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'file_mutation_letter' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'file_additional' => 'nullable|file|mimes:pdf,jpg,jpeg,png,zip|max:5120',
+            'file_request_letter' => 'required|file|extensions:pdf,jpg,jpeg,png|max:2048',
+            'file_report_card' => 'required|file|extensions:pdf,jpg,jpeg,png|max:2048',
+            'file_mutation_letter' => 'required|file|extensions:pdf,jpg,jpeg,png|max:2048',
+            'file_additional' => 'nullable|file|extensions:pdf,jpg,jpeg,png,zip|max:5120',
         ]);
 
         try {
@@ -175,10 +175,10 @@ class SchoolTransferController extends Controller
             'target_school' => 'required|string|max:255',
             'target_school_address' => 'required|string',
             'reason' => 'required|string',
-            'file_request_letter' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'file_report_card' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'file_mutation_letter' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'file_additional' => 'nullable|file|mimes:pdf,jpg,jpeg,png,zip|max:5120',
+            'file_request_letter' => 'nullable|file|extensions:pdf,jpg,jpeg,png|max:2048',
+            'file_report_card' => 'nullable|file|extensions:pdf,jpg,jpeg,png|max:2048',
+            'file_mutation_letter' => 'nullable|file|extensions:pdf,jpg,jpeg,png|max:2048',
+            'file_additional' => 'nullable|file|extensions:pdf,jpg,jpeg,png,zip|max:5120',
         ]);
 
         try {

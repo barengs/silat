@@ -61,11 +61,11 @@ class IjazahRevisionController extends Controller
             'education_level' => 'required|string|max:50',
             'wrong_data_description' => 'required|string',
             'correct_data_description' => 'required|string',
-            'file_ijazah_wrong' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'file_akte' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'file_kk' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'file_sptjm' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'file_additional' => 'nullable|file|mimes:pdf,jpg,jpeg,png,zip|max:5120',
+            'file_ijazah_wrong' => 'required|file|extensions:pdf,jpg,jpeg,png|max:2048',
+            'file_akte' => 'required|file|extensions:pdf,jpg,jpeg,png|max:2048',
+            'file_kk' => 'required|file|extensions:pdf,jpg,jpeg,png|max:2048',
+            'file_sptjm' => 'required|file|extensions:pdf,jpg,jpeg,png|max:2048',
+            'file_additional' => 'nullable|file|extensions:pdf,jpg,jpeg,png,zip|max:5120',
         ]);
 
         try {

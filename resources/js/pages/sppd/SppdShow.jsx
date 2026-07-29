@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from '@/bootstrap';
-import { MapPin, Calendar, Users, FileText, CheckCircle2, XCircle, Clock, Check, Loader2, Upload } from 'lucide-react';
+import { MapPin, Calendar, Users, FileText, CheckCircle2, XCircle, Clock, Check, Loader2, Upload, Download } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import { toast } from 'sonner';
@@ -18,6 +18,7 @@ export default function SppdShow() {
     const [reportData, setReportData] = useState({ real_start_date: '', real_end_date: '', report_text: '', actual_cost: '', attachment: null, notes: '' });
     const [isSubmittingReport, setIsSubmittingReport] = useState(false);
     const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
+    const [previewFile, setPreviewFile] = useState(null);
 
     const { data, isLoading } = useQuery({
         queryKey: ['sppd', id],
@@ -250,6 +251,70 @@ export default function SppdShow() {
                             </table>
                         </div>
                     </div>
+
+                    {/* Laporan Perjalanan Dinas (LPP) */}
+                    {sppd.report && (
+                        <div className="bg-white rounded shadow-sm border border-slate-200 overflow-hidden">
+                            <div className="border-b border-slate-100 bg-slate-50 px-6 py-4">
+                                <h2 className="font-semibold text-slate-800 flex items-center gap-2">
+                                    <FileText size={18} className="text-purple-600" />
+                                    Laporan Perjalanan Dinas (LPP)
+                                </h2>
+                            </div>
+                            <div className="p-6 space-y-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs font-medium text-slate-500">Tanggal Pelaksanaan Riil</label>
+                                        <p className="text-sm font-semibold text-slate-800 mt-1">
+                                            {formatDate(sppd.report.real_start_date)} s/d {formatDate(sppd.report.real_end_date)}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-slate-500">Biaya Riil (Actual Cost)</label>
+                                        <p className="text-sm font-semibold text-slate-800 mt-1">
+                                            {sppd.report.actual_cost ? `Rp ${new Intl.NumberFormat('id-ID').format(sppd.report.actual_cost)}` : '-'}
+                                        </p>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-xs font-medium text-slate-500">Isi Laporan / Kegiatan</label>
+                                    <p className="text-sm text-slate-700 whitespace-pre-line mt-1 bg-slate-50 p-3 rounded border border-slate-100">
+                                        {sppd.report.report_text}
+                                    </p>
+                                </div>
+
+                                {sppd.report.notes && (
+                                    <div>
+                                        <label className="block text-xs font-medium text-slate-500">Catatan Tambahan</label>
+                                        <p className="text-sm text-slate-600 italic mt-1">
+                                            "{sppd.report.notes}"
+                                        </p>
+                                    </div>
+                                )}
+
+                                {sppd.report.attachment_proof && (
+                                    <div className="pt-2 border-t border-slate-100">
+                                        <label className="block text-xs font-medium text-slate-500 mb-2">Dokumen Bukti Pendukung / Laporan</label>
+                                        <div 
+                                            className="inline-flex items-center gap-3 p-3 border border-slate-200 rounded hover:border-purple-400 hover:bg-purple-50/30 transition-colors group cursor-pointer"
+                                            onClick={() => setPreviewFile({ label: 'Bukti Laporan (LPP)', path: sppd.report.attachment_proof })}
+                                        >
+                                            <div className="w-10 h-10 rounded bg-slate-50 border border-slate-100 flex items-center justify-center group-hover:bg-purple-50 transition-colors">
+                                                <FileText size={20} className="text-slate-400 group-hover:text-purple-600" />
+                                            </div>
+                                            <div>
+                                                <h4 className="font-bold text-xs text-slate-800 group-hover:text-purple-700">Dokumen Bukti LPP</h4>
+                                                <p className="text-[10px] text-slate-500 flex items-center gap-1 mt-0.5">
+                                                    Lihat Dokumen <Download size={10} />
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Panel Kanan: Alur Persetujuan & Aksi */}
@@ -519,6 +584,69 @@ export default function SppdShow() {
                                 </Button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Preview File Modal */}
+            {previewFile && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+                    <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl h-[85vh] flex flex-col overflow-hidden">
+                        {/* Header */}
+                        <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                            <h3 className="font-bold text-slate-800 text-sm flex items-center">
+                                <FileText size={18} className="mr-2 text-emerald-600" />
+                                Preview Lampiran: {previewFile.label}
+                            </h3>
+                            <div className="flex items-center gap-2">
+                                <a 
+                                    href={`/storage/${previewFile.path}`} 
+                                    download 
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-semibold transition-colors flex items-center gap-1"
+                                >
+                                    <Download size={14} /> Unduh
+                                </a>
+                                <button
+                                    onClick={() => setPreviewFile(null)}
+                                    className="p-1.5 hover:bg-slate-200 rounded text-slate-600 transition-colors"
+                                >
+                                    <XCircle size={20} />
+                                </button>
+                            </div>
+                        </div>
+                        {/* Content */}
+                        <div className="flex-1 bg-slate-100 p-4 flex items-center justify-center overflow-auto">
+                            {previewFile.path.toLowerCase().endsWith('.pdf') ? (
+                                <iframe 
+                                    src={`/storage/${previewFile.path}`} 
+                                    className="w-full h-full border-0 rounded bg-white"
+                                    title={previewFile.label}
+                                />
+                            ) : (previewFile.path.toLowerCase().endsWith('.zip') || previewFile.path.toLowerCase().endsWith('.rar')) ? (
+                                <div className="text-center p-8 bg-white border rounded shadow-sm">
+                                    <FileText size={48} className="mx-auto text-slate-400 mb-3" />
+                                    <p className="text-sm font-medium text-slate-700">Berkas ini ({previewFile.path.split('.').pop().toUpperCase()}) tidak dapat di-preview secara langsung.</p>
+                                    <a 
+                                        href={`/storage/${previewFile.path}`} 
+                                        download 
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="inline-flex items-center px-4 py-2 mt-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-sm font-medium transition-colors"
+                                    >
+                                        <Download size={16} className="mr-2" />
+                                        Unduh Berkas
+                                    </a>
+                                </div>
+                            ) : (
+                                <img 
+                                    src={`/storage/${previewFile.path}`} 
+                                    alt={previewFile.label} 
+                                    className="max-w-full max-h-full object-contain rounded shadow"
+                                />
+                            )}
+                        </div>
                     </div>
                 </div>
             )}

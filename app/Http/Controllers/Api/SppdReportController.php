@@ -26,7 +26,7 @@ class SppdReportController extends Controller
             'real_end_date' => 'required|date|after_or_equal:real_start_date',
             'report_text' => 'required|string',
             'actual_cost' => 'nullable|numeric',
-            'attachment' => 'nullable|file|mimes:pdf,zip,rar|max:5120', // Max 5MB
+            'attachment' => 'nullable|file|extensions:pdf,zip,rar|max:5120', // Max 5MB
             'notes' => 'nullable|string',
         ]);
 

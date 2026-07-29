@@ -184,7 +184,7 @@ export default function TreasurerCreate() {
                     accept=".pdf,.jpg,.jpeg,.png"
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                 />
-                <button type="button" className="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded text-xs font-semibold hover:bg-slate-50 transition-colors w-full sm:w-auto">
+                <button type="button" className="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded text-xs font-semibold hover:bg-slate-50 transition-colors w-full sm:w-auto pointer-events-none">
                     {files[fieldName] ? files[fieldName].name : 'Pilih File'}
                 </button>
             </div>

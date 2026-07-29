@@ -108,9 +108,9 @@ class TreasurerChangeController extends Controller
             'new_npwp' => 'required_if:change_type,bendahara,both|nullable|string|max:50',
             'bank_name' => 'required|string|max:100',
             'bank_branch' => 'required|string|max:255',
-            'file_sk_kepsek' => 'required_if:change_type,bendahara,both|nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'file_ktp_npwp' => 'required_if:change_type,bendahara,both|nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'file_additional' => 'nullable|file|mimes:pdf,jpg,jpeg,png,zip|max:5120',
+            'file_sk_kepsek' => 'required_if:change_type,bendahara,both|nullable|file|extensions:pdf,jpg,jpeg,png|max:2048',
+            'file_ktp_npwp' => 'required_if:change_type,bendahara,both|nullable|file|extensions:pdf,jpg,jpeg,png|max:2048',
+            'file_additional' => 'nullable|file|extensions:pdf,jpg,jpeg,png,zip|max:5120',
         ]);
 
         try {
@@ -226,9 +226,9 @@ class TreasurerChangeController extends Controller
             'new_npwp' => 'required_if:change_type,bendahara,both|nullable|string|max:50',
             'bank_name' => 'required|string|max:100',
             'bank_branch' => 'required|string|max:255',
-            'file_sk_kepsek' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'file_ktp_npwp' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'file_additional' => 'nullable|file|mimes:pdf,jpg,jpeg,png,zip|max:5120',
+            'file_sk_kepsek' => 'nullable|file|extensions:pdf,jpg,jpeg,png|max:2048',
+            'file_ktp_npwp' => 'nullable|file|extensions:pdf,jpg,jpeg,png|max:2048',
+            'file_additional' => 'nullable|file|extensions:pdf,jpg,jpeg,png,zip|max:5120',
         ]);
 
         try {

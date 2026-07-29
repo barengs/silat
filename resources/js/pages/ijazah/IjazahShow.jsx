@@ -28,6 +28,7 @@ export default function IjazahShow() {
     const [isActionModalOpen, setIsActionModalOpen] = useState(false);
     const [actionType, setActionType] = useState('approve'); // 'approve', 'reject'
     const [note, setNote] = useState('');
+    const [previewFile, setPreviewFile] = useState(null);
 
     const { data: ijazahRes, isLoading } = useQuery({
         queryKey: ['ijazah', id],
@@ -265,7 +266,7 @@ export default function IjazahShow() {
                                     { label: 'SPTJM', path: ijazah.file_sptjm },
                                     ...(ijazah.file_additional ? [{ label: 'Lampiran Tambahan', path: ijazah.file_additional }] : [])
                                 ].map((file, idx) => (
-                                    <div key={idx} className="border border-slate-200 rounded p-3 hover:border-emerald-400 transition-colors group cursor-pointer" onClick={() => window.open(`/storage/${file.path}`, '_blank')}>
+                                    <div key={idx} className="border border-slate-200 rounded p-3 hover:border-emerald-400 transition-colors group cursor-pointer" onClick={() => setPreviewFile(file)}>
                                         <div className="w-full aspect-[4/3] bg-slate-50 rounded mb-2 flex items-center justify-center group-hover:bg-emerald-50 transition-colors">
                                             <FileText size={24} className="text-slate-300 group-hover:text-emerald-500 transition-colors" />
                                         </div>
@@ -446,6 +447,69 @@ export default function IjazahShow() {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Preview File Modal */}
+            {previewFile && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+                    <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl h-[85vh] flex flex-col overflow-hidden">
+                        {/* Header */}
+                        <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                            <h3 className="font-bold text-slate-800 text-sm flex items-center">
+                                <FileText size={18} className="mr-2 text-emerald-600" />
+                                Preview Lampiran: {previewFile.label}
+                            </h3>
+                            <div className="flex items-center gap-2">
+                                <a 
+                                    href={`/storage/${previewFile.path}`} 
+                                    download 
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-semibold transition-colors flex items-center gap-1"
+                                >
+                                    <Download size={14} /> Unduh
+                                </a>
+                                <button
+                                    onClick={() => setPreviewFile(null)}
+                                    className="p-1.5 hover:bg-slate-200 rounded text-slate-600 transition-colors"
+                                >
+                                    <XCircle size={20} />
+                                </button>
+                            </div>
+                        </div>
+                        {/* Content */}
+                        <div className="flex-1 bg-slate-100 p-4 flex items-center justify-center overflow-auto">
+                            {previewFile.path.toLowerCase().endsWith('.pdf') ? (
+                                <iframe 
+                                    src={`/storage/${previewFile.path}`} 
+                                    className="w-full h-full border-0 rounded bg-white"
+                                    title={previewFile.label}
+                                />
+                            ) : (previewFile.path.toLowerCase().endsWith('.zip') || previewFile.path.toLowerCase().endsWith('.rar')) ? (
+                                <div className="text-center p-8 bg-white border rounded shadow-sm">
+                                    <FileText size={48} className="mx-auto text-slate-400 mb-3" />
+                                    <p className="text-sm font-medium text-slate-700">Berkas ini ({previewFile.path.split('.').pop().toUpperCase()}) tidak dapat di-preview secara langsung.</p>
+                                    <a 
+                                        href={`/storage/${previewFile.path}`} 
+                                        download 
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="inline-flex items-center px-4 py-2 mt-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-sm font-medium transition-colors"
+                                    >
+                                        <Download size={16} className="mr-2" />
+                                        Unduh Berkas
+                                    </a>
+                                </div>
+                            ) : (
+                                <img 
+                                    src={`/storage/${previewFile.path}`} 
+                                    alt={previewFile.label} 
+                                    className="max-w-full max-h-full object-contain rounded shadow"
+                                />
+                            )}
+                        </div>
                     </div>
                 </div>
             )}

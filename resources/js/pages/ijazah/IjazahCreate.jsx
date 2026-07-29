@@ -62,6 +62,24 @@ export default function IjazahCreate() {
             return;
         }
 
+        // Validate required files programmatically
+        if (!files.file_ijazah_wrong) {
+            toast.error('Scan Ijazah Asli wajib diunggah.');
+            return;
+        }
+        if (!files.file_akte) {
+            toast.error('Akte Kelahiran wajib diunggah.');
+            return;
+        }
+        if (!files.file_kk) {
+            toast.error('Kartu Keluarga (KK) wajib diunggah.');
+            return;
+        }
+        if (!files.file_sptjm) {
+            toast.error('Surat Pernyataan (SPTJM) wajib diunggah.');
+            return;
+        }
+
         setIsSubmitting(true);
 
         try {
@@ -99,9 +117,8 @@ export default function IjazahCreate() {
                     onChange={(e) => handleFileChange(e, fieldName)}
                     accept={accept}
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    required={fieldName !== 'file_additional'}
                 />
-                <button type="button" className="px-4 py-2 bg-white border border-emerald-600 text-emerald-700 rounded text-xs font-medium hover:bg-emerald-50 transition-colors w-full sm:w-auto">
+                <button type="button" className="px-4 py-2 bg-white border border-emerald-600 text-emerald-700 rounded text-xs font-medium hover:bg-emerald-50 transition-colors w-full sm:w-auto pointer-events-none">
                     {files[fieldName] ? files[fieldName].name : 'Pilih File'}
                 </button>
             </div>
