@@ -37,6 +37,30 @@ export default function CheckinModal({ isOpen, onClose, guest = null }) {
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [guestType, setGuestType] = useState('instansi'); // 'instansi' | 'mandiri'
 
+    // Native Browser Fullscreen Toggle
+    useEffect(() => {
+        if (isOpen) {
+            const element = document.documentElement;
+            if (element.requestFullscreen) {
+                element.requestFullscreen().catch(() => {});
+            } else if (element.webkitRequestFullscreen) {
+                element.webkitRequestFullscreen();
+            } else if (element.msRequestFullscreen) {
+                element.msRequestFullscreen();
+            }
+        } else {
+            if (document.fullscreenElement) {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen().catch(() => {});
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+            }
+        }
+    }, [isOpen]);
+
     // Prepopulate form on edit
     useEffect(() => {
         if (isOpen) {
@@ -129,20 +153,20 @@ export default function CheckinModal({ isOpen, onClose, guest = null }) {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[100] bg-white animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[100] bg-slate-50 flex items-center justify-center p-4 lg:p-8 animate-in fade-in zoom-in duration-300">
             
+            {/* Hidden close button - Barely visible for operators */}
             <button 
-                type="button"
                 onClick={onClose}
-                className="absolute top-6 right-6 z-30 p-2.5 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-full transition-all"
+                className="absolute top-4 right-4 z-20 p-2 text-slate-400 hover:text-slate-800 transition-colors opacity-70 hover:opacity-100"
                 title="Tutup (Kembali ke Dasbor)"
             >
-                <X size={28} />
+                <X size={32} />
             </button>
 
-            <div className="relative z-10 w-full h-full bg-white flex flex-col md:flex-row">
+            <div className="relative z-10 w-full max-w-4xl bg-white shadow-xl rounded overflow-hidden flex flex-col md:flex-row border border-slate-200">
                 {/* Left Side: Branding / Info */}
-                <div className="md:w-5/12 lg:w-4/12 bg-[#166534] text-white p-8 lg:p-12 flex flex-col justify-center relative overflow-hidden shrink-0 h-1/4 md:h-full">
+                <div className="md:w-5/12 bg-[#166534] text-white p-10 flex flex-col justify-center relative overflow-hidden">
                     {/* Batik Background */}
                     <div 
                         className="absolute inset-0 z-0 mix-blend-overlay"
@@ -155,22 +179,22 @@ export default function CheckinModal({ isOpen, onClose, guest = null }) {
                     ></div>
                     <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none"></div>
                     <div className="relative z-10">
-                        <div className="bg-white p-2 lg:p-4 rounded inline-block mb-4 lg:mb-6 shadow-sm">
-                            <img src="/images/logo-pamekasan.png" alt="Logo" className="w-16 h-16 lg:w-24 lg:h-24 object-contain" onError={(e) => e.target.src='https://upload.wikimedia.org/wikipedia/commons/e/e0/Lambang_Kabupaten_Pamekasan.png'} />
+                        <div className="bg-white p-4 rounded inline-block mb-6 shadow-sm">
+                            <img src="/images/logo-pamekasan.png" alt="Logo" className="w-24 h-24 object-contain" onError={(e) => e.target.src='https://upload.wikimedia.org/wikipedia/commons/e/e0/Lambang_Kabupaten_Pamekasan.png'} />
                         </div>
-                        <h2 className="text-xl lg:text-3xl font-bold mb-1 lg:mb-2">Buku Tamu Digital</h2>
-                        <p className="text-emerald-100/80 text-xs lg:text-base mb-4 lg:mb-8">Dinas Pendidikan Kabupaten Pamekasan</p>
-                        <div className="space-y-2 lg:space-y-4 hidden md:block">
-                            <div className="flex items-center text-xs lg:text-sm text-emerald-100/90">
-                                <div className="w-6 h-6 lg:w-8 lg:h-8 rounded-full bg-emerald-700/50 flex items-center justify-center mr-3">1</div>
+                        <h2 className="text-3xl font-bold mb-2">Buku Tamu Digital</h2>
+                        <p className="text-emerald-100/80 mb-8">Dinas Pendidikan Kabupaten Pamekasan</p>
+                        <div className="space-y-4">
+                            <div className="flex items-center text-sm text-emerald-100/90">
+                                <div className="w-8 h-8 rounded-full bg-emerald-700/50 flex items-center justify-center mr-3">1</div>
                                 Lengkapi data diri dengan benar
                             </div>
-                            <div className="flex items-center text-xs lg:text-sm text-emerald-100/90">
-                                <div className="w-6 h-6 lg:w-8 lg:h-8 rounded-full bg-emerald-700/50 flex items-center justify-center mr-3">2</div>
+                            <div className="flex items-center text-sm text-emerald-100/90">
+                                <div className="w-8 h-8 rounded-full bg-emerald-700/50 flex items-center justify-center mr-3">2</div>
                                 Pilih bidang/divisi tujuan
                             </div>
-                            <div className="flex items-center text-xs lg:text-sm text-emerald-100/90">
-                                <div className="w-6 h-6 lg:w-8 lg:h-8 rounded-full bg-emerald-700/50 flex items-center justify-center mr-3">3</div>
+                            <div className="flex items-center text-sm text-emerald-100/90">
+                                <div className="w-8 h-8 rounded-full bg-emerald-700/50 flex items-center justify-center mr-3">3</div>
                                 Petugas akan mencatat kedatangan
                             </div>
                         </div>
@@ -178,7 +202,7 @@ export default function CheckinModal({ isOpen, onClose, guest = null }) {
                 </div>
 
                 {/* Right Side: Form */}
-                <div className="md:w-7/12 lg:w-8/12 p-8 lg:p-16 overflow-y-auto flex flex-col justify-start bg-white h-3/4 md:h-full relative pt-16 md:pt-16">
+                <div className="md:w-7/12 p-10 lg:p-12">
                     <div className="mb-8">
                         <h3 className="text-2xl font-bold text-slate-900">{isEdit ? 'Ubah Data Tamu' : 'Formulir Kedatangan'}</h3>
                         <p className="text-slate-500 text-sm mt-1">{isEdit ? 'Silakan perbarui informasi tamu di bawah ini.' : 'Silakan isi formulir di bawah ini untuk mencatat tamu.'}</p>
