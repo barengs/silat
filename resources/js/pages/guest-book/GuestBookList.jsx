@@ -109,6 +109,7 @@ export default function GuestBookList() {
             return res.data;
         },
         keepPreviousData: true,
+        refetchInterval: 5000, // Refresh data automatically every 5 seconds for real-time updates
     });
 
     const guests = data?.data?.data || [];
