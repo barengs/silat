@@ -231,8 +231,13 @@ class GuestBookController extends Controller
     {
         $guestBook = GuestBook::findOrFail($id);
 
-        if ($guestBook->check_out_time !== null) {
-            return response()->json(['message' => 'Tamu sudah melakukan check-out.'], 422);
+        if ($guestBook->status === 'selesai') {
+            return response()->json(['message' => 'Proses kunjungan tamu sudah selesai.'], 422);
+        }
+
+        $user = $request->user();
+        if (!$user->hasRole('super-admin') && (int)$user->division_id !== (int)$guestBook->target_division_id) {
+            return response()->json(['message' => 'Hanya divisi tujuan yang dapat menyelesaikan kunjungan tamu ini.'], 403);
         }
 
         $guestBook->check_out_time = Carbon::now()->format('H:i:s');
@@ -240,7 +245,7 @@ class GuestBookController extends Controller
         $guestBook->save();
 
         return response()->json([
-            'message' => 'Tamu berhasil check-out.',
+            'message' => 'Proses kunjungan tamu selesai.',
             'data' => $guestBook,
         ]);
     }
@@ -259,7 +264,7 @@ class GuestBookController extends Controller
             'purpose' => 'required|string',
             'guest_contact' => 'nullable|string|max:20',
             'notes' => 'nullable|string',
-            'status' => 'required|string|in:menunggu,berkunjung,selesai',
+            'status' => 'required|string|in:menunggu,proses,selesai',
         ]);
 
         try {
@@ -339,22 +344,24 @@ class GuestBookController extends Controller
         ]);
     }
 
-    /**
-     * Change status from 'menunggu' to 'berkunjung'.
-     */
     public function visit(Request $request, $id)
     {
         $guestBook = GuestBook::findOrFail($id);
 
         if ($guestBook->status !== 'menunggu') {
-            return response()->json(['message' => 'Hanya tamu dengan status menunggu yang bisa mulai berkunjung.'], 422);
+            return response()->json(['message' => 'Hanya tamu dengan status menunggu yang bisa mulai diproses.'], 422);
         }
 
-        $guestBook->status = 'berkunjung';
+        $user = $request->user();
+        if (!$user->hasRole('super-admin') && (int)$user->division_id !== (int)$guestBook->target_division_id) {
+            return response()->json(['message' => 'Hanya divisi tujuan yang dapat memproses tamu ini.'], 403);
+        }
+
+        $guestBook->status = 'proses';
         $guestBook->save();
 
         return response()->json([
-            'message' => 'Tamu diarahkan ke divisi tujuan (status berkunjung).',
+            'message' => 'Tamu berhasil diproses (status proses).',
             'data' => $guestBook,
         ]);
     }

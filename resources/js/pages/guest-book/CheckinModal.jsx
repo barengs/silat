@@ -316,7 +316,7 @@ export default function CheckinModal({ isOpen, onClose, guest = null }) {
                                 <FormGroup label="Status Kunjungan" error={errors.status?.message}>
                                     <Select {...register('status')} error={errors.status}>
                                         <option value="menunggu">Menunggu</option>
-                                        <option value="berkunjung">Sedang Berkunjung</option>
+                                        <option value="proses">Proses</option>
                                         <option value="selesai">Selesai</option>
                                     </Select>
                                 </FormGroup>

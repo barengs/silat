@@ -19,7 +19,7 @@ import Input from '@/components/ui/Input';
 import FormGroup from '@/components/ui/FormGroup';
 
 export default function GuestBookList() {
-    const { roles, permissions } = useSelector(state => state.auth);
+    const { user, roles, permissions } = useSelector(state => state.auth);
     const canCreate = permissions.includes('guest-book.create') || roles.includes('super-admin');
     const canEdit = permissions.includes('guest-book.edit') || roles.includes('super-admin');
     const canDelete = permissions.includes('guest-book.delete') || roles.includes('super-admin');
@@ -144,10 +144,14 @@ export default function GuestBookList() {
             header: 'STATUS / AKSI',
             id: 'status',
             cell: ({ row }) => {
-                const status = row.original.status || (row.original.check_out_time ? 'selesai' : 'berkunjung');
+                const rawStatus = row.original.status || (row.original.check_out_time ? 'selesai' : 'berkunjung');
+                const status = rawStatus === 'berkunjung' ? 'proses' : rawStatus;
+                
                 const isWaiting = status === 'menunggu';
-                const isVisiting = status === 'berkunjung';
+                const isProcessing = status === 'proses';
                 const isCompleted = status === 'selesai';
+
+                const isTargetDivision = roles.includes('super-admin') || (user?.division_id && Number(user.division_id) === Number(row.original.target_division_id));
                 
                 return (
                     <div className="flex items-center gap-1.5 flex-wrap">
@@ -156,34 +160,34 @@ export default function GuestBookList() {
                                 Menunggu
                             </Badge>
                         )}
-                        {isVisiting && (
+                        {isProcessing && (
                             <Badge variant="info" className="bg-blue-100 text-blue-700 border-blue-200">
-                                Sedang Berkunjung
+                                Proses
                             </Badge>
                         )}
                         {isCompleted && (
                             <Badge variant="success">Selesai</Badge>
                         )}
                         
-                        {isWaiting && canCreate && (
+                        {isWaiting && isTargetDivision && (
                             <Button 
                                 size="xs" 
                                 className="bg-indigo-600 hover:bg-indigo-700 text-white py-1 px-2 text-xs font-semibold rounded shrink-0"
                                 onClick={() => visitMutation.mutate(row.original.id)}
                                 isLoading={visitMutation.isPending && visitMutation.variables === row.original.id}
                             >
-                                Arahkan
+                                Proses
                             </Button>
                         )}
                         
-                        {isVisiting && canCreate && (
+                        {isProcessing && isTargetDivision && (
                             <Button 
                                 size="xs" 
                                 className="bg-rose-600 hover:bg-rose-700 text-white py-1 px-2 text-xs font-semibold rounded shrink-0"
                                 onClick={() => checkoutMutation.mutate(row.original.id)}
                                 isLoading={checkoutMutation.isPending && checkoutMutation.variables === row.original.id}
                             >
-                                Check Out
+                                Selesai
                             </Button>
                         )}
 
@@ -215,7 +219,7 @@ export default function GuestBookList() {
                 );
             }
         }
-    ], [canCreate, canEdit, canDelete, checkoutMutation, visitMutation, deleteMutation, setEditingGuest, setIsCheckinOpen, handleDelete]);
+    ], [user, canCreate, canEdit, canDelete, checkoutMutation, visitMutation, deleteMutation, setEditingGuest, setIsCheckinOpen, handleDelete]);
 
     const table = useReactTable({
         data: guests,
