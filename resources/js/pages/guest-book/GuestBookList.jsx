@@ -152,7 +152,7 @@ export default function GuestBookList() {
                 const isProcessing = status === 'proses';
                 const isCompleted = status === 'selesai';
 
-                const isTargetDivision = roles.includes('super-admin') || (user?.division_id && Number(user.division_id) === Number(row.original.target_division_id));
+                const isTargetDivision = !roles.includes('resepsionis') && (roles.includes('super-admin') || (user?.division_id && Number(user.division_id) === Number(row.original.target_division_id)));
                 
                 return (
                     <div className="flex items-center gap-1.5 flex-wrap">
@@ -192,7 +192,7 @@ export default function GuestBookList() {
                             </Button>
                         )}
 
-                        {canEdit && (
+                        {canEdit && isWaiting && (
                             <Button 
                                 size="xs" 
                                 variant="outline"
@@ -206,7 +206,7 @@ export default function GuestBookList() {
                             </Button>
                         )}
 
-                        {canDelete && (
+                        {canDelete && isWaiting && (
                             <Button 
                                 size="xs" 
                                 className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-1 px-2 text-xs font-semibold rounded shrink-0"
