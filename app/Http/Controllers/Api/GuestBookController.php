@@ -25,7 +25,8 @@ class GuestBookController extends Controller
         $user = $request->user();
 
         $query = GuestBook::with(['agency', 'targetDivision', 'registeredBy'])
-            ->orderBy('created_at', 'desc');
+            ->orderBy('date', 'desc')
+            ->orderBy('check_in_time', 'desc');
 
         if (!$user->can('guest-book.view-all')) {
             $query->where('target_division_id', $user->division_id);
