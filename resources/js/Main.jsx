@@ -9,6 +9,8 @@ import AppLayout from '@/layouts/AppLayout';
 
 // ── Lazy-loaded pages ──────────────────────────────────────────────────────────
 const LoginPage       = React.lazy(() => import('@/pages/auth/LoginPage'));
+const ForgotPasswordPage = React.lazy(() => import('@/pages/auth/ForgotPasswordPage'));
+const ResetPasswordPage  = React.lazy(() => import('@/pages/auth/ResetPasswordPage'));
 const DashboardPage   = React.lazy(() => import('@/pages/dashboard/DashboardPage'));
 const NotFoundPage    = React.lazy(() => import('@/pages/errors/NotFoundPage'));
 
@@ -157,6 +159,22 @@ export default function Main() {
                         element={
                             <PublicRoute>
                                 <LoginPage />
+                            </PublicRoute>
+                        }
+                    />
+                    <Route
+                        path="/forgot-password"
+                        element={
+                            <PublicRoute>
+                                <ForgotPasswordPage />
+                            </PublicRoute>
+                        }
+                    />
+                    <Route
+                        path="/reset-password"
+                        element={
+                            <PublicRoute>
+                                <ResetPasswordPage />
                             </PublicRoute>
                         }
                     />

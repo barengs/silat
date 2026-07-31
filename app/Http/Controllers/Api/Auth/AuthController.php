@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -132,12 +135,34 @@ class AuthController extends Controller
      */
     public function forgotPassword(Request $request)
     {
-        $request->validate(['email' => 'required|email|exists:users,email']);
+        $request->validate(['email' => 'required|email|exists:users,email'], [
+            'email.required' => 'Email wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+            'email.exists' => 'Email tidak terdaftar dalam sistem.',
+        ]);
 
-        // TODO: Implement password reset email using Laravel's built-in broker
+        $email = $request->email;
+        $token = Str::random(60);
+
+        DB::table('password_reset_tokens')->updateOrInsert(
+            ['email' => $email],
+            [
+                'token' => Hash::make($token),
+                'created_at' => now()
+            ]
+        );
+
+        $resetUrl = url("/reset-password?token={$token}&email=" . urlencode($email));
+
+        Mail::raw("Silakan klik link berikut untuk mereset password Anda: {$resetUrl}", function ($message) use ($email) {
+            $message->to($email)
+                    ->subject('Reset Password');
+        });
+
         return response()->json([
             'success' => true,
             'message' => 'Email reset password telah dikirim.',
+            'dev_reset_url' => $resetUrl,
         ]);
     }
 
@@ -148,12 +173,43 @@ class AuthController extends Controller
     public function resetPassword(Request $request)
     {
         $request->validate([
-            'token' => 'required',
-            'email' => 'required|email',
+            'token' => 'required|string',
+            'email' => 'required|email|exists:users,email',
             'password' => 'required|min:8|confirmed',
+        ], [
+            'token.required' => 'Token wajib diisi.',
+            'email.required' => 'Email wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+            'email.exists' => 'Email tidak terdaftar dalam sistem.',
+            'password.required' => 'Password baru wajib diisi.',
+            'password.min' => 'Password baru minimal harus 8 karakter.',
+            'password.confirmed' => 'Konfirmasi password baru tidak cocok.',
         ]);
 
-        // TODO: Implement password reset logic
+        $record = DB::table('password_reset_tokens')->where('email', $request->email)->first();
+
+        if (!$record || !Hash::check($request->token, $record->token)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Token reset password tidak valid.',
+            ], 422);
+        }
+
+        $createdAt = \Carbon\Carbon::parse($record->created_at);
+        if ($createdAt->addMinutes(60)->isPast()) {
+            DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+            return response()->json([
+                'success' => false,
+                'message' => 'Token reset password telah kedaluwarsa.',
+            ], 422);
+        }
+
+        $user = User::where('email', $request->email)->first();
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+
         return response()->json([
             'success' => true,
             'message' => 'Password berhasil diubah.',
