@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
 
             // 4. Users (depends on institutions which is auto-created in AdminUserSeeder)
             AdminUserSeeder::class,
+            SysadminUserSeeder::class,
         ]);
     }
 }
