@@ -119,7 +119,12 @@ export default function GuestBookList() {
         {
             header: 'WAKTU',
             accessorKey: 'check_in_time',
-            cell: ({ getValue }) => <span className="text-sm font-medium text-slate-700">{getValue()} WIB</span>
+            cell: ({ row }) => (
+                <div className="flex flex-col">
+                    <span className="text-sm font-medium text-slate-700">{row.original.check_in_time} WIB</span>
+                    <span className="text-[11px] text-slate-400 font-normal leading-normal">{row.original.time_ago}</span>
+                </div>
+            )
         },
         {
             header: 'NAMA TAMU',

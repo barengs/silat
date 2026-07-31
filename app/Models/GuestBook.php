@@ -26,6 +26,23 @@ class GuestBook extends Model
         'date' => 'date',
     ];
 
+    protected $appends = ['time_ago'];
+
+    public function getTimeAgoAttribute(): string
+    {
+        if (!$this->date || !$this->check_in_time) {
+            return '';
+        }
+        
+        $dateStr = $this->date instanceof \DateTimeInterface 
+            ? $this->date->format('Y-m-d') 
+            : $this->date;
+            
+        return \Carbon\Carbon::parse($dateStr . ' ' . $this->check_in_time)
+            ->locale('id')
+            ->diffForHumans();
+    }
+
     public function agency(): BelongsTo
     {
         return $this->belongsTo(GuestAgency::class, 'guest_agency_id');
