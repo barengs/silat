@@ -29,6 +29,7 @@ export default function GuestBookReport() {
 
     const dailyTrend = reportData?.daily_trend || [];
     const divisionStats = reportData?.division_stats || [];
+    const agencyStats = reportData?.agency_stats || [];
 
     return (
         <div className="space-y-6">
@@ -143,7 +144,7 @@ export default function GuestBookReport() {
                 </div>
 
                 {/* Bar Chart: Division Stats (Alternative View) */}
-                <div className="bg-white border border-slate-200 rounded p-6 shadow-sm lg:col-span-2">
+                <div className="bg-white border border-slate-200 rounded p-6 shadow-sm">
                     <h3 className="text-lg font-bold text-slate-800 mb-6">Distribusi Tamu per Bidang</h3>
                     {isLoading ? (
                         <div className="h-80 flex items-center justify-center text-slate-400 animate-pulse">Memuat data...</div>
@@ -153,7 +154,7 @@ export default function GuestBookReport() {
                                 <BarChart data={divisionStats} margin={{ top: 5, right: 30, left: 20, bottom: 5 }} layout="vertical">
                                     <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#e2e8f0" />
                                     <XAxis type="number" axisLine={false} tickLine={false} allowDecimals={false} />
-                                    <YAxis dataKey="name" type="category" width={200} axisLine={false} tickLine={false} style={{ fontSize: '12px' }} />
+                                    <YAxis dataKey="name" type="category" width={150} axisLine={false} tickLine={false} style={{ fontSize: '11px' }} />
                                     <RechartsTooltip 
                                         cursor={{fill: '#f1f5f9'}}
                                         contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
@@ -171,6 +172,70 @@ export default function GuestBookReport() {
                     )}
                 </div>
 
+                {/* Bar Chart: Agency Stats */}
+                <div className="bg-white border border-slate-200 rounded p-6 shadow-sm">
+                    <h3 className="text-lg font-bold text-slate-800 mb-6">Instansi Terbanyak Kunjungan</h3>
+                    {isLoading ? (
+                        <div className="h-80 flex items-center justify-center text-slate-400 animate-pulse">Memuat data...</div>
+                    ) : agencyStats.length > 0 ? (
+                        <div className="h-80 w-full">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={agencyStats} margin={{ top: 5, right: 30, left: 20, bottom: 5 }} layout="vertical">
+                                    <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#e2e8f0" />
+                                    <XAxis type="number" axisLine={false} tickLine={false} allowDecimals={false} />
+                                    <YAxis dataKey="name" type="category" width={150} axisLine={false} tickLine={false} style={{ fontSize: '11px' }} />
+                                    <RechartsTooltip 
+                                        cursor={{fill: '#f1f5f9'}}
+                                        contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                                    />
+                                    <Bar dataKey="value" name="Total Kunjungan" fill="#10b981" radius={[0, 4, 4, 0]}>
+                                        {agencyStats.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={COLORS[(index + 2) % COLORS.length]} />
+                                        ))}
+                                    </Bar>
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+                    ) : (
+                        <div className="h-80 flex items-center justify-center text-slate-400">Tidak ada data instansi.</div>
+                    )}
+                </div>
+
+            </div>
+
+            {/* Table: Most Visited Agencies */}
+            <div className="bg-white border border-slate-200 rounded p-6 shadow-sm mt-6">
+                <h3 className="text-lg font-bold text-slate-800 mb-4">Tabel Kunjungan Terbanyak per Instansi</h3>
+                {isLoading ? (
+                    <div className="h-40 flex items-center justify-center text-slate-400 animate-pulse">Memuat data...</div>
+                ) : agencyStats.length > 0 ? (
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left text-sm text-slate-600">
+                            <thead className="text-xs text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
+                                <tr>
+                                    <th className="px-6 py-3 font-semibold w-16 text-center">No</th>
+                                    <th className="px-6 py-3 font-semibold">Nama Instansi</th>
+                                    <th className="px-6 py-3 font-semibold text-center w-40">Jumlah Kunjungan</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                                {agencyStats.map((item, index) => (
+                                    <tr key={index} className="hover:bg-slate-50/50 transition-colors">
+                                        <td className="px-6 py-3 text-center font-semibold text-slate-500">{index + 1}</td>
+                                        <td className="px-6 py-3 font-medium text-slate-900">{item.name}</td>
+                                        <td className="px-6 py-3 text-center">
+                                            <span className="inline-block px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">
+                                                {item.value} Kunjungan
+                                            </span>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                ) : (
+                    <div className="text-center py-8 text-slate-400">Tidak ada data kunjungan instansi.</div>
+                )}
             </div>
         </div>
     );

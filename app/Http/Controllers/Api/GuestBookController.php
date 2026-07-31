@@ -49,28 +49,27 @@ class GuestBookController extends Controller
             });
         }
 
-        // Statistics based on the selected date range (defaults to today if not provided)
+        // Statistics: Total Today
+        $todayQuery = GuestBook::where('date', Carbon::today()->format('Y-m-d'));
+        if (!$user->can('guest-book.view-all')) {
+            $todayQuery->where('target_division_id', $user->division_id);
+        }
+        $totalToday = $todayQuery->count();
+
+        // Statistics: Total This Month
+        $monthQuery = GuestBook::whereBetween('date', [
+            Carbon::now()->startOfMonth()->format('Y-m-d'),
+            Carbon::now()->endOfMonth()->format('Y-m-d')
+        ]);
+        if (!$user->can('guest-book.view-all')) {
+            $monthQuery->where('target_division_id', $user->division_id);
+        }
+        $totalMonth = $monthQuery->count();
+
+        // Statistics: Main Target Division based on range (defaults to today)
         $startDate = $request->start_date ? Carbon::parse($request->start_date)->startOfDay() : Carbon::today();
         $endDate = $request->end_date ? Carbon::parse($request->end_date)->endOfDay() : Carbon::today()->endOfDay();
-
-        $statsQuery = GuestBook::whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')]);
-        if (!$user->can('guest-book.view-all')) {
-            $statsQuery->where('target_division_id', $user->division_id);
-        }
-        $totalInRange = $statsQuery->count();
-
-        $mostVisitedAgencyQuery = GuestBook::whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
-            ->whereNotNull('guest_agency_id');
-        if (!$user->can('guest-book.view-all')) {
-            $mostVisitedAgencyQuery->where('target_division_id', $user->division_id);
-        }
-        $mostVisitedAgency = $mostVisitedAgencyQuery
-            ->select('guest_agency_id', DB::raw('count(*) as total'))
-            ->groupBy('guest_agency_id')
-            ->orderBy('total', 'desc')
-            ->with('agency')
-            ->first();
-
+        
         $mainTargetDivisionQuery = GuestBook::whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')]);
         if (!$user->can('guest-book.view-all')) {
             $mainTargetDivisionQuery->where('target_division_id', $user->division_id);
@@ -83,8 +82,8 @@ class GuestBookController extends Controller
             ->first();
 
         $stats = [
-            'total_today' => $totalInRange,
-            'most_visited_agency' => $mostVisitedAgency ? $mostVisitedAgency->agency->name : '-',
+            'total_today' => $totalToday,
+            'total_month' => $totalMonth,
             'main_target_division' => $mainTargetDivision ? $mainTargetDivision->targetDivision->name : '-',
         ];
 
@@ -219,9 +218,29 @@ class GuestBookController extends Controller
                 ];
             });
 
+        // 3. Kunjungan per Instansi (Bar Chart)
+        $agencyStatsQuery = GuestBook::whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
+            ->whereNotNull('guest_agency_id');
+        if (!$user->can('guest-book.view-all')) {
+            $agencyStatsQuery->where('target_division_id', $user->division_id);
+        }
+        $agencyStats = $agencyStatsQuery
+            ->select('guest_agency_id', DB::raw('count(*) as total'))
+            ->groupBy('guest_agency_id')
+            ->orderBy('total', 'desc')
+            ->with('agency')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'name' => $item->agency ? $item->agency->name : 'Tanpa Instansi',
+                    'value' => $item->total,
+                ];
+            });
+
         return response()->json([
             'daily_trend' => $dailyTrend,
             'division_stats' => $divisionStats,
+            'agency_stats' => $agencyStats,
         ]);
     }
 

@@ -113,7 +113,7 @@ export default function GuestBookList() {
     });
 
     const guests = data?.data?.data || [];
-    const stats = data?.stats || { total_today: 0, most_visited_agency: '-', main_target_division: '-' };
+    const stats = data?.stats || { total_today: 0, total_month: 0, main_target_division: '-' };
 
     const columns = useMemo(() => [
         {
@@ -347,7 +347,7 @@ export default function GuestBookList() {
                         <Users size={28} />
                     </div>
                     <div>
-                        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Tamu (Rentang)</p>
+                        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Tamu Hari Ini</p>
                         <h3 className="text-3xl font-bold text-slate-800">{stats.total_today}</h3>
                     </div>
                 </div>
@@ -357,8 +357,8 @@ export default function GuestBookList() {
                         <Building2 size={28} />
                     </div>
                     <div>
-                        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Instansi Terbanyak</p>
-                        <h3 className="text-lg font-bold text-slate-800 leading-tight line-clamp-2">{stats.most_visited_agency}</h3>
+                        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Tamu Bulan Ini</p>
+                        <h3 className="text-3xl font-bold text-slate-800">{stats.total_month}</h3>
                     </div>
                 </div>
 
