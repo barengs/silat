@@ -26,11 +26,10 @@ class SysadminUserSeeder extends Seeder
         );
 
         // Create Sysadmin user
-        $sysadmin = User::firstOrCreate(
+        $sysadmin = User::updateOrCreate(
             ['email' => 'sysadmin@disdik.pamekasan.go.id'],
             [
                 'name' => 'System Administrator',
-                'email' => 'sysadmin@disdik.pamekasan.go.id',
                 'password' => Hash::make('sysadmin123'),
                 'institution_id' => $dinas->id,
                 'is_active' => true,
